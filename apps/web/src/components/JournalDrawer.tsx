@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Message, TripBundle } from '@pinlog/schema';
 import { api } from '@/lib/api';
+import { ArtIcon } from './ArtIcon';
 import { Button, Chip, Sheet, Spinner, cx } from './ui';
 
 /** Meeting notes: "talk to your journal" — trip-level chat grounded in notes, plus the "Summarize my day" chip. */
@@ -25,7 +26,9 @@ export function JournalDrawer({
   useEffect(() => {
     api.tripMessages(tripId).then(setHistory, onError);
   }, [tripId, onError]);
-  useEffect(() => bottom.current?.scrollIntoView({ behavior: 'smooth' }), [history, live]);
+  useEffect(() => {
+    bottom.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [history, live]);
 
   const now = () => new Date().toISOString();
   const send = async (message: string) => {
@@ -119,8 +122,11 @@ export function JournalDrawer({
     <Sheet>
       <div className="flex items-center justify-between border-b border-line p-4">
         <div>
-          <div className="text-xs text-muted">Talk to your journal</div>
-          <h2 className="font-display text-lg font-bold leading-tight">{bundle.trip.title}</h2>
+          <div className="flex items-center gap-2 text-xs text-muted">
+            <ArtIcon name="journal" size={34} />
+            Talk to your journal
+          </div>
+          <h2 className="font-display text-3xl leading-tight">{bundle.trip.title}</h2>
           <div className="text-[11px] text-muted">
             {bundle.pins.length} pins · {notesCount} notes · {bundle.media.length} photos · answers
             only from what you wrote
@@ -134,13 +140,13 @@ export function JournalDrawer({
           ✕
         </button>
       </div>
-      <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-3">
+      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
         {history.map((m) => (
           <div
             key={m.id}
             className={cx(
               'max-w-[92%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm',
-              m.role === 'user' ? 'ml-auto bg-ink text-paper' : 'border border-line bg-card',
+              m.role === 'user' ? 'ml-auto bg-accent-soft text-ink' : 'border border-line bg-card',
             )}
           >
             {m.content}
@@ -177,7 +183,8 @@ export function JournalDrawer({
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Ask your journal…"
-            className="flex-1 rounded-full border border-line bg-card px-3.5 py-2 text-sm outline-none focus:border-accent"
+            aria-label="Message to your journal"
+            className="min-w-0 flex-1 rounded-lg border border-line bg-card px-3.5 py-2 text-sm outline-none focus:border-accent"
           />
           <Button type="submit" disabled={busy || !text.trim()}>
             Send

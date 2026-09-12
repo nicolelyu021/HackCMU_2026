@@ -1,10 +1,10 @@
 'use client';
+import { ArtIcon } from '@/components/ArtIcon';
 import { useEffect, useMemo, useState } from 'react';
 import type { Message, TripBundle } from '@pinlog/schema';
 import { api, fileUrl } from '@/lib/api';
 import { prettyDate } from '@/lib/format';
 import {
-  applyEdits,
   assembleScrapbook,
   emptyEdits,
   loadEdits,
@@ -36,7 +36,6 @@ export function ScrapbookSpread({
   }, [tripId, onError]);
 
   const raw = useMemo(() => assembleScrapbook(bundle, messages), [bundle, messages]);
-  const visible = useMemo(() => applyEdits(raw, edits), [raw, edits]);
   const excludedCount = edits.excluded.length;
 
   const commit = (next: ScrapEdits) => {
@@ -58,7 +57,7 @@ export function ScrapbookSpread({
     try {
       const days = [...new Set(bundle.pins.map((p) => p.day_index))];
       for (const d of days) {
-        await api.summarize(tripId, d).catch(() => null);
+        await api.summarize(tripId, d);
       }
       const next = await api.tripMessages(tripId);
       setMessages(next);
@@ -69,15 +68,6 @@ export function ScrapbookSpread({
     }
   };
 
-  const photos = visible.items.filter(
-    (i): i is Extract<ScrapItem, { kind: 'photo' }> => i.kind === 'photo',
-  );
-  const notes = visible.items.filter(
-    (i): i is Extract<ScrapItem, { kind: 'note' }> => i.kind === 'note',
-  );
-  const chats = visible.items.filter(
-    (i): i is Extract<ScrapItem, { kind: 'chat' }> => i.kind === 'chat',
-  );
   const w = 220;
   const h = 140;
   const pts = projectPins(raw.route, w, h, 18);
@@ -90,30 +80,39 @@ export function ScrapbookSpread({
       <div className="flex flex-none items-start justify-between gap-3 border-b border-line px-4 pb-3 pt-3">
         <div>
           <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
-            Field notes
+            Your scrapbook
           </div>
           <h2 className="font-display text-xl font-extrabold leading-tight">{raw.title}</h2>
           <p className="mt-0.5 text-[11px] text-muted">
-            AI documented {raw.pinCount} pins · {raw.photoCount} photos · {raw.noteCount} notes ·{' '}
-            {raw.chatCount} chat turns
+            Collected here: {raw.pinCount} places · {raw.photoCount} photos · {raw.noteCount} notes
+            · {raw.chatCount} journal moments
             {excludedCount ? ` · you hid ${excludedCount}` : ''}
           </p>
         </div>
         <Button size="sm" onClick={() => void generate()} disabled={busy}>
-          {busy ? <Spinner className="border-white" /> : 'Generate scrapbook'}
+          {busy ? (
+            <>
+              <Spinner /> Gathering…
+            </>
+          ) : (
+            <>
+              <ArtIcon name="scrapbook" size={24} />
+              Generate scrapbook
+            </>
+          )}
         </Button>
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
-        <div className="mb-3 rounded-2xl border border-line bg-card p-3">
-          <div className="flex items-baseline justify-between gap-2">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5">
+        <div className="scrapbook-content scrapbook-route mb-6 p-4">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
             <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
-              Date · route card
+              The path we took
             </div>
             <div className="text-[11px] text-muted">
               {prettyDate(raw.start)} → {prettyDate(raw.end)} · {raw.km} km
             </div>
           </div>
-          <svg viewBox={`0 0 ${w} ${h}`} className="mt-2 h-28 w-full rounded-xl bg-[#e7efe8]">
+          <svg viewBox={`0 0 ${w} ${h}`} className="mt-2 h-28 w-full rounded-xl bg-[#ede7dc]">
             {path && (
               <path d={path} fill="none" stroke="#8b7cb8" strokeWidth="3" strokeLinejoin="round" />
             )}
@@ -130,12 +129,12 @@ export function ScrapbookSpread({
           </ol>
         </div>
 
-        {photos.length > 0 && (
-          <section className="mb-4">
+        {raw.items.some((item) => item.kind === 'photo') && (
+          <section className="scrapbook-content mb-6">
             <h3 className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
-              Polaroids
+              Little windows into the trip
             </h3>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="scrapbook-photos">
               {raw.items
                 .filter((i): i is Extract<ScrapItem, { kind: 'photo' }> => i.kind === 'photo')
                 .map((p, i) => {
@@ -157,7 +156,7 @@ export function ScrapbookSpread({
                       />
                       <figcaption className="mt-1.5">
                         <div className="flex items-center justify-between gap-1">
-                          <span className="hand-caption text-[13px]">{p.pinName}</span>
+                          <span className="hand-caption text-[18px]">{p.pinName}</span>
                           <Mark source={p.source} />
                         </div>
                         {editing === p.id ? (
@@ -172,8 +171,21 @@ export function ScrapbookSpread({
                               autoFocus
                               value={draft}
                               onChange={(e) => setDraft(e.target.value)}
-                              className="w-full rounded-md border border-line bg-paper px-2 py-1 text-[11px] outline-none"
+                              aria-label={`Caption for ${p.pinName}`}
+                              className="w-full rounded-md border border-line bg-paper px-2 py-1 text-xs outline-none"
                             />
+                            <div className="mt-2 flex gap-3">
+                              <button type="submit" className="text-xs font-bold text-accent">
+                                Save caption
+                              </button>
+                              <button
+                                type="button"
+                                className="text-xs text-muted"
+                                onClick={() => setEditing(null)}
+                              >
+                                Cancel
+                              </button>
+                            </div>
                           </form>
                         ) : (
                           <button
@@ -202,10 +214,10 @@ export function ScrapbookSpread({
           </section>
         )}
 
-        {notes.length + chats.length > 0 && (
-          <section className="space-y-2">
-            <h3 className="px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
-              What is already written
+        {raw.items.some((item) => item.kind !== 'photo') && (
+          <section className="scrapbook-content scrapbook-notes">
+            <h3 className="col-span-full px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
+              Words worth keeping
             </h3>
             {raw.items
               .filter((i) => i.kind !== 'photo')
@@ -217,7 +229,7 @@ export function ScrapbookSpread({
                   <article
                     key={item.id}
                     className={cx(
-                      'rounded-xl border border-line bg-card px-3 py-2.5 text-sm',
+                      'scrapbook-note border border-line bg-card px-4 py-3 text-sm',
                       hidden && 'opacity-40',
                     )}
                   >
@@ -240,8 +252,21 @@ export function ScrapbookSpread({
                           value={draft}
                           onChange={(e) => setDraft(e.target.value)}
                           rows={2}
+                          aria-label="Edit scrapbook text"
                           className="w-full rounded-md border border-line bg-paper px-2 py-1 text-sm outline-none"
                         />
+                        <div className="mt-2 flex gap-3">
+                          <Button type="submit" size="sm">
+                            Save changes
+                          </Button>
+                          <button
+                            type="button"
+                            className="text-xs text-muted"
+                            onClick={() => setEditing(null)}
+                          >
+                            Cancel
+                          </button>
+                        </div>
                       </form>
                     ) : (
                       <p className="mt-1 leading-snug">{text}</p>
@@ -258,7 +283,7 @@ export function ScrapbookSpread({
                         Edit
                       </button>
                       <button type="button" className="text-muted" onClick={() => toggle(item.id)}>
-                        {hidden ? 'Include' : 'I did not say that'}
+                        {hidden ? 'Include again' : 'Leave out'}
                       </button>
                     </div>
                   </article>

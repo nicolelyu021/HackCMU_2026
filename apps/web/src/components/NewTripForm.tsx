@@ -1,4 +1,5 @@
 'use client';
+import { ArtIcon } from './ArtIcon';
 import { useState } from 'react';
 import type { Budget, Pace } from '@pinlog/schema';
 import { api } from '@/lib/api';
@@ -69,10 +70,15 @@ export function NewTripForm({
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
-      <h2 className="font-display text-2xl font-extrabold tracking-tight">Where to?</h2>
-      <p className="mt-1 text-sm text-muted">
-        Pins stream onto the map as each place is verified on OpenStreetMap.
-      </p>
+      <div className="trip-form-heading">
+        <ArtIcon name="satchel" size={74} />
+        <div>
+          <h2 className="font-display text-4xl">Where shall we wander?</h2>
+          <p className="mt-1 text-sm text-muted">
+            Tell us a little. We'll sketch out the adventure.
+          </p>
+        </div>
+      </div>
       <section className="mt-5 space-y-5">
         <label className="block">
           <span className="text-sm font-semibold">Destination</span>
@@ -178,7 +184,7 @@ export function NewTripForm({
           </div>
         )}
         <Button size="lg" onClick={() => void submit()} disabled={busy || !destination.trim()}>
-          {busy ? 'Creating…' : 'Create trip & plan it'}
+          {busy ? 'Creating…' : 'Let’s start this adventure'}
         </Button>
       </section>
     </div>

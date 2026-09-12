@@ -1,5 +1,7 @@
 # Handoff — where Pinlog stands and what to do next
 
+> **Latest update:** use the [README startup guide](../README.md#start-the-hackathon-demo-no-api-keys-needed) and [frontend design handoff](DESIGN_HANDOFF.md). The historical green checks below predate the latest design changes; final build verification is outstanding. Smoke checks mutate demo data and should use an isolated API.
+
 _Written 2026-09-12 ~00:30 ET, after two Claude sessions. Read this first, then [PLAN.md](PLAN.md) (the status board) and
 [DEMO.md](DEMO.md) (the 3-minute script). Owners: A Client · B Platform · C AI · D Video ([TEAM.md](TEAM.md))._
 

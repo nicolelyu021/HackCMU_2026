@@ -9,7 +9,8 @@ import MapGL, {
 } from 'react-map-gl/maplibre';
 import type { ItineraryStop, TripBundle } from '@pinlog/schema';
 import { MAP_STYLE_URL } from '@/lib/config';
-import { dayColor, KIND_EMOJI } from '@/lib/format';
+import { dayColor } from '@/lib/format';
+import { RouteSketch } from './RouteSketch';
 import { cx } from '@/components/ui';
 
 export interface ProvisionalStop {
@@ -29,6 +30,8 @@ export interface TripMapProps {
   mapStyle?: string;
   /** Fraction of the map height covered by the paper desk (pins pad above it). */
   deskFraction?: number;
+  sketch?: boolean;
+  onUnavailable?: () => void;
 }
 
 const lineFor = (points: { lng: number; lat: number }[]) => ({
@@ -48,6 +51,8 @@ export function TripMap({
   provisional,
   mapStyle,
   deskFraction = 0.3,
+  sketch = false,
+  onUnavailable,
 }: TripMapProps) {
   const mapRef = useRef<MapRef>(null);
   const pins = useMemo(
@@ -97,10 +102,13 @@ export function TripMap({
       ],
       {
         padding: {
-          top: 72,
+          top: 42,
           left: 28,
           right: 28,
-          bottom: Math.round(map.getContainer().clientHeight * deskFraction) + 24,
+          bottom: Math.min(
+            Math.round(map.getContainer().clientHeight * deskFraction) + 18,
+            map.getContainer().clientHeight - 80,
+          ),
         },
         duration: 900,
         maxZoom: 15.5,
@@ -129,120 +137,153 @@ export function TripMap({
     });
   }, [selectedPinId, bundle.pins, deskFraction]);
 
+  useEffect(() => {
+    if (sketch) return;
+    const timer = setTimeout(() => {
+      const map = mapRef.current?.getMap();
+      if (!map || !map.isStyleLoaded() || map.queryRenderedFeatures().length === 0)
+        onUnavailable?.();
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, [sketch, bundle.trip.id, onUnavailable]);
+
+  if (sketch) {
+    return (
+      <RouteSketch
+        pins={pins}
+        onSelectPin={onSelectPin}
+        selectedPinId={selectedPinId}
+        deskFraction={deskFraction}
+      />
+    );
+  }
+
   return (
-    <MapGL
-      ref={mapRef}
-      mapStyle={mapStyle ?? MAP_STYLE_URL}
-      initialViewState={{ longitude: center.lng, latitude: center.lat, zoom: 12.5 }}
-      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-      onClick={() => onSelectPin(null)}
-      onLoad={fit}
-    >
-      <NavigationControl position="top-right" showCompass={false} />
-      {days.map((d) => {
-        const pts = pins.filter((p) => p.day_index === d);
-        if (pts.length < 2) return null;
-        return (
-          <Source key={`route-${d}`} id={`route-${d}`} type="geojson" data={lineFor(pts)}>
-            <Layer
-              id={`route-${d}-casing`}
-              type="line"
-              paint={{ 'line-color': '#ffffff', 'line-width': 7, 'line-opacity': 0.9 }}
-              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
-            />
-            <Layer
-              id={`route-${d}-line`}
-              type="line"
-              paint={{ 'line-color': dayColor(d), 'line-width': 4, 'line-opacity': 0.9 }}
-              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
-            />
-          </Source>
-        );
-      })}
-      {provisional.length > 1 && (
-        <Source
-          id="route-provisional"
-          type="geojson"
-          data={lineFor(provisional.map((s) => s.stop))}
+    <>
+      <div className="absolute inset-0" aria-hidden={sketch} inert={sketch}>
+        <MapGL
+          ref={mapRef}
+          mapStyle={mapStyle ?? MAP_STYLE_URL}
+          initialViewState={{ longitude: center.lng, latitude: center.lat, zoom: 12.5 }}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+          onClick={() => onSelectPin(null)}
+          onLoad={fit}
+          onError={() => onUnavailable?.()}
         >
-          <Layer
-            id="route-provisional-line"
-            type="line"
-            paint={{
-              'line-color': '#8b7cb8',
-              'line-width': 3,
-              'line-dasharray': [1.5, 1.5],
-              'line-opacity': 0.8,
-            }}
-          />
-        </Source>
-      )}
-      {pins.map((p) => {
-        const idx = pins.filter((x) => x.day_index === p.day_index).indexOf(p) + 1;
-        const n = photoCount.get(p.id) ?? 0;
-        const selected = p.id === selectedPinId;
-        const isNow = p.id === nowPinId;
-        return (
-          <Marker
-            key={p.id}
-            longitude={p.lng}
-            latitude={p.lat}
-            anchor="bottom"
-            onClick={(e) => {
-              e.originalEvent.stopPropagation();
-              onSelectPin(p.id);
-            }}
-          >
-            <div className="group relative flex flex-col items-center" title={p.name}>
-              <div
-                className={cx(
-                  'relative flex h-9 min-w-9 items-center justify-center rounded-full border-[3px] border-white px-1 text-sm font-bold text-white shadow-lg transition-transform',
-                  selected ? 'scale-125' : 'group-hover:scale-110',
-                  p.id === pulsePinId && 'pin-pulse',
-                )}
-                style={{
-                  background: dayColor(p.day_index),
-                  boxShadow: isNow
-                    ? `0 0 0 4px ${dayColor(p.day_index)}55, 0 6px 16px rgba(0,0,0,0.3)`
-                    : undefined,
+          <NavigationControl position="top-right" showCompass={false} />
+          {days.map((d) => {
+            const pts = pins.filter((p) => p.day_index === d);
+            if (pts.length < 2) return null;
+            return (
+              <Source key={`route-${d}`} id={`route-${d}`} type="geojson" data={lineFor(pts)}>
+                <Layer
+                  id={`route-${d}-casing`}
+                  type="line"
+                  paint={{ 'line-color': '#fffcf5', 'line-width': 5, 'line-opacity': 0.8 }}
+                  layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+                />
+                <Layer
+                  id={`route-${d}-line`}
+                  type="line"
+                  paint={{
+                    'line-color': dayColor(d),
+                    'line-width': 2.5,
+                    'line-opacity': 0.9,
+                    'line-dasharray': [2, 1.4],
+                  }}
+                  layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+                />
+              </Source>
+            );
+          })}
+          {provisional.length > 1 && (
+            <Source
+              id="route-provisional"
+              type="geojson"
+              data={lineFor(provisional.map((s) => s.stop))}
+            >
+              <Layer
+                id="route-provisional-line"
+                type="line"
+                paint={{
+                  'line-color': '#8b7cb8',
+                  'line-width': 3,
+                  'line-dasharray': [1.5, 1.5],
+                  'line-opacity': 0.8,
+                }}
+              />
+            </Source>
+          )}
+          {pins.map((p) => {
+            const idx = pins.filter((x) => x.day_index === p.day_index).indexOf(p) + 1;
+            const n = photoCount.get(p.id) ?? 0;
+            const selected = p.id === selectedPinId;
+            const isNow = p.id === nowPinId;
+            return (
+              <Marker
+                key={p.id}
+                longitude={p.lng}
+                latitude={p.lat}
+                anchor="bottom"
+                onClick={(e) => {
+                  e.originalEvent.stopPropagation();
+                  onSelectPin(p.id);
                 }}
               >
-                {p.source === 'user' || p.source === 'photo' ? KIND_EMOJI[p.kind] : idx}
-                {n > 0 && (
-                  <span className="absolute -right-2 -top-2 rounded-full bg-ink px-1.5 text-[10px] font-semibold text-paper ring-2 ring-white">
-                    {n}
-                  </span>
-                )}
-              </div>
-              <div className="h-2 w-0.5 bg-white/90" />
+                <button
+                  type="button"
+                  className="group relative flex flex-col items-center"
+                  title={p.name}
+                  aria-label={`Open ${p.name}`}
+                  aria-pressed={selected}
+                >
+                  <div
+                    className={cx(
+                      'map-marker relative flex items-center justify-center transition-transform',
+                      selected ? 'selected scale-110' : 'group-hover:scale-110',
+                      p.id === pulsePinId && 'pin-pulse',
+                    )}
+                    style={{
+                      borderColor: dayColor(p.day_index),
+                      boxShadow: isNow
+                        ? `0 0 0 4px ${dayColor(p.day_index)}55, 0 6px 16px rgba(0,0,0,0.3)`
+                        : undefined,
+                    }}
+                  >
+                    {idx}
+                    {n > 0 && <span className="marker-photo-count">{n}</span>}
+                  </div>
+                  <div className="h-2 w-px bg-line-strong" />
+                  <div
+                    className={cx(
+                      'pointer-events-none absolute top-full mt-0.5 whitespace-nowrap rounded-md border border-line bg-card px-1.5 py-0.5 text-[11px] font-semibold',
+                      selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+                    )}
+                  >
+                    {p.name}
+                  </div>
+                  {isNow && (
+                    <div className="absolute -top-6 rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                      now
+                    </div>
+                  )}
+                </button>
+              </Marker>
+            );
+          })}
+          {provisional.map((s, i) => (
+            <Marker key={`prov-${i}`} longitude={s.stop.lng} latitude={s.stop.lat} anchor="bottom">
               <div
-                className={cx(
-                  'pointer-events-none absolute top-full mt-0.5 whitespace-nowrap rounded-md border border-line bg-card px-1.5 py-0.5 text-[11px] font-semibold',
-                  selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
-                )}
+                className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-dashed border-accent bg-card text-xs font-bold text-accent animate-bounce"
+                title={s.stop.name}
               >
-                {p.name}
+                {i + 1}
               </div>
-              {isNow && (
-                <div className="absolute -top-6 rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-semibold text-white">
-                  now
-                </div>
-              )}
-            </div>
-          </Marker>
-        );
-      })}
-      {provisional.map((s, i) => (
-        <Marker key={`prov-${i}`} longitude={s.stop.lng} latitude={s.stop.lat} anchor="bottom">
-          <div
-            className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-dashed border-accent bg-card text-xs font-bold text-accent animate-bounce"
-            title={s.stop.name}
-          >
-            {i + 1}
-          </div>
-        </Marker>
-      ))}
-    </MapGL>
+            </Marker>
+          ))}
+        </MapGL>
+      </div>
+    </>
   );
 }
 

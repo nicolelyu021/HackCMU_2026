@@ -9,25 +9,65 @@ plan  ──►  pins on a map  ──►  photos auto-land on pins (EXIF)  ─�
 
 **New here? Start with [docs/HANDOFF.md](docs/HANDOFF.md)** — what exists, how to verify it, and the next step for each owner.
 
-## 60-second start (no keys needed)
+## Start the hackathon demo (no API keys needed)
+
+Run every command below from the repository root (the folder containing `pnpm-workspace.yaml`). Use **Node.js 24+** and **pnpm 10.15.0**.
 
 ```bash
-node --version                      # 24 or newer (25 works); node:sqlite is built in
-npm i -g pnpm@10.15.0               # once per laptop (Homebrew node has no corepack)
-pnpm install
-pnpm seed                           # demo trip "Pittsburgh weekend": 9 pins, 18 photos, 7 notes, a finished vlog
-pnpm dev                            # api http://localhost:8787 · web http://localhost:3000
-pnpm smoke                          # in a second terminal: every route end to end against the running api
+node --version
+npm install -g pnpm@10.15.0          # once, if pnpm is not installed
+pnpm install --frozen-lockfile
+pnpm seed                            # creates demo data; leaves an existing seed alone
+pnpm dev                             # leave this terminal running
 ```
 
-Demo day: `pnpm seed:reset --start 2026-09-12` (the day before the demo) makes the seeded "Day 2" today.
+Wait for the API to listen on **8787** and Next.js to report ready on **3000**. Open:
 
-No install at all? Open [`docs/preview.html`](docs/preview.html) in any browser: a phone-shaped, zero-dependency prototype built
-from the same fixtures (map, pins, photo drop, tray, journal chat, vlog player) with the seven demo beats as buttons.
-Regenerate it after fixture changes with `pnpm preview`.
+- Shelf: http://localhost:3000
+- Pittsburgh demo: http://localhost:3000/trips/trip_pgh
+- API health: http://localhost:8787/health
 
-Open http://localhost:3000 → the seeded trip. With no `.env` every provider is a mock ("Demo mode" badge).
-For real Claude / OpenAI TTS / Nominatim: `cp .env.example .env`, add keys, set `PINLOG_MODE=live`, restart.
+The demo has 9 stops, 18 placeholder photos, 7 notes and a prepared film. The map opens as a **local pencil route sketch with clickable real stops**; it does not wait for street tiles or start WebGL. The optional **Street map** button tries the online basemap. Select **All** in the day filter to show every stop. Try a pin → Scrapbook → Journal → Little film for a quick walkthrough. Mock narration is silent.
+
+No `.env` is needed on a fresh checkout. If you already have one, set `PINLOG_MODE=mock` and remove any live per-provider overrides for a no-key demo. Data and uploads persist in `data/`; restarting does not erase them. Stop the app with **Ctrl+C**. On subsequent runs, just run `pnpm dev`.
+
+To run each server in its own terminal:
+
+```bash
+# Terminal 1, repository root
+pnpm --filter @pinlog/api start
+```
+
+```bash
+# Terminal 2, repository root
+pnpm dev:web
+```
+
+Do not also run `pnpm dev` when these two servers are already running.
+
+### If startup fails
+
+- **Port already in use:** stop the previous server terminal with Ctrl+C, then retry. Keep web on 3000 and API on 8787 for the links above.
+- **Missing demo trip:** run `pnpm seed`, then reload. Only use `pnpm seed:reset --start YYYY-MM-DD` when you intend to replace the seeded demo trip; the date is the trip's first day. Back up `data/` before resetting a customized demo.
+- **Next.js hangs before Ready, or reports `patchErrorInspectNodeJS is not a function`:** this occurred on the development laptop and remains unresolved. Stop the stuck process, use Node 24 LTS, run `pnpm install --frozen-lockfile --force`, then retry `pnpm dev:web`. This is a recovery attempt, not a verified fix. It does not require deleting `data/`.
+- **API unavailable but Next.js works:** http://localhost:3000/trips/trip_pgh?fixture=1 provides a read-only fixture view; edits and uploads need the API.
+- **Need an emergency demo without either server:** open [docs/preview.html](docs/preview.html) directly in a browser. This is the older standalone prototype, not the new illustrated frontend. Rebuild it with `pnpm preview` after fixture changes.
+
+For a phone, connect to the laptop's Wi-Fi and open `http://<laptop-LAN-IP>:3000`. Both server ports must be reachable from the phone. The frontend derives the API host from the page URL.
+
+### Verification and handoff
+
+See [docs/DESIGN_HANDOFF.md](docs/DESIGN_HANDOFF.md) for the latest design changes, artwork attribution and exact verification status. Earlier checks passed 69 tests and 19 smoke checks; the final production build/type-check rerun remains unverified because of local dependency startup failures.
+
+```bash
+pnpm test
+pnpm typecheck
+pnpm --filter @pinlog/web exec next build --webpack
+```
+
+`pnpm smoke` **mutates the seeded demo**, including chat/planning content. Run it against a separate seeded data directory/API, not the presentation database. It is not required to start the app.
+
+For live providers, copy `.env.example` to `.env`, add your own keys, set `PINLOG_MODE=live`, and restart. Frontend overrides belong in `apps/web/.env.local`; the root `.env` is read by the API. Never commit credentials.
 
 ## Where things are
 

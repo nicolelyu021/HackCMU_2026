@@ -1,4 +1,5 @@
 'use client';
+import { ArtIcon } from '@/components/ArtIcon';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
@@ -29,10 +30,10 @@ const STEPS: { status: VlogStatus; label: string; hint: string }[] = [
   {
     status: 'scripting',
     label: 'Writing the script',
-    hint: 'narration grounded only in your notes and captions',
+    hint: 'gathering the words you want to remember',
   },
-  { status: 'tts', label: 'Recording the voice', hint: 'one WAV per pin, durations measured' },
-  { status: 'done', label: 'Ready', hint: 'plays in the browser' },
+  { status: 'tts', label: 'Recording the voice', hint: 'finding a voice for your story' },
+  { status: 'done', label: 'Ready', hint: 'your keepsake is ready' },
 ];
 const VOICES: { id: Voice; label: string }[] = [
   { id: 'warm_female', label: 'Warm' },
@@ -190,17 +191,20 @@ export function VlogStudio({
     <div
       className={
         embedded
-          ? 'flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-3 py-3'
+          ? 'vlog-layout'
           : 'mx-auto grid max-w-7xl gap-5 px-4 pb-28 pt-20 md:px-6 md:pb-16 md:pt-24 grid-cols-[minmax(0,1fr)] lg:grid-cols-[320px_minmax(0,1fr)_360px]'
       }
     >
       {/* left: settings + stepper + history */}
-      <div className={embedded ? 'order-2 space-y-3' : 'order-2 min-w-0 space-y-4 lg:order-1'}>
+      <div
+        className={embedded ? 'vlog-settings space-y-3' : 'order-2 min-w-0 space-y-4 lg:order-1'}
+      >
         <Panel dark={!embedded} className="p-4">
-          <h2 className="text-lg font-bold">One-tap vlog</h2>
+          <h2 className="flex items-center gap-2 font-display text-3xl">
+            <ArtIcon name="vlog" size={38} />A little film
+          </h2>
           <p className={embedded ? 'mt-1 text-xs text-muted' : 'mt-1 text-xs text-slate-400'}>
-            The video is a pure function of your pins, photos and notes. Narration only says what
-            your notes say.
+            Your places, photos and words, stitched into a keepsake you can play again.
           </p>
           <div className="mt-4">
             <div
@@ -279,7 +283,7 @@ export function VlogStudio({
                 <Spinner className="border-white" /> Making your vlog…
               </>
             ) : (
-              '🎬 Make vlog'
+              'Make my little film'
             )}
           </Button>
           {bundle && bundle.pins.length === 0 && (
@@ -306,7 +310,7 @@ export function VlogStudio({
                       className={cx(
                         'mt-0.5 flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold',
                         state === 'done'
-                          ? 'bg-emerald-500 text-white'
+                          ? 'bg-accent-soft text-accent'
                           : state === 'now'
                             ? 'bg-accent text-white'
                             : embedded
@@ -323,7 +327,12 @@ export function VlogStudio({
                       )}
                     </span>
                     <span>
-                      <div className={cx('font-medium', state === 'todo' && 'text-slate-400')}>
+                      <div
+                        className={cx(
+                          'font-medium',
+                          state === 'todo' && (embedded ? 'text-muted' : 'text-slate-400'),
+                        )}
+                      >
                         {s.label}
                       </div>
                       {state === 'now' && <div className="text-xs text-slate-400">{s.hint}</div>}
@@ -337,7 +346,13 @@ export function VlogStudio({
 
         {vlogs.length > 0 && (
           <Panel dark={!embedded} className="p-3">
-            <div className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+            <div
+              className={
+                embedded
+                  ? 'px-1 text-xs font-semibold text-muted'
+                  : 'px-1 text-xs font-semibold uppercase tracking-wide text-slate-400'
+              }
+            >
               Vlogs of this trip
             </div>
             <ul className="mt-1 space-y-1">
@@ -358,9 +373,13 @@ export function VlogStudio({
                       className={cx(
                         'ml-2 rounded-full px-1.5 py-0.5 text-[10px]',
                         v.status === 'done'
-                          ? 'bg-emerald-500/20 text-emerald-300'
+                          ? embedded
+                            ? 'bg-accent-soft text-accent'
+                            : 'bg-emerald-500/20 text-emerald-300'
                           : v.status === 'failed'
-                            ? 'bg-red-500/20 text-red-300'
+                            ? embedded
+                              ? 'bg-red-50 text-red-800'
+                              : 'bg-red-500/20 text-red-300'
                             : 'bg-slate-700 text-slate-200',
                       )}
                     >
@@ -377,14 +396,14 @@ export function VlogStudio({
       <div
         className={
           embedded
-            ? 'order-1 flex shrink-0 flex-col items-center'
+            ? 'vlog-preview flex flex-col items-center'
             : 'order-1 flex min-w-0 flex-col items-center lg:order-2'
         }
       >
         <div
           className={
             embedded
-              ? 'aspect-[9/16] w-[min(14rem,78%)] shrink-0 overflow-hidden rounded-2xl border border-line bg-ink'
+              ? 'film-frame shrink-0 overflow-hidden'
               : 'w-[360px] max-w-full rounded-[2.6rem] border-[10px] border-slate-800 bg-black p-1 shadow-2xl'
           }
         >
@@ -395,7 +414,7 @@ export function VlogStudio({
               controls
               autoPlay={false}
               onSegmentChange={setSegmentIndex}
-              style={{ borderRadius: embedded ? 16 : 32 }}
+              style={{ borderRadius: embedded ? 3 : 32 }}
             />
           ) : (
             <div className="flex aspect-[9/16] w-full flex-col items-center justify-center rounded-2xl bg-ink p-8 text-center text-paper/70">
@@ -432,7 +451,7 @@ export function VlogStudio({
         </div>
       </div>
 
-      <div className={embedded ? 'order-3 space-y-3' : 'order-3 min-w-0 space-y-4'}>
+      <div className={embedded ? 'vlog-notes space-y-3' : 'order-3 min-w-0 space-y-4'}>
         {seg && (
           <Panel dark={!embedded} className="p-4">
             <div

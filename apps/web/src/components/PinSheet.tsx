@@ -10,15 +10,7 @@ import {
   type TripBundle,
 } from '@pinlog/schema';
 import { api, fileUrl } from '@/lib/api';
-import {
-  KIND_EMOJI,
-  KIND_LABEL,
-  MOOD_EMOJI,
-  clock,
-  isVerified,
-  prettyDate,
-  windowLabel,
-} from '@/lib/format';
+import { KIND_LABEL, clock, isVerified, prettyDate, windowLabel } from '@/lib/format';
 import { Button, Chip, Sheet, Spinner, cx } from './ui';
 
 type Tab = 'info' | 'photos' | 'notes' | 'ask';
@@ -48,9 +40,7 @@ export function PinSheet({
       <div className="flex items-start justify-between gap-2 border-b border-line p-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-xs text-muted">
-            <span>
-              {KIND_EMOJI[pin.kind]} {KIND_LABEL[pin.kind]}
-            </span>
+            <span>{KIND_LABEL[pin.kind]}</span>
             <span>
               · Day {pin.day_index} ·{' '}
               {prettyDate(dateForDay(bundle.trip.start_date, pin.day_index))}
@@ -172,13 +162,13 @@ function InfoTab({
           <p className="mt-1">{pin.ai_reason}</p>
         </div>
       )}
-      {pin.address && <div className="text-slate-600">📮 {pin.address}</div>}
-      <div className="text-xs text-slate-500">
+      {pin.address && <div className="text-muted">{pin.address}</div>}
+      <div className="text-xs text-muted">
         {pin.lat.toFixed(5)}, {pin.lng.toFixed(5)}
       </div>
       {date && (
         <div>
-          <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+          <div className="text-[11px] font-semibold uppercase tracking-wide text-muted">
             Planned time
           </div>
           <div className="mt-1 flex items-center gap-2">
@@ -228,7 +218,7 @@ function PhotosTab({
 }) {
   if (photos.length === 0)
     return (
-      <div className="p-6 text-center text-sm text-slate-500">
+      <div className="p-6 text-center text-sm text-muted">
         No photos here yet. Drop photos on the map — the ones taken here land automatically.
       </div>
     );
@@ -243,7 +233,7 @@ function PhotosTab({
   return (
     <div className="grid grid-cols-2 gap-2 p-3">
       {photos.map((m) => (
-        <figure key={m.id} className="group relative overflow-hidden rounded-xl bg-slate-100">
+        <figure key={m.id} className="group relative overflow-hidden rounded-xl bg-paper">
           <a href={fileUrl(m.storage_path)} target="_blank" rel="noreferrer">
             <img
               src={fileUrl(m.thumb_path)}
@@ -260,7 +250,7 @@ function PhotosTab({
           </figcaption>
           <button
             onClick={() => toTray(m)}
-            className="absolute right-1.5 top-1.5 hidden rounded-full bg-white/90 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700 group-hover:block"
+            className="absolute right-1.5 top-1.5 rounded-full bg-white/90 px-1.5 py-0.5 text-[10px] font-semibold text-ink group-hover:block"
             title="Move back to the unsorted tray"
           >
             to tray
@@ -313,18 +303,18 @@ function NotesTab({
     <div className="flex h-full flex-col">
       <ul className="flex-1 space-y-2 p-3">
         {notes.length === 0 && (
-          <li className="p-3 text-center text-sm text-slate-500">
+          <li className="p-3 text-center text-sm text-muted">
             Write the one detail you want to remember. The vlog narration only uses what you write
             here.
           </li>
         )}
         {notes.map((e) => (
-          <li key={e.id} className="group rounded-xl bg-slate-50 p-3 text-sm">
+          <li key={e.id} className="group rounded-xl bg-paper p-3 text-sm">
             <div className="flex items-start justify-between gap-2">
-              <p className="text-slate-800">{e.text}</p>
-              <span className="text-lg">{e.mood ? MOOD_EMOJI[e.mood] : ''}</span>
+              <p className="text-ink">{e.text}</p>
+              <span className="font-display text-lg text-accent">{e.mood ?? ''}</span>
             </div>
-            <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500">
+            <div className="mt-1 flex items-center justify-between text-[11px] text-muted">
               <span>
                 {new Date(e.created_at).toLocaleString('en-US', {
                   month: 'short',
@@ -333,14 +323,14 @@ function NotesTab({
                   minute: '2-digit',
                 })}
               </span>
-              <button onClick={() => remove(e)} className="hidden text-red-600 group-hover:block">
+              <button onClick={() => remove(e)} className="text-red-700">
                 delete
               </button>
             </div>
           </li>
         ))}
       </ul>
-      <div className="border-t border-slate-200 p-3">
+      <div className="border-t border-line p-3">
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -348,19 +338,19 @@ function NotesTab({
           placeholder={`Quick note at ${pin.name}…`}
           className="w-full resize-none rounded-xl border border-line bg-card px-3 py-2 text-sm outline-none focus:border-accent"
         />
-        <div className="mt-2 flex items-center justify-between">
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
           <div className="flex gap-1">
             {MOODS.map((m) => (
               <button
                 key={m}
                 onClick={() => setMood(mood === m ? null : m)}
                 className={cx(
-                  'rounded-full px-1.5 py-0.5 text-lg',
+                  'rounded-md px-2 py-1 text-xs',
                   mood === m ? 'bg-accent-soft ring-2 ring-accent' : 'hover:bg-paper',
                 )}
                 title={m}
               >
-                {MOOD_EMOJI[m]}
+                {m}
               </button>
             ))}
           </div>
@@ -391,7 +381,9 @@ function AskTab({
   useEffect(() => {
     api.pinMessages(pin.id).then(setHistory, onError);
   }, [pin.id, onError]);
-  useEffect(() => bottom.current?.scrollIntoView({ behavior: 'smooth' }), [history, live]);
+  useEffect(() => {
+    bottom.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [history, live]);
   const send = async (question: string) => {
     if (!question.trim() || busy) return;
     setBusy(true);
@@ -446,7 +438,7 @@ function AskTab({
   return (
     <div className="flex h-full flex-col">
       <div className="flex-1 space-y-2 p-3">
-        <div className="rounded-xl bg-slate-50 p-2.5 text-[11px] text-slate-600">
+        <div className="rounded-xl bg-paper p-2.5 text-[11px] text-muted">
           Answers only from your plan, your notes and photo captions — no web search. Sentences that
           use a note start with <b>“From your notes:”</b>.
         </div>
@@ -455,7 +447,7 @@ function AskTab({
             key={m.id}
             className={cx(
               'max-w-[92%] rounded-2xl px-3 py-2 text-sm',
-              m.role === 'user' ? 'ml-auto bg-ink text-paper' : 'border border-line bg-card',
+              m.role === 'user' ? 'ml-auto bg-accent-soft text-ink' : 'border border-line bg-card',
             )}
           >
             {m.content}
@@ -464,7 +456,7 @@ function AskTab({
         {live !== null && (
           <div
             className={cx(
-              'max-w-[92%] rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm',
+              'max-w-[92%] rounded-2xl border border-line bg-white px-3 py-2 text-sm',
               'caret',
             )}
           >
@@ -483,7 +475,7 @@ function AskTab({
         <div ref={bottom} />
       </div>
       <form
-        className="flex gap-2 border-t border-slate-200 p-3"
+        className="flex gap-2 border-t border-line p-3"
         onSubmit={(e) => {
           e.preventDefault();
           void send(q);
@@ -493,7 +485,7 @@ function AskTab({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder={`Ask about ${pin.name}…`}
-          className="flex-1 rounded-full border border-line bg-card px-3.5 py-2 text-sm outline-none focus:border-accent"
+          className="min-w-0 flex-1 rounded-lg border border-line bg-card px-3.5 py-2 text-sm outline-none focus:border-accent"
         />
         <Button type="submit" disabled={busy || !q.trim()}>
           {busy ? <Spinner className="border-white" /> : 'Ask'}

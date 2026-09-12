@@ -2,18 +2,17 @@
 import Link from 'next/link';
 import { useFixtureQuery } from '@/lib/hooks';
 import { cx } from './ui';
+import { ArtIcon } from './ArtIcon';
 
 export type DockKey = 'shelf' | 'map' | 'scrapbook' | 'journal' | 'vlog';
-
-const ITEMS: { key: DockKey; label: string; icon: string }[] = [
-  { key: 'shelf', label: 'Shelf', icon: '▤' },
-  { key: 'map', label: 'Map', icon: '◎' },
-  { key: 'scrapbook', label: 'Scrapbook', icon: '❐' },
-  { key: 'journal', label: 'Journal', icon: '✎' },
-  { key: 'vlog', label: 'Vlog', icon: '▶' },
+const ITEMS: { key: DockKey; label: string }[] = [
+  { key: 'shelf', label: 'My shelf' },
+  { key: 'map', label: 'Map' },
+  { key: 'scrapbook', label: 'Scrapbook' },
+  { key: 'journal', label: 'Journal' },
+  { key: 'vlog', label: 'Little film' },
 ];
 
-/** Furniture at the bottom of the notebook — not a second website. */
 export function Dock({
   tripId,
   active,
@@ -27,51 +26,61 @@ export function Dock({
 }) {
   const q = useFixtureQuery();
   return (
-    <nav className="pb-safe grid flex-none grid-cols-5 border-t border-line-strong bg-paper px-1 pt-1">
-      {ITEMS.map((it) => {
-        const on = active === it.key;
+    <nav className="notebook-dock pb-safe" aria-label="Travel notebook">
+      {ITEMS.map(({ key, label }) => {
+        const selected = active === key;
         const className = cx(
-          'flex flex-col items-center gap-0.5 rounded-xl px-1 py-1.5 text-[10px] font-medium tracking-wide',
-          on ? 'text-accent' : 'text-muted',
-          pulse === it.key && 'ring-1 ring-accent',
+          'dock-object',
+          selected && 'is-active',
+          pulse === key && 'has-new-memory',
         );
-        if (it.key === 'shelf') {
+        const content = (
+          <>
+            <ArtIcon name={key} size={48} />
+            <span>{label}</span>
+          </>
+        );
+        if (key === 'shelf')
           return (
-            <Link key={it.key} href={`/${q}`} className={className}>
-              <span className="font-display text-lg leading-none">{it.icon}</span>
-              {it.label}
+            <Link
+              key={key}
+              href={`/${q}`}
+              className={className}
+              aria-current={selected ? 'page' : undefined}
+            >
+              {content}
             </Link>
           );
-        }
-        if (!tripId) {
+        if (!tripId)
           return (
-            <span key={it.key} className={cx(className, 'opacity-40')}>
-              <span className="font-display text-lg leading-none">{it.icon}</span>
-              {it.label}
+            <span key={key} className={cx(className, 'opacity-35')} aria-disabled="true">
+              {content}
             </span>
           );
-        }
-        if (onSelect) {
+        if (onSelect)
           return (
             <button
-              key={it.key}
+              key={key}
               type="button"
-              onClick={() => onSelect(it.key)}
               className={className}
+              onClick={() => onSelect(key)}
+              aria-pressed={selected}
             >
-              <span className="font-display text-lg leading-none">{it.icon}</span>
-              {it.label}
+              {content}
             </button>
           );
-        }
         const href =
-          it.key === 'map'
+          key === 'map'
             ? `/trips/${tripId}${q}`
-            : `/trips/${tripId}${q ? `${q}&` : '?'}panel=${it.key}`;
+            : `/trips/${tripId}${q ? `${q}&` : '?'}panel=${key}`;
         return (
-          <Link key={it.key} href={href} className={className}>
-            <span className="font-display text-lg leading-none">{it.icon}</span>
-            {it.label}
+          <Link
+            key={key}
+            href={href}
+            className={className}
+            aria-current={selected ? 'page' : undefined}
+          >
+            {content}
           </Link>
         );
       })}

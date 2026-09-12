@@ -14,7 +14,7 @@ export function Button({
   size?: 'sm' | 'md' | 'lg';
 }) {
   const v = {
-    primary: 'bg-accent text-white hover:bg-accent/90 border border-line-strong/20',
+    primary: 'bg-[#cab9d9] text-[#484050] hover:bg-[#bda8ce] border border-line-strong',
     dark: 'bg-ink text-paper hover:bg-ink/90 border border-ink',
     ghost: 'bg-card text-ink hover:bg-white border border-line',
     danger: 'bg-card text-red-800 hover:bg-red-50 border border-red-200',
@@ -26,7 +26,7 @@ export function Button({
     <button
       {...props}
       className={cx(
-        'inline-flex items-center gap-1.5 rounded-full font-medium transition disabled:cursor-not-allowed disabled:opacity-50',
+        'pencil-button inline-flex items-center gap-1.5 font-medium transition disabled:cursor-not-allowed disabled:opacity-50',
         v,
         s,
         className,
@@ -46,11 +46,11 @@ export function Chip({
     <button
       {...props}
       className={cx(
-        'rounded-full border px-3 py-1 text-xs font-medium transition',
+        'pencil-chip border px-3 py-1 text-xs font-medium transition',
         active
           ? dark
             ? 'border-accent bg-accent text-white'
-            : 'border-accent bg-accent text-white'
+            : 'border-accent bg-accent-soft text-accent'
           : dark
             ? 'border-white/20 bg-black/40 text-white/80 hover:bg-black/55'
             : 'border-line bg-card text-ink hover:border-line-strong',
@@ -71,7 +71,7 @@ export function Panel({
     <div
       {...props}
       className={cx(
-        'rounded-2xl border',
+        'paper-panel border',
         dark ? 'border-white/10 bg-black/70 text-white' : 'border-line bg-card text-ink',
         className,
       )}
@@ -121,8 +121,12 @@ export function Spinner({ className }: { className?: string }) {
  */
 export function Sheet({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={cx('flex min-h-0 flex-1 flex-col overflow-hidden bg-card text-ink', className)}>
-      <div className="mx-auto mt-2 h-1 w-10 flex-none rounded-full bg-line" />
+    <div
+      className={cx(
+        'notebook-sheet flex min-h-0 flex-1 flex-col overflow-hidden text-ink',
+        className,
+      )}
+    >
       {children}
     </div>
   );
