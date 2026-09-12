@@ -1,0 +1,52 @@
+@import 'tailwindcss';
+@import 'maplibre-gl/dist/maplibre-gl.css';
+
+:root {
+  --ink: #0b1220;
+  --paper: #f7f7f5;
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--paper);
+  color: var(--ink);
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
+}
+
+/* marker pulse after a photo lands (docs/DEMO.md signature moment 1) */
+@keyframes pin-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.75);
+  }
+  100% {
+    box-shadow: 0 0 0 28px rgba(249, 115, 22, 0);
+  }
+}
+.pin-pulse {
+  animation: pin-pulse 1.1s ease-out 3;
+}
+
+/* streaming caret */
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+.caret::after {
+  content: '▍';
+  animation: blink 0.9s steps(1) infinite;
+  margin-left: 2px;
+}
+
+.maplibregl-ctrl-attrib {
+  font-size: 10px;
+}
