@@ -3,17 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Pinlog — a map-first travel diary</title>
-    <link rel="icon" href="../apps/web/public/icons/icon-192.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <title>Pinlog — pitch demo</title>
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Nunito:wght@400;600;700;800&display=swap"
     />
     <style>
       :root {
-        /* Straight from apps/web/src/app/globals.css — keep the two in step. */
         --paper: #f6f2e8;
         --card: #fffcf5;
         --ink: #48443e;
@@ -33,161 +29,371 @@
         margin: 0;
       }
       body {
+        min-height: 100vh;
         background: var(--paper);
         color: var(--ink);
         font-family: var(--font-sans);
         -webkit-font-smoothing: antialiased;
-        /* faint ruled-paper texture, like the notebook pages */
         background-image:
-          radial-gradient(circle at 20% 10%, rgba(121, 103, 144, 0.05), transparent 40%),
-          radial-gradient(circle at 85% 85%, rgba(121, 103, 144, 0.06), transparent 45%);
+          radial-gradient(circle at 18% 12%, rgba(121, 103, 144, 0.05), transparent 42%),
+          radial-gradient(circle at 88% 88%, rgba(121, 103, 144, 0.06), transparent 46%);
       }
-
       .stage {
         min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 56px;
-        padding: 48px 32px;
+        gap: 52px;
+        padding: 36px 28px;
         flex-wrap: wrap;
       }
 
-      /* ---- the phone ---------------------------------------------------- */
+      /* ---- phone: portrait, as if you opened Pinlog -------------------- */
       .phone {
         position: relative;
-        width: 300px;
+        width: 320px;
         flex: none;
         border-radius: 46px;
         background: #10151a;
-        padding: 12px;
+        padding: 11px;
         box-shadow:
           0 40px 90px rgba(72, 68, 62, 0.28),
           inset 0 0 0 2px #2b3138;
       }
       .phone::before {
-        /* the notch */
         content: '';
         position: absolute;
-        top: 20px;
+        top: 18px;
         left: 50%;
         transform: translateX(-50%);
-        width: 104px;
-        height: 26px;
+        width: 96px;
+        height: 24px;
         background: #10151a;
-        border-radius: 18px;
-        z-index: 3;
+        border-radius: 16px;
+        z-index: 6;
       }
-      .screen {
+      .app {
         position: relative;
-        display: block;
-        width: 100%;
-        aspect-ratio: 9 / 19;
+        height: 640px;
         border-radius: 36px;
         overflow: hidden;
-        background: #000;
+        background: var(--paper);
+        display: flex;
+        flex-direction: column;
       }
-      .screen video {
-        width: 100%;
-        height: 100%;
-        object-fit: cover; /* the 16:9 reel fills the tall screen, cropped top/bottom */
-        display: block;
-      }
-      .screen .play-hint {
-        position: absolute;
-        inset: 0;
+      .app-header {
+        flex: none;
         display: flex;
         align-items: center;
-        justify-content: center;
-        background: rgba(16, 21, 26, 0.35);
-        cursor: pointer;
-        transition: opacity 0.25s;
+        justify-content: space-between;
+        padding: 28px 14px 8px;
+        border-bottom: 1px solid var(--line);
       }
-      .screen .play-hint[hidden] {
-        display: none;
-      }
-      .play-hint span {
-        width: 66px;
-        height: 66px;
-        border-radius: 50%;
-        background: var(--card);
-        color: var(--accent);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+      .app-brand {
+        font-family: var(--font-display);
         font-size: 26px;
-        padding-left: 5px;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
-      }
-      .phone-caption {
-        text-align: center;
-        font-family: var(--font-display);
-        font-size: 15px;
-        color: var(--muted);
-        margin-top: 14px;
-      }
-
-      /* ---- the intro ----------------------------------------------------- */
-      .intro {
-        max-width: 480px;
-        flex: 1 1 340px;
-        min-width: 300px;
-      }
-      .brand {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-family: var(--font-display);
-        font-size: 40px;
         line-height: 1;
       }
-      .brand .dot {
+      .app-brand em {
         color: var(--accent);
+        font-style: normal;
       }
       .stamp {
-        display: inline-block;
         border: 1px solid #aaa091;
-        padding: 4px 10px;
+        padding: 3px 8px;
         border-radius: 5px 3px 6px 3px;
-        font-size: 10px;
-        letter-spacing: 0.06em;
+        font-size: 9px;
+        letter-spacing: 0.05em;
         color: var(--muted);
         transform: rotate(2deg);
-        margin-left: 10px;
-        vertical-align: middle;
       }
-      h1 {
+      .view {
+        display: none;
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+        position: relative;
+      }
+      .view.on {
+        display: block;
+      }
+      .dock {
+        flex: none;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        border-top: 1px solid var(--line);
+        background: var(--card);
+        padding: 6px 4px 10px;
+      }
+      .dock button {
+        appearance: none;
+        border: 0;
+        background: none;
         font-family: var(--font-display);
-        font-size: 46px;
-        line-height: 1.02;
-        margin: 18px 0 12px;
-        letter-spacing: -0.01em;
+        font-size: 13px;
+        color: var(--muted);
+        padding: 6px 0;
+        cursor: pointer;
       }
-      .lede {
-        font-size: 17px;
-        line-height: 1.55;
-        color: var(--ink);
-        margin: 0 0 22px;
+      .dock button.on {
+        color: var(--accent);
       }
 
-      .steps {
+      /* shelf */
+      .welcome {
+        padding: 16px 16px 8px;
+      }
+      .welcome .eyebrow {
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin: 0 0 4px;
+      }
+      .welcome h2 {
+        font-family: var(--font-display);
+        font-size: 28px;
+        line-height: 1.05;
+        margin: 0 0 6px;
+      }
+      .welcome p {
+        margin: 0;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .trip-card {
+        margin: 12px 16px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 8px 12px 9px 6px;
+        overflow: hidden;
+        box-shadow: 1px 2px 0 rgba(104, 98, 88, 0.1);
+        cursor: pointer;
+      }
+      .trip-card img {
+        width: 100%;
+        height: 132px;
+        object-fit: cover;
+        display: block;
+      }
+      .trip-card .meta {
+        padding: 9px 11px 11px;
+      }
+      .trip-card h3 {
+        font-family: var(--font-display);
+        font-size: 20px;
+        margin: 0;
+      }
+      .trip-card small {
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      /* map */
+      .map {
+        height: 100%;
+        background: #efe8d8;
+        position: relative;
+      }
+      .map svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      .pin-dot {
+        cursor: pointer;
+      }
+      .pin-label {
+        font-family: var(--font-display);
+        font-size: 11px;
+        fill: var(--ink);
+      }
+      .day-strip {
+        position: absolute;
+        left: 8px;
+        right: 8px;
+        top: 8px;
+        display: flex;
+        gap: 6px;
+      }
+      .chip {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 4px 9px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .chip.on {
+        background: var(--accent-soft);
+        color: var(--accent);
+        border-color: var(--accent);
+      }
+
+      /* pin sheet */
+      .sheet {
+        position: absolute;
+        inset: auto 0 0;
+        background: var(--card);
+        border-top: 1px solid var(--line);
+        border-radius: 16px 16px 0 0;
+        padding: 10px 14px 14px;
+        box-shadow: 0 -8px 24px rgba(72, 68, 62, 0.08);
+      }
+      .sheet h3 {
+        font-family: var(--font-display);
+        font-size: 22px;
+        margin: 0;
+      }
+      .sheet .why {
+        font-size: 12px;
+        color: var(--muted);
+        margin: 4px 0 10px;
+      }
+      .photos {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+      .photos img {
+        width: 100%;
+        height: 92px;
+        object-fit: cover;
+        border-radius: 6px;
+        display: block;
+      }
+      .hud {
+        display: none;
+        position: absolute;
+        left: 10px;
+        right: 10px;
+        top: 44px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 12px;
+        box-shadow: 1px 2px 0 rgba(104, 98, 88, 0.12);
+      }
+      .hud.on {
+        display: block;
+      }
+      .hud b {
+        color: var(--accent);
+      }
+
+      /* scrapbook */
+      .spread {
+        padding: 12px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .spread figure {
+        margin: 0;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 6px 9px 7px 5px;
+        overflow: hidden;
+        transform: rotate(-1deg);
+      }
+      .spread figure:nth-child(2n) {
+        transform: rotate(1.2deg);
+      }
+      .spread img {
+        width: 100%;
+        height: 118px;
+        object-fit: cover;
+        display: block;
+      }
+      .spread figcaption {
+        font-family: var(--font-display);
+        font-size: 13px;
+        padding: 4px 7px 6px;
+        color: var(--muted);
+      }
+
+      /* vlog: landscape reel letterboxed inside the portrait phone */
+      .vlog {
+        height: 100%;
+        background: #1a1814;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .vlog video {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: #000;
+        display: block;
+      }
+      .vlog .bar {
+        padding: 8px 12px 10px;
+        color: #efe8d8;
+        font-size: 11px;
+      }
+      .vlog .bar b {
+        font-family: var(--font-display);
+        font-size: 16px;
+        font-weight: 400;
+        display: block;
+      }
+
+      /* ---- pitch script on the right ---------------------------------- */
+      .pitch {
+        max-width: 440px;
+        flex: 1 1 320px;
+      }
+      .pitch .brand {
+        font-family: var(--font-display);
+        font-size: 38px;
+        line-height: 1;
+      }
+      .pitch .brand em {
+        color: var(--accent);
+        font-style: normal;
+      }
+      .pitch h1 {
+        font-family: var(--font-display);
+        font-size: 34px;
+        line-height: 1.05;
+        margin: 12px 0 8px;
+      }
+      .pitch .lede {
+        margin: 0 0 18px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .beats {
         list-style: none;
-        margin: 0 0 26px;
+        margin: 0;
         padding: 0;
         display: grid;
-        gap: 12px;
+        gap: 8px;
       }
-      .steps li {
+      .beats button {
+        width: 100%;
+        text-align: left;
         display: flex;
         gap: 12px;
         align-items: flex-start;
         background: var(--card);
         border: 1px solid var(--line);
         border-radius: 8px 12px 9px 6px;
-        padding: 12px 14px;
+        padding: 11px 12px;
+        cursor: pointer;
+        font: inherit;
+        color: inherit;
         box-shadow: 1px 2px 0 rgba(104, 98, 88, 0.08);
       }
-      .steps .n {
+      .beats button:hover {
+        transform: translateY(-1px);
+      }
+      .beats button.on {
+        border-color: var(--accent);
+        background: #faf6ff;
+      }
+      .beats .n {
         flex: none;
         width: 26px;
         height: 26px;
@@ -195,226 +401,281 @@
         background: var(--accent-soft);
         color: var(--accent);
         font-family: var(--font-display);
-        font-size: 15px;
         display: flex;
         align-items: center;
         justify-content: center;
       }
-      .steps b {
-        display: block;
-        font-size: 15px;
-      }
-      .steps span {
-        font-size: 13px;
-        color: var(--muted);
-      }
-
-      .cta {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-        align-items: center;
-      }
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        min-height: 46px;
-        padding: 10px 20px;
-        border: 1.5px solid var(--line-strong);
-        border-radius: 7px 12px 8px 10px / 10px 6px 12px 7px;
-        font-size: 14px;
-        font-weight: 700;
-        text-decoration: none;
-        color: var(--ink);
-        background: var(--card);
-        box-shadow: 1px 2px 0 rgba(104, 98, 88, 0.16);
-        transition:
-          transform 0.18s,
-          background 0.18s;
-      }
-      .btn:hover {
-        transform: translateY(-2px) rotate(-0.4deg);
-      }
-      .btn:active {
-        transform: translateY(1px);
-        box-shadow: none;
-      }
-      .btn.primary {
+      .beats button.on .n {
         background: var(--accent);
-        border-color: var(--accent);
         color: #fff;
       }
-
-      .photos {
-        display: flex;
-        gap: 10px;
-        margin-top: 28px;
-        flex-wrap: wrap;
-      }
-      .photos figure {
-        margin: 0;
-        width: 108px;
-        border: 1px solid var(--line);
-        border-radius: 6px 9px 7px 5px;
-        overflow: hidden;
-        background: var(--card);
-        box-shadow: 1px 2px 0 rgba(104, 98, 88, 0.1);
-        transform: rotate(-1deg);
-      }
-      .photos figure:nth-child(2n) {
-        transform: rotate(1.4deg);
-      }
-      .photos figure:nth-child(3n) {
-        transform: rotate(-0.6deg);
-      }
-      .photos img {
-        width: 100%;
-        height: 78px;
-        object-fit: cover;
+      .beats .t {
         display: block;
+        font-weight: 800;
+        font-size: 14px;
       }
-      .photos figcaption {
+      .beats .d {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .say {
+        margin: 16px 0 0;
+        padding: 12px 14px;
+        background: var(--card);
+        border-left: 3px solid var(--accent);
         font-family: var(--font-display);
+        font-size: 20px;
+        line-height: 1.25;
+      }
+      .hint {
+        margin: 12px 0 0;
         font-size: 12px;
         color: var(--muted);
-        padding: 5px 7px;
-        text-align: center;
       }
-
-      .foot {
-        margin-top: 26px;
-        font-size: 12px;
-        color: var(--muted);
-        line-height: 1.5;
-      }
-      .foot code {
-        font-family: ui-monospace, Menlo, monospace;
-        font-size: 11px;
-        background: var(--accent-soft);
-        padding: 1px 5px;
-        border-radius: 4px;
-        color: var(--accent);
-      }
-
-      @media (max-width: 720px) {
+      @media (max-width: 760px) {
         .stage {
-          gap: 32px;
-          padding: 32px 20px;
-        }
-        h1 {
-          font-size: 38px;
+          gap: 28px;
+          padding: 24px 16px;
         }
       }
     </style>
   </head>
   <body>
     <div class="stage">
-      <!-- left: the phone, playing our own demo reel -->
-      <div>
-        <div class="phone">
-          <div class="screen">
-            <video
-              id="reel"
-              src="../Videos/pinlog_demo_concat_vo.mp4"
-              poster="assets/phipps.jpg"
-              preload="metadata"
-              playsinline
-              loop
-              muted
-            ></video>
-            <div class="play-hint" id="playHint"><span>▶</span></div>
+      <div class="phone">
+        <div class="app">
+          <header class="app-header">
+            <span class="app-brand">pinlog<em>.</em></span>
+            <span class="stamp" id="stamp">demo notebook</span>
+          </header>
+
+          <div class="view on" id="view-shelf">
+            <div class="welcome">
+              <p class="eyebrow">Your travel shelf</p>
+              <h2>Go somewhere.<br />Keep a little of it.</h2>
+              <p>One weekend. Our own photos.</p>
+            </div>
+            <article class="trip-card" data-go="1">
+              <img src="assets/cathy.jpg" alt="Cathedral of Learning" />
+              <div class="meta">
+                <h3>Pittsburgh weekend</h3>
+                <small>3 places · 4 photos · a little film</small>
+              </div>
+            </article>
           </div>
+
+          <div class="view" id="view-map" hidden>
+            <div class="map">
+              <div class="day-strip">
+                <span class="chip on">All</span>
+                <span class="chip">Day 1</span>
+                <span class="chip">Day 2 · today</span>
+              </div>
+              <svg viewBox="0 0 300 480" aria-hidden="true">
+                <path
+                  d="M40 420 C 70 340, 90 300, 120 250 S 160 160, 210 90"
+                  fill="none"
+                  stroke="#686258"
+                  stroke-width="1.6"
+                  stroke-dasharray="5 6"
+                />
+                <g class="pin-dot" data-go="2">
+                  <circle cx="210" cy="90" r="8" fill="#796790" />
+                  <text class="pin-label" x="222" y="86">Cathedral</text>
+                </g>
+                <g class="pin-dot" data-go="2">
+                  <circle cx="120" cy="250" r="8" fill="#796790" />
+                  <text class="pin-label" x="132" y="246">Phipps</text>
+                </g>
+                <g class="pin-dot" data-go="2">
+                  <circle cx="70" cy="400" r="8" fill="#796790" />
+                  <text class="pin-label" x="82" y="396">Warhol</text>
+                </g>
+              </svg>
+              <div class="hud" id="landHud">
+                Photo landed on <b>Phipps Conservatory</b> · 40 m · within window
+              </div>
+            </div>
+          </div>
+
+          <div class="view" id="view-pin" hidden>
+            <div class="map">
+              <svg viewBox="0 0 300 480">
+                <path
+                  d="M40 420 C 70 340, 90 300, 120 250 S 160 160, 210 90"
+                  fill="none"
+                  stroke="#686258"
+                  stroke-width="1.6"
+                  stroke-dasharray="5 6"
+                />
+                <circle cx="120" cy="250" r="11" fill="#796790" />
+              </svg>
+              <div class="sheet">
+                <small style="color: var(--muted)">Day 1 · verified on OpenStreetMap</small>
+                <h3>Phipps Conservatory</h3>
+                <p class="why">$3 extra for the fern room. The glasshouse ate the afternoon.</p>
+                <div class="photos">
+                  <img src="assets/phipps.jpg" alt="Phipps Conservatory" />
+                  <img src="assets/phipps2.jpg" alt="Inside the glasshouse" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="view" id="view-scrapbook" hidden>
+            <div class="spread">
+              <figure>
+                <img src="assets/cathy.jpg" alt="Cathedral of Learning" />
+                <figcaption>Cathedral</figcaption>
+              </figure>
+              <figure>
+                <img src="assets/phipps.jpg" alt="Phipps" />
+                <figcaption>Phipps</figcaption>
+              </figure>
+              <figure>
+                <img src="assets/phipps2.jpg" alt="Glasshouse" />
+                <figcaption>the glasshouse</figcaption>
+              </figure>
+              <figure>
+                <img src="assets/andy-warhol.jpg" alt="Warhol Museum" />
+                <figcaption>Warhol</figcaption>
+              </figure>
+            </div>
+          </div>
+
+          <div class="view" id="view-vlog" hidden>
+            <div class="vlog">
+              <video
+                id="reel"
+                src="../Videos/pinlog_demo_concat_vo.mp4"
+                poster="assets/phipps.jpg"
+                playsinline
+                controls
+              ></video>
+              <div class="bar">
+                <b>Pittsburgh weekend · a little film</b>
+                30 s · 3 pins · our photos · our notes
+              </div>
+            </div>
+          </div>
+
+          <nav class="dock">
+            <button data-go="0" class="on">shelf</button>
+            <button data-go="1">map</button>
+            <button data-go="3">book</button>
+            <button data-go="4">film</button>
+          </nav>
         </div>
-        <p class="phone-caption">the little film Pinlog cut from the trip</p>
       </div>
 
-      <!-- right: the intro -->
-      <div class="intro">
-        <span class="brand">pinlog<span class="dot">.</span></span>
-        <span class="stamp">HackCMU 2026</span>
-
-        <h1>Go somewhere.<br />Keep a little of it.</h1>
+      <aside class="pitch">
+        <div class="brand">pinlog<em>.</em></div>
+        <h1>The 3-minute pitch</h1>
         <p class="lede">
-          Plan a trip as pins on a map, live it by dropping photos and notes onto those pins, then
-          relive it as an auto-generated vlog. Everything is a pin.
+          Click a beat — the phone on the left is the app. The photos and the film are ours, used as
+          input, not stock.
         </p>
-
-        <ul class="steps">
+        <ol class="beats">
           <li>
-            <span class="n">1</span>
-            <div>
-              <b>Plan as pins</b>
-              <span>Drop stops on the map; the planner turns them into a day-by-day route.</span>
-            </div>
+            <button data-go="0">
+              <span class="n">1</span>
+              <span>
+                <span class="t">Open the shelf</span>
+                <span class="d">Sign in, then the travel shelf — one trip waiting</span>
+              </span>
+            </button>
           </li>
           <li>
-            <span class="n">2</span>
-            <div>
-              <b>Photos land themselves</b>
-              <span
-                >Shoot as you go — EXIF GPS puts each photo on the right pin automatically.</span
-              >
-            </div>
+            <button data-go="1">
+              <span class="n">2</span>
+              <span>
+                <span class="t">Everything is a pin</span>
+                <span class="d">Cathedral → Phipps → Warhol on one map</span>
+              </span>
+            </button>
           </li>
           <li>
-            <span class="n">3</span>
-            <div>
-              <b>One tap, a little film</b>
-              <span>Your pins, photos and notes become a narrated vlog. No editing.</span>
-            </div>
+            <button data-go="2">
+              <span class="n">3</span>
+              <span>
+                <span class="t">Photos land themselves</span>
+                <span class="d">Our Phipps shots, EXIF GPS, 40 m from the pin</span>
+              </span>
+            </button>
           </li>
-        </ul>
-
-        <div class="cta">
-          <a class="btn primary" href="http://localhost:3000">Open the app</a>
-          <a class="btn" href="../Videos/pinlog_demo_concat_vo.mp4" target="_blank" rel="noopener">
-            Watch the full reel
-          </a>
-        </div>
-
-        <!-- our own photos from the Pittsburgh trip -->
-        <div class="photos">
-          <figure>
-            <img src="assets/phipps.jpg" alt="Phipps Conservatory, Pittsburgh" />
-            <figcaption>Phipps</figcaption>
-          </figure>
-          <figure>
-            <img src="assets/phipps2.jpg" alt="Inside the conservatory" />
-            <figcaption>the glasshouse</figcaption>
-          </figure>
-          <figure>
-            <img src="assets/cathy.jpg" alt="Cathy, the university mascot" />
-            <figcaption>Cathy</figcaption>
-          </figure>
-          <figure>
-            <img src="assets/andy-warhol.jpg" alt="The Andy Warhol Museum" />
-            <figcaption>Warhol</figcaption>
-          </figure>
-        </div>
-
-        <p class="foot">
-          Built at HackCMU 2026. Sign-in by Auth0 · map by MapLibre + OpenFreeMap · narration by
-          Claude + OpenAI · film by Remotion. Run it yourself with <code>pnpm dev</code>, then open
-          <code>localhost:3000</code>.
+          <li>
+            <button data-go="3">
+              <span class="n">4</span>
+              <span>
+                <span class="t">The scrapbook</span>
+                <span class="d">Four photos from the weekend, already on their pins</span>
+              </span>
+            </button>
+          </li>
+          <li>
+            <button data-go="4">
+              <span class="n">5</span>
+              <span>
+                <span class="t">One tap, a little film</span>
+                <span class="d">The reel Pinlog cut from those pins, photos and notes</span>
+              </span>
+            </button>
+          </li>
+        </ol>
+        <p class="say" id="say">
+          Planning, photos and the recap used to live in three apps. In Pinlog everything is a pin.
         </p>
-      </div>
+        <p class="hint">Space / → next beat · ← previous. Click the trip card or a pin too.</p>
+      </aside>
     </div>
 
     <script>
-      // The reel is muted so it can autoplay; the overlay is the fallback for browsers that block it.
-      const video = document.getElementById('reel');
-      const hint = document.getElementById('playHint');
-      const tryPlay = () =>
-        video
-          .play()
-          .then(() => hint.setAttribute('hidden', ''))
-          .catch(() => hint.removeAttribute('hidden'));
-      tryPlay();
-      hint.addEventListener('click', () => {
-        video.muted = false; // a tap is a user gesture, so sound is allowed from here
-        tryPlay();
+      const SAY = [
+        'Planning, photos and the recap used to live in three apps. In Pinlog everything is a pin.',
+        'Nine pins would be the full weekend. Here are the three we actually walked — Cathedral, Phipps, Warhol.',
+        'The browser reads the EXIF before anything uploads. Forty metres from Phipps, inside the window — it lands itself.',
+        'Nothing is invented. The scrapbook is only what we shot.',
+        'The video is a pure function of the trip. Every line of narration cites a note we wrote.',
+      ];
+      const VIEWS = ['shelf', 'map', 'pin', 'scrapbook', 'vlog'];
+      const reel = document.getElementById('reel');
+      let beat = 0;
+
+      function show(n) {
+        beat = n;
+        VIEWS.forEach((name, i) => {
+          document.getElementById('view-' + name).classList.toggle('on', i === n);
+        });
+        document
+          .querySelectorAll('.beats button')
+          .forEach((b, i) => b.classList.toggle('on', i === n));
+        document.querySelectorAll('.dock button').forEach((b) => {
+          b.classList.toggle('on', Number(b.dataset.go) === n || (n === 2 && b.dataset.go === '1'));
+        });
+        document.getElementById('say').textContent = SAY[n];
+        document.getElementById('stamp').textContent = n === 4 ? 'a little film' : 'demo notebook';
+        document.getElementById('landHud').classList.toggle('on', n === 2);
+        if (n === 4) {
+          reel.currentTime = 0;
+          reel.play().catch(() => {});
+        } else {
+          reel.pause();
+        }
+      }
+
+      document.querySelectorAll('[data-go]').forEach((el) => {
+        el.addEventListener('click', () => show(Number(el.dataset.go)));
       });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+          e.preventDefault();
+          show(Math.min(4, beat + 1));
+        }
+        if (e.key === 'ArrowLeft') show(Math.max(0, beat - 1));
+      });
+      show(0);
     </script>
   </body>
 </html>
