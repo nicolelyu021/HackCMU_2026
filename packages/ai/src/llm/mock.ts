@@ -45,7 +45,7 @@ export function mockAnswerText(req: LLMRequest): string {
 function mockReplanFor(i: Inputs): unknown {
   const pins = Array.isArray(i.pins) ? (i.pins as { id: string }[]) : [];
   const knows = new Set(pins.map((p) => p.id));
-  if (knows.has('pin_pgh_d2_schenley') && knows.has('pin_pgh_d2_strip')) return mockReplanDraft;
+  if (knows.has('pin_pgh_d1_warhol') && knows.has('pin_pgh_d1_phipps')) return mockReplanDraft;
   return { summary: 'Mock replan: nothing to change.', added: [], changed: [], removed: [] };
 }
 

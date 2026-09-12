@@ -612,7 +612,7 @@
   async function chat(message) {
     state.chat = state.chat || []; state.chat.push({ role: 'user', content: message }); renderJournal();
     const b = document.createElement('div'); b.className = 'bubble a'; $('#chat-live').appendChild(b); $('#chat-scroll').scrollTop = 1e6;
-    const last = PGH.entries[PGH.entries.length - 1].text; const text = `From your journal so far: 9 pins and 7 notes; latest note: "${last}" Ask me about any pin, or say "summarize my day".`;
+    const last = PGH.entries[PGH.entries.length - 1].text; const text = `From your journal so far: 4 pins and 5 notes; latest note: "${last}" Ask me about any pin, or say "summarize my day".`;
     await typeInto(b, text); state.chat.push({ role: 'assistant', content: text }); renderJournal();
   }
   async function summarize() {
@@ -663,15 +663,15 @@
     const st = state.studio; if (st.running) return; st.running = true; st.justMade = false; st.step = 0; renderStudio(); player.pause();
     for (const [i, ms] of [[0, 600], [1, 1900], [2, 1700]]) { st.step = i; renderStudio(); await sleep(ms); }
     st.step = 3; st.running = false; st.justMade = true; st.made++; st.vlogs.unshift({ id: 'v' + st.made, label: `${label} · 47 s`, status: 'done' }); renderStudio();
-    toast('Your vlog is ready', '47 s · 7 pins · every line cites the note it came from', true); player.seek(0); player.play();
+    toast('Your vlog is ready', '50 s · 4 pins · every line cites the note it came from', true); player.seek(0); player.play();
   }
 
   const BEATS = [
-    { t: 'Open on the Pittsburgh map', d: '9 pins, route per day, "Day 2 · today", the now marker', say: 'Everything is a pin — plan, photos, notes and the video hang off one map.', run: () => { state.ds = PGH; state.screen = 'map'; state.day = 'all'; state.sheet = null; state.plan = null; render(); } },
+    { t: 'Open on the Pittsburgh map', d: '4 pins, route per day, "Day 2 · today", the now marker', say: 'Everything is a pin — plan, photos, notes and the video hang off one map.', run: () => { state.ds = PGH; state.screen = 'map'; state.day = 'all'; state.sheet = null; state.plan = null; render(); } },
     { t: 'Plan Kyoto — pins stream in', d: 'Claude drafts, OpenStreetMap verifies, one stop is dropped', say: 'Anything it can\'t verify never appears.', run: planKyoto },
     { t: 'Open Phipps: photos, note, why', d: 'Pin sheet · Info / Photos / Notes / Ask', say: 'This is our actual weekend. Day 2 is today.', run: () => { state.ds = PGH; state.screen = 'map'; state.day = 1; state.plan = null; state.selected = 'pin_pgh_d1_phipps'; state.sheet = 'pin'; state.tab = 'notes'; render(); } },
     { t: 'Drop this morning\'s Fence photo', d: 'EXIF in the browser → lands on the CMU pin, HUD shows the maths', say: '300 metres and two hours, in the trip\'s time zone.', run: dropFence },
-    { t: 'No-GPS photo → tray → move', d: 'Nothing is lost: it waits in the tray', say: 'No GPS? It waits in the tray.', run: () => { state.ds = PGH; state.screen = 'map'; state.day = 'all'; state.plan = null; state.sheet = 'tray'; state.picking = 'media_pgh_17_nogps'; render(); } },
+    { t: 'Open Carnival photos', d: 'Day 2 · Ferris wheel, pirate booth, Eras Tour mural', say: 'These are the photos from the weekend.', run: () => { state.ds = PGH; state.screen = 'map'; state.day = 2; state.plan = null; state.selected = 'pin_pgh_d2_cmu'; state.sheet = 'pin'; state.tab = 'photos'; render(); } },
     { t: 'Summarize my day', d: 'Trip-level journal chat, streamed, ends with "From your notes"', say: 'It only knows what we wrote.', run: async () => { state.screen = 'journal'; state.sheet = null; render(); await summarize(); } },
     { t: 'Make vlog → stepper → Player', d: 'Script → voice → ready; flyover, Ken Burns, note pill, route outro', say: 'The video is a pure function of the trip data.', run: async () => { state.screen = 'vlog'; state.sheet = null; render(); await makeVlog('Made now'); } },
   ];

@@ -21,7 +21,7 @@ describe('vlog script (mock llm)', () => {
     expect(script.segments[0]!.type).toBe('title');
     expect(script.segments.at(-1)!.type).toBe('outro');
     const pins = script.segments.filter((s) => s.type === 'pin');
-    expect(pins).toHaveLength(7); // pins with photos or notes (CMU has neither yet)
+    expect(pins).toHaveLength(4);
     for (const s of pins) {
       if (s.type !== 'pin') continue;
       expect(pinIds.has(s.pin_id)).toBe(true);
@@ -35,10 +35,10 @@ describe('vlog script (mock llm)', () => {
       expect(s.duration_s).toBeGreaterThanOrEqual(3);
     }
     const phipps = pins.find((s) => s.type === 'pin' && s.pin_id === 'pin_pgh_d1_phipps');
-    expect(phipps?.type === 'pin' && phipps.narration).toContain('$3 extra for the fern room');
+    expect(phipps?.type === 'pin' && phipps.narration).toContain('rain chain of little cups');
     expect(phipps?.type === 'pin' && phipps.source_entry_ids).toEqual(['entry_pgh_02']);
     const outro = script.segments.at(-1)!;
-    expect(outro.type === 'outro' && outro.text).toMatch(/km · 9 places · 16 photos/);
+    expect(outro.type === 'outro' && outro.text).toMatch(/km · 4 places · 8 photos/);
     expect(scriptDurationS(script)).toBeGreaterThan(30);
     expect(scriptDurationS(script)).toBeLessThan(90);
     // regenerate with instructions + previous still works
@@ -62,8 +62,8 @@ describe('vlog script (mock llm)', () => {
     const repo = createMemoryRepo(demoFixtures());
     const bundle = (await repo.trips.bundle('trip_pgh'))!;
     const t = buildTimeline(bundle);
-    expect(t.map((x) => x.pin_id)).not.toContain('pin_pgh_d2_cmu');
-    expect(t[0]!.photos.map((p) => p.id)).toEqual(['media_pgh_01', 'media_pgh_02']);
+    expect(t.map((x) => x.pin_id)).toContain('pin_pgh_d2_cmu');
+    expect(t[0]!.photos.map((p) => p.id)).toEqual(['media_pgh_01']);
     expect(wordBudget(60, 7).per_segment).toBeGreaterThanOrEqual(12);
     expect(wordBudget(120, 3).per_segment).toBe(40);
     await expect(

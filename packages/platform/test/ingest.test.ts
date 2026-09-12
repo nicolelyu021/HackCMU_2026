@@ -33,13 +33,13 @@ describe('exif + ingest', () => {
   it('ingests a photo: stores original + thumb, lands on the expected pin, trusts client meta', async () => {
     const repo = createMemoryRepo(demoFixtures());
     const storage = createMemoryStorage();
-    const spec = DEMO_PHOTO_SPECS.find((s) => s.id === 'media_pgh_14')!;
+    const spec = DEMO_PHOTO_SPECS.find((s) => s.id === 'media_pgh_03')!;
     const bytes = await generateDemoPhoto(spec);
     const r = await ingestPhoto(
       { repo, storage },
-      { trip_id: 'trip_pgh', bytes, meta: { name: 'strip.jpg' } },
+      { trip_id: 'trip_pgh', bytes, meta: { name: 'phipps.jpg' } },
     );
-    expect(r.assigned_pin_id).toBe('pin_pgh_d2_strip');
+    expect(r.assigned_pin_id).toBe('pin_pgh_d1_phipps');
     expect(r.reason).toMatch(/within window/);
     expect(r.media.assign_method).toBe('auto');
     expect(r.media.width).toBe(1600);
@@ -69,7 +69,7 @@ describe('exif + ingest', () => {
     );
     expect(r3.assigned_pin_id).toBeNull();
     expect(r3.media.assign_method).toBe('none');
-    expect((await repo.media.listByTrip('trip_pgh')).length).toBe(21);
+    expect((await repo.media.listByTrip('trip_pgh')).length).toBe(11);
   });
 
   it('seeds rows (skip photos), is idempotent, resets on demand, writes files when asked', async () => {
@@ -80,13 +80,13 @@ describe('exif + ingest', () => {
     const a = await seedFixtures({ repo, storage }, { photos: 'skip', log: (l) => log.push(l) });
     expect(a).toMatchObject({
       trip_id: 'trip_pgh',
-      pins: 9,
-      media: 18,
-      entries: 7,
+      pins: 4,
+      media: 8,
+      entries: 5,
       vlog_id: 'vlog_pgh_demo',
       seeded: true,
     });
-    expect((await repo.trips.bundle('trip_pgh'))?.pins).toHaveLength(9);
+    expect((await repo.trips.bundle('trip_pgh'))?.pins).toHaveLength(4);
     const b = await seedFixtures({ repo, storage }, { photos: 'skip', log: (l) => log.push(l) });
     expect(b.seeded).toBe(false);
     expect(log.some((l) => /already exists/.test(l))).toBe(true);
@@ -108,6 +108,6 @@ describe('exif + ingest', () => {
       expect(await storage.exists(`trips/trip_pgh/thumbs/${s.id}.jpg`)).toBe(true);
     }
     expect(await storage.exists('vlogs/vlog_pgh_demo/seg_01.wav')).toBe(true);
-    expect(await storage.exists('vlogs/vlog_pgh_demo/seg_07.wav')).toBe(true);
+    expect(await storage.exists('vlogs/vlog_pgh_demo/seg_04.wav')).toBe(true);
   }, 60_000);
 });

@@ -40,7 +40,7 @@ export const getVlog = async (id: string): Promise<Vlog> => {
 };
 export const summarize = async () => ({
   summary:
-    'Fixture mode: run `pnpm dev:api` for real summaries. Today went from the Cathedral to the Incline. From your notes: the incline car creaks the whole way up.',
+    'Fixture mode: run `pnpm dev:api` for real summaries. Today went from the Cathedral to the Warhol. From your notes: the elephant sculpture stopped you in the doorway.',
   day_index: 1,
   message_id: 'fixture',
 });

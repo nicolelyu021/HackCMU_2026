@@ -35,7 +35,7 @@ Wait for the API to listen on **8787** and Next.js to report ready on **3000**. 
 - Pittsburgh demo: http://localhost:3000/trips/trip_pgh
 - API health: http://localhost:8787/health
 
-The demo has 9 stops, 18 placeholder photos, 7 notes and a prepared film. The map opens as a **local pencil route sketch with clickable real stops**; it does not wait for street tiles or start WebGL. The **Street map** button switches to the online OpenFreeMap basemap (needs internet; the page returns to the sketch only if the map never loads within 8 s). Select **All** in the day filter to show every stop. Try a pin → Scrapbook → Journal → Little film for a quick walkthrough. Mock narration is silent.
+The demo has 4 stops, 8 real photos, 5 notes and a prepared film. The map opens as a **local pencil route sketch with clickable real stops**; it does not wait for street tiles or start WebGL. The **Street map** button switches to the online OpenFreeMap basemap (needs internet; the page returns to the sketch only if the map never loads within 8 s). Select **All** in the day filter to show every stop. Try a pin → Scrapbook → Journal → Little film for a quick walkthrough. Mock narration is silent.
 
 Beyond `apps/web/.env.local` above, no `.env` is needed on a fresh checkout. If you already have one, set `PINLOG_MODE=mock` and remove any live per-provider overrides for a no-key demo. Data and uploads persist in `data/`; restarting does not erase them. Stop the app with **Ctrl+C**. On subsequent runs, just run `pnpm dev`.
 
@@ -97,7 +97,7 @@ For live providers, copy `.env.example` to `.env`, add your own keys, set `PINLO
 | `pnpm dev` / `pnpm dev:api` / `pnpm dev:web` | run api + web (or one of them) |
 | `pnpm auth0:setup` | create the Auth0 application and write `apps/web/.env.local` ([docs/AUTH.md](docs/AUTH.md)) |
 | `pnpm auth0:brand` | dress the Auth0 login page in Pinlog's colours and copy (`--dry-run` to preview) |
-| `pnpm seed` / `pnpm seed:reset` | (re)create `data/pinlog.db` + `data/files` from the fixtures (`--start YYYY-MM-DD` shifts the demo dates, `--photos generate` re-renders the demo JPEGs) |
+| `pnpm seed` / `pnpm seed:reset` | (re)create `data/pinlog.db` + `data/files` from the fixtures (`--start YYYY-MM-DD` shifts the demo dates, `--photos generate` restamps the real demo JPEGs) |
 | `pnpm typecheck` · `pnpm test` · `pnpm lint` | what CI runs (tsc per package + dependency-direction check · vitest projects · prettier) |
 | `pnpm smoke` | end-to-end check of every route against a running API |
 | `pnpm studio` | Remotion Studio on :3100 (run `pnpm seed` first; it serves `data/files`) |

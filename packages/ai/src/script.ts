@@ -51,7 +51,7 @@ export type ScriptDraftSegment = z.infer<typeof ScriptDraftSegment>;
 
 export const ScriptDraft = z.object({
   title: z.string().describe('vlog title, ≤ 5 words'),
-  subtitle: z.string().optional().describe('e.g. "two days · nine pins"'),
+  subtitle: z.string().optional().describe('e.g. "two days · four pins"'),
   music_mood: MusicMood.optional(),
   segments: z.array(ScriptDraftSegment),
 });
@@ -105,7 +105,7 @@ Hard rules:
 - photo_ids: pick at most 4 of that pin's photo ids, most telling first.
 - caption: "<place> · <HH:MM of the first chosen photo>" (or just the place).
 - Keep the total narration within the word budget you are given.
-- title: ≤ 5 words; subtitle: like "two days · nine pins".`;
+- title: ≤ 5 words; subtitle: like "two days · four pins".`;
 
 export function scriptPrompt(
   bundle: TripBundle,

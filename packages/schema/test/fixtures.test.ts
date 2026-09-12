@@ -25,9 +25,9 @@ describe('demo fixtures satisfy the contracts', () => {
     VlogScript.parse(f.script);
   });
 
-  it('has 9 pins over 2 days with unique ids and dense order indexes', () => {
-    expect(f.pins).toHaveLength(9);
-    expect(new Set(f.pins.map((p) => p.id)).size).toBe(9);
+  it('has 4 pins over 2 days with unique ids and dense order indexes', () => {
+    expect(f.pins).toHaveLength(4);
+    expect(new Set(f.pins.map((p) => p.id)).size).toBe(4);
     for (const day of [1, 2]) {
       const idx = f.pins
         .filter((p) => p.day_index === day)
@@ -38,17 +38,16 @@ describe('demo fixtures satisfy the contracts', () => {
     f.pins.filter((p) => p.source === 'ai').forEach((p) => expect(p.place_id).toBeTruthy());
   });
 
-  it('has 18 photos: 16 assigned, 2 in the tray, all expected pins exist', () => {
-    expect(f.media).toHaveLength(18);
+  it('has 8 photos, all assigned to a real stop', () => {
+    expect(f.media).toHaveLength(8);
     const pinIds = new Set(f.pins.map((p) => p.id));
-    expect(f.media.filter((m) => m.pin_id).length).toBe(16);
-    expect(f.media.filter((m) => !m.pin_id).length).toBe(2);
+    expect(f.media.filter((m) => m.pin_id).length).toBe(8);
+    expect(f.media.filter((m) => !m.pin_id).length).toBe(0);
     f.media.forEach((m) => {
       if (m.pin_id) expect(pinIds.has(m.pin_id)).toBe(true);
-      expect(m.assign_method).toBe(m.pin_id ? 'auto' : 'none');
+      expect(m.assign_method).toBe('auto');
     });
-    // the CMU pin (live photo target) has no seeded photos
-    expect(f.media.some((m) => m.pin_id === 'pin_pgh_d2_cmu')).toBe(false);
+    expect(f.media.some((m) => m.pin_id === 'pin_pgh_d2_cmu')).toBe(true);
   });
 
   it('script references only known pins, media and entries, ≤ 4 photos per pin, 45–90 s', () => {
@@ -75,7 +74,7 @@ describe('demo fixtures satisfy the contracts', () => {
     const g = demoFixtures('2026-10-03');
     expect(g.trip.end_date).toBe('2026-10-04');
     expect(g.pins[0]!.planned_start).toBe('2026-10-03T10:00:00');
-    expect(g.media.find((m) => m.id === 'media_pgh_14')!.taken_at).toBe('2026-10-04T09:20:00');
+    expect(g.media.find((m) => m.id === 'media_pgh_06')!.taken_at).toBe('2026-10-04T12:10:00');
   });
 
   it('mock LLM drafts parse and the mock places resolve every real stop', () => {

@@ -39,9 +39,9 @@ describe('B · trips / pins / entries / media', () => {
     expect(trip.pace).toBe('moderate');
 
     const bundle = TripBundle.parse(await (await app.request('/trips/trip_pgh')).json());
-    expect(bundle.pins).toHaveLength(9);
-    expect(bundle.media).toHaveLength(18);
-    expect(bundle.entries).toHaveLength(7);
+    expect(bundle.pins).toHaveLength(4);
+    expect(bundle.media).toHaveLength(8);
+    expect(bundle.entries).toHaveLength(5);
 
     const patched = await app.request(`/trips/${trip.id}`, {
       ...json({ title: 'Kyoto in autumn' }),
@@ -72,7 +72,7 @@ describe('B · trips / pins / entries / media', () => {
     );
     expect(created.status).toBe(201);
     const pin = Pin.parse(await created.json());
-    expect(pin.order_index).toBe(6);
+    expect(pin.order_index).toBe(3);
     expect(pin.source).toBe('user');
     const patched = Pin.parse(
       await (
@@ -111,22 +111,22 @@ describe('B · trips / pins / entries / media', () => {
 
   it('media: multipart upload ingests + auto-assigns, patch moves between pin and tray, delete removes files', async () => {
     const { app, container } = await seededTestApp();
-    const spec = DEMO_PHOTO_SPECS.find((s) => s.id === 'media_pgh_09')!; // Point State Park 17:15
+    const spec = DEMO_PHOTO_SPECS.find((s) => s.id === 'media_pgh_03')!; // Phipps 12:18
     const bytes = await generateDemoPhoto(spec);
     const form = new FormData();
-    form.append('files', new File([bytes], 'point.jpg', { type: 'image/jpeg' }));
+    form.append('files', new File([bytes], 'phipps.jpg', { type: 'image/jpeg' }));
     form.append('files', new File([bytes], 'fence.jpg', { type: 'image/jpeg' }));
     form.append(
       'meta',
       JSON.stringify([
-        { name: 'point.jpg' },
+        { name: 'phipps.jpg' },
         { name: 'fence.jpg', taken_at: '2026-09-12T14:03:00', lat: 40.4431, lng: -79.9427 },
       ]),
     );
     const res = await app.request('/trips/trip_pgh/media', { method: 'POST', body: form });
     expect(res.status).toBe(201);
     const out = UploadMediaResponse.parse(await res.json());
-    expect(out.results.map((r) => r.pin_id)).toEqual(['pin_pgh_d1_point', 'pin_pgh_d2_cmu']);
+    expect(out.results.map((r) => r.pin_id)).toEqual(['pin_pgh_d1_phipps', 'pin_pgh_d2_cmu']);
     expect(out.results[0]!.reason).toMatch(/within window/);
     expect(out.media[1]!.assign_method).toBe('auto');
     const file = await app.request(`/files/${out.media[0]!.thumb_path}`);
@@ -145,13 +145,13 @@ describe('B · trips / pins / entries / media', () => {
     const moved = Media.parse(
       await (
         await app.request(`/media/${out.media[0]!.id}`, {
-          ...json({ pin_id: 'pin_pgh_d1_incline' }),
+          ...json({ pin_id: 'pin_pgh_d1_warhol' }),
           method: 'PATCH',
         })
       ).json(),
     );
     expect(moved.assign_method).toBe('manual');
-    expect(moved.pin_id).toBe('pin_pgh_d1_incline');
+    expect(moved.pin_id).toBe('pin_pgh_d1_warhol');
     expect(
       (
         await app.request(`/media/${out.media[0]!.id}`, {
@@ -221,8 +221,8 @@ describe('C · plan / replan / ask / journal', () => {
     );
     expect(res.status).toBe(200);
     const body = (await res.json()) as { diff: { removed: { pin_id: string }[] }; pins: Pin[] };
-    expect(body.diff.removed[0]?.pin_id).toBe('pin_pgh_d2_schenley');
-    expect(body.pins).toHaveLength(8);
+    expect(body.diff.removed[0]?.pin_id).toBe('pin_pgh_d1_warhol');
+    expect(body.pins).toHaveLength(3);
   });
 
   it('ask streams AskEvents and saves history; chat + summary at trip level', async () => {
@@ -269,7 +269,7 @@ describe('D · vlogs', () => {
     expect(vlog.error).toBeNull();
     const script = VlogScript.parse(vlog.script);
     const pins = script.segments.filter((s) => s.type === 'pin');
-    expect(pins.length).toBe(7);
+    expect(pins.length).toBe(4);
     for (const [i, seg] of script.segments.entries()) {
       if (seg.type !== 'pin') continue;
       expect(seg.audio_path).toBe(`vlogs/${vlog.id}/seg_${String(i).padStart(2, '0')}.wav`);
