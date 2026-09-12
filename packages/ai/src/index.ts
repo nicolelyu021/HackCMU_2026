@@ -1,21 +1,11 @@
-// Owner C — public surface of @pinlog/ai. Signatures are part of the frozen contract; implementations are C's.
-import type {
-  AskEvent,
-  AskRequest,
-  ChatRequest,
-  LLMProvider,
-  PlacesProvider,
-  PlanEvent,
-  PlanRequest,
-  Ports,
-  ReplanRequest,
-  ReplanResponse,
-  SummaryRequest,
-  SummaryResponse,
-  Trip,
-  VlogScript,
-  VlogSettings,
-} from '@pinlog/schema';
+// Owner C — public surface of @pinlog/ai. Signatures are part of the frozen contract (services/api uses them).
+import type { LLMProvider, LLMTask, PlacesProvider } from '@pinlog/schema';
+import { createAnthropicLLM } from './llm/anthropic';
+import { withFallback } from './llm/fallback';
+import { createMockLLM } from './llm/mock';
+import { withReplay } from './llm/replay';
+import { createMockPlaces } from './places/mock';
+import { createNominatimPlaces } from './places/nominatim';
 
 export type LLMKind = 'mock' | 'anthropic';
 export interface LLMOptions {
@@ -26,76 +16,69 @@ export interface LLMOptions {
   replay_dir?: string;
   /** Mock streaming delay between words (ms); 0 in tests. */
   mock_delay_ms?: number;
+  /** Live only: per-task request timeouts (ms). */
+  timeouts_ms?: Partial<Record<LLMTask, number>>;
+  /** Live only: answer with the mock when the live provider fails (default true — the demo never dies on a 5xx). */
+  fallback_to_mock?: boolean;
 }
-export function createLLM(_kind: LLMKind, _opts: LLMOptions = {}): LLMProvider {
-  throw new Error('TODO(C): createLLM not implemented');
+
+export function createLLM(kind: LLMKind, opts: LLMOptions = {}): LLMProvider {
+  if (kind === 'mock') return createMockLLM({ mock_delay_ms: opts.mock_delay_ms });
+  if (!opts.api_key) throw new Error('createLLM("anthropic") needs api_key (ANTHROPIC_API_KEY)');
+  let llm: LLMProvider = createAnthropicLLM({
+    api_key: opts.api_key,
+    model: opts.model,
+    timeouts_ms: opts.timeouts_ms,
+  });
+  if (opts.fallback_to_mock ?? true) llm = withFallback(llm, createMockLLM({ mock_delay_ms: 10 }));
+  if (opts.replay && opts.replay !== 'off') {
+    if (!opts.replay_dir) throw new Error('replay needs replay_dir');
+    llm = withReplay(llm, { mode: opts.replay, dir: opts.replay_dir });
+  }
+  return llm;
 }
 
 export type PlacesKind = 'mock' | 'nominatim';
 export interface PlacesOptions {
   email?: string;
 }
-export function createPlaces(_kind: PlacesKind, _opts: PlacesOptions = {}): PlacesProvider {
-  throw new Error('TODO(C): createPlaces not implemented');
+export function createPlaces(kind: PlacesKind, opts: PlacesOptions = {}): PlacesProvider {
+  return kind === 'mock' ? createMockPlaces() : createNominatimPlaces({ email: opts.email });
 }
 
-export interface AskOptions {
-  /** Trip-local "now" (NaiveDateTime); defaults to the machine clock. */
-  now?: string;
-  signal?: AbortSignal;
-}
-
-/** Streams the itinerary as it is drafted and verified; persists pins in one transaction before `done`. */
-export function plan(
-  _ports: Pick<Ports, 'repo' | 'llm' | 'places'>,
-  _trip: Trip,
-  _req: PlanRequest,
-  _signal?: AbortSignal,
-): AsyncIterable<PlanEvent> {
-  throw new Error('TODO(C): plan not implemented');
-}
-export async function replan(
-  _ports: Pick<Ports, 'repo' | 'llm' | 'places'>,
-  _trip: Trip,
-  _req: ReplanRequest,
-): Promise<ReplanResponse> {
-  throw new Error('TODO(C): replan not implemented');
-}
-export function ask(
-  _ports: Pick<Ports, 'repo' | 'llm'>,
-  _pin_id: string,
-  _req: AskRequest,
-  _opts: AskOptions = {},
-): AsyncIterable<AskEvent> {
-  throw new Error('TODO(C): ask not implemented');
-}
-export function chat(
-  _ports: Pick<Ports, 'repo' | 'llm'>,
-  _trip_id: string,
-  _req: ChatRequest,
-  _opts: AskOptions = {},
-): AsyncIterable<AskEvent> {
-  throw new Error('TODO(C): chat not implemented');
-}
-export async function summarize(
-  _ports: Pick<Ports, 'repo' | 'llm'>,
-  _trip_id: string,
-  _req: SummaryRequest,
-  _opts: AskOptions = {},
-): Promise<SummaryResponse> {
-  throw new Error('TODO(C): summarize not implemented');
-}
-export async function caption(
-  _ports: Pick<Ports, 'llm'>,
-  _image: { bytes: Uint8Array; mime: 'image/jpeg' | 'image/png' | 'image/webp' },
-): Promise<string> {
-  throw new Error('TODO(C): caption not implemented');
-}
-export async function generateScript(
-  _ports: Pick<Ports, 'repo' | 'llm'>,
-  _trip_id: string,
-  _settings: VlogSettings,
-  _opts: { previous?: VlogScript | null } = {},
-): Promise<VlogScript> {
-  throw new Error('TODO(C): generateScript not implemented');
-}
+export { plan, PLANNER_SYSTEM, planPrompt, resolveStop } from './planner';
+export { replan, REPLAN_SYSTEM } from './replan';
+export { ask, chat, summarize, ASK_SYSTEM, CHAT_SYSTEM, SUMMARY_SYSTEM } from './ask';
+export type { AskOptions } from './ask';
+export { caption, CAPTION_SYSTEM } from './caption';
+export {
+  generateScript,
+  assembleScript,
+  buildTimeline,
+  mockScriptDraft,
+  scriptPrompt,
+  wordBudget,
+  cameraFor,
+  ScriptDraft,
+  ScriptDraftSegment,
+  SCRIPT_SYSTEM,
+} from './script';
+export type { TimelinePin } from './script';
+export {
+  describePinContext,
+  describeTimeline,
+  describeTrip,
+  dayIndexForNow,
+  collectNotes,
+} from './context';
+export { createMockLLM, mockAnswerText } from './llm/mock';
+export { createAnthropicLLM, DEFAULT_TIMEOUTS_MS } from './llm/anthropic';
+export { withReplay, replayKey } from './llm/replay';
+export { withFallback } from './llm/fallback';
+export { createMockPlaces } from './places/mock';
+export {
+  createNominatimPlaces,
+  parseNominatimGeocode,
+  parseNominatimPlaces,
+} from './places/nominatim';
+export { estimateSpeechSeconds, firstSentences, splitSentences, wordCount } from './util';
