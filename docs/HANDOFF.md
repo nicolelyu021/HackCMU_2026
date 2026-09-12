@@ -57,7 +57,7 @@ Verified end to end on this laptop, mock mode: `pnpm typecheck` · `pnpm test` (
 ```bash
 npm i -g pnpm@10.15.0          # once (Homebrew node ships no corepack)
 pnpm install
-pnpm seed                      # or on demo day: pnpm seed:reset --start 2026-09-12  (Day 2 = today)
+pnpm seed:reset --start 2026-09-11   # Day 2 = Sep 12; run again after pulling fixture/photo changes
 pnpm dev                       # api :8787 · web :3000 — the api log prints "on your phone → http://<lan-ip>:3000"
 pnpm smoke                     # second terminal: every route end to end
 pnpm preview                   # rebuild docs/preview.html after fixture changes

@@ -27,7 +27,7 @@ describe('ask / chat / summarize (mock llm)', () => {
       ask(
         p,
         'pin_pgh_d1_phipps',
-        { question: 'Is the rain chain worth it?' },
+        { question: 'Is the fern room worth it?' },
         { now: '2026-09-11T12:00:00' },
       ),
     );
@@ -36,7 +36,7 @@ describe('ask / chat / summarize (mock llm)', () => {
     expect(deltas.length).toBeGreaterThan(3);
     expect(done.type).toBe('done');
     if (done.type !== 'done') return;
-    expect(done.content).toContain('From your notes: "A rain chain of little cups');
+    expect(done.content).toContain('From your notes: "$3 extra for the fern room');
     expect(done.content).toContain('11:30 and 13:00');
     expect(deltas.map((d) => (d as { text: string }).text).join('')).toBe(done.content);
     const history = await p.repo.messages.listByPin('pin_pgh_d1_phipps');
@@ -67,7 +67,7 @@ describe('ask / chat / summarize (mock llm)', () => {
     const p = setup();
     const res = await summarize(p, 'trip_pgh', {}, { now: '2026-09-11T20:00:00' });
     expect(res.day_index).toBe(1);
-    expect(res.summary).toContain('from Cathedral of Learning to The Andy Warhol Museum');
+    expect(res.summary).toContain('from Cathedral of Learning to Duquesne Incline');
     expect(res.summary).toContain(
       'From your notes'.replace('From your notes', 'Best moment from your notes'),
     );

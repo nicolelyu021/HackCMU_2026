@@ -15,7 +15,7 @@ describe('render props', () => {
       map_style_url: 'https://tiles.openfreemap.org/styles/liberty',
     });
     VlogRenderProps.parse(props);
-    expect(Object.keys(props.media).length).toBe(8);
+    expect(Object.keys(props.media).length).toBe(19);
     expect(props.media['media_pgh_01']!.url).toBe(
       'http://localhost:8787/files/trips/trip_pgh/media/media_pgh_01.jpg',
     );
@@ -26,7 +26,7 @@ describe('render props', () => {
     const script = demoScript();
     const starts = segmentStartFrames(script);
     expect(starts[0]).toBe(0);
-    expect(starts[1]).toBe(120);
+    expect(starts[1]).toBe(90);
     expect(scriptDurationInFrames(script)).toBe(
       Math.round(script.segments.reduce((s, x) => s + x.duration_s, 0) * 30),
     );

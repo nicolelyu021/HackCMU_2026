@@ -17,7 +17,7 @@ Run every command below from the repository root (the folder containing `pnpm-wo
 node --version
 npm install -g pnpm@10.15.0          # once, if pnpm is not installed
 pnpm install --frozen-lockfile
-pnpm seed                            # creates demo data; leaves an existing seed alone
+pnpm seed:reset --start 2026-09-11   # full Pittsburgh weekend; Day 2 = Sep 12. Reset after pulling fixture changes.
 
 brew install auth0 && auth0 login    # once per laptop — free signup at auth0.com/signup
 pnpm auth0:setup                     # writes apps/web/.env.local
@@ -35,7 +35,7 @@ Wait for the API to listen on **8787** and Next.js to report ready on **3000**. 
 - Pittsburgh demo: http://localhost:3000/trips/trip_pgh
 - API health: http://localhost:8787/health
 
-The demo has 4 stops, 8 real photos, 5 notes and a prepared film. The map opens as a **local pencil route sketch with clickable real stops**; it does not wait for street tiles or start WebGL. The **Street map** button switches to the online OpenFreeMap basemap (needs internet; the page returns to the sketch only if the map never loads within 8 s). Select **All** in the day filter to show every stop. Try a pin → Scrapbook → Journal → Little film for a quick walkthrough. Mock narration is silent.
+The demo has 9 stops, 21 photos (including the team's real Cathedral, Phipps, Warhol, and Carnival shots), 8 notes and a prepared film. The map opens as a **local pencil route sketch with clickable real stops**; it does not wait for street tiles or start WebGL. The **Street map** button switches to the online OpenFreeMap basemap (needs internet; the page returns to the sketch only if the map never loads within 8 s). Select **All** in the day filter to show every stop. Try a pin → Scrapbook → Journal → Little film for a quick walkthrough. Mock narration is silent.
 
 Beyond `apps/web/.env.local` above, no `.env` is needed on a fresh checkout. If you already have one, set `PINLOG_MODE=mock` and remove any live per-provider overrides for a no-key demo. Data and uploads persist in `data/`; restarting does not erase them. Stop the app with **Ctrl+C**. On subsequent runs, just run `pnpm dev`.
 
@@ -57,7 +57,7 @@ Do not also run `pnpm dev` when these two servers are already running.
 
 - **Every page 500s with `Auth0 is not configured`:** `apps/web/.env.local` is missing — run `pnpm auth0:setup` ([docs/AUTH.md](docs/AUTH.md)).
 - **Port already in use:** stop the previous server terminal with Ctrl+C, then retry. Keep web on 3000 and API on 8787 for the links above.
-- **Missing demo trip:** run `pnpm seed`, then reload. Only use `pnpm seed:reset --start YYYY-MM-DD` when you intend to replace the seeded demo trip; the date is the trip's first day. Back up `data/` before resetting a customized demo.
+- **Missing demo trip, or still the 4-stop Carnival-only map:** run `pnpm seed:reset --start 2026-09-11`, then reload. The date is the trip's first day (Day 2 = today). `data/` is local and gitignored, so every laptop has to seed. Back up `data/` before resetting a customized demo.
 - **Next.js hangs before Ready, or reports `patchErrorInspectNodeJS is not a function`:** this occurred on the development laptop and remains unresolved. Stop the stuck process, use Node 24 LTS, run `pnpm install --frozen-lockfile --force`, then retry `pnpm dev:web`. This is a recovery attempt, not a verified fix. It does not require deleting `data/`.
 - **API unavailable but Next.js works:** http://localhost:3000/trips/trip_pgh?fixture=1 provides a read-only fixture view; edits and uploads need the API.
 - **Need an emergency demo without either server:** open [docs/preview.html](docs/preview.html) directly in a browser. This is the older standalone prototype, not the new illustrated frontend. Rebuild it with `pnpm preview` after fixture changes.
@@ -97,7 +97,7 @@ For live providers, copy `.env.example` to `.env`, add your own keys, set `PINLO
 | `pnpm dev` / `pnpm dev:api` / `pnpm dev:web` | run api + web (or one of them) |
 | `pnpm auth0:setup` | create the Auth0 application and write `apps/web/.env.local` ([docs/AUTH.md](docs/AUTH.md)) |
 | `pnpm auth0:brand` | dress the Auth0 login page in Pinlog's colours and copy (`--dry-run` to preview) |
-| `pnpm seed` / `pnpm seed:reset` | (re)create `data/pinlog.db` + `data/files` from the fixtures (`--start YYYY-MM-DD` shifts the demo dates, `--photos generate` restamps the real demo JPEGs) |
+| `pnpm seed` / `pnpm seed:reset` | (re)create `data/pinlog.db` + `data/files` from the fixtures (`--start YYYY-MM-DD` shifts the demo dates, `--photos generate` re-renders the demo JPEGs) |
 | `pnpm typecheck` · `pnpm test` · `pnpm lint` | what CI runs (tsc per package + dependency-direction check · vitest projects · prettier) |
 | `pnpm smoke` | end-to-end check of every route against a running API |
 | `pnpm studio` | Remotion Studio on :3100 (run `pnpm seed` first; it serves `data/files`) |

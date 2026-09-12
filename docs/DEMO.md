@@ -21,7 +21,7 @@ fallback that looks identical on screen.
 
 ## Pre-warm checklist (start 45 minutes before, in this order)
 1. Hotspot on, laptop on it, venue wifi forgotten. Power adapter in. Do Not Disturb. Chrome: one window, 100 % zoom, no other tabs.
-2. `git checkout demo && pnpm seed:reset --start 2026-09-12 && pnpm dev` (`.env` with keys present). `--start` = the day before the demo, so the seeded "Day 2" is today and the CMU pin's 11:00–18:00 window is live.
+2. `git checkout demo && pnpm seed:reset --start 2026-09-11 && pnpm dev` (`.env` with keys present). `--start` = the day before the demo, so the seeded "Day 2" is today and the CMU pin's 11:00–18:00 window is live.
 3. Walk every map view of the Pittsburgh trip (all day chips, zoomed in and out) so tiles are cached.
 4. Play the seeded vlog end to end once (images, audio cached).
 5. Run the Kyoto plan once (geocoder cache warm, replay recorded), then **delete that trip** so the live one is fresh.

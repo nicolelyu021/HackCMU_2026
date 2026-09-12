@@ -24,7 +24,6 @@ interface PinSpec {
 }
 
 // Coordinates verified against Nominatim (2026-09-11); place_ids are the real OSM ids where known.
-// Stops match the team's real photos (Cathedral, Phipps, Warhol, CMU Carnival).
 export const DEMO_PIN_SPECS: PinSpec[] = [
   {
     id: 'pin_pgh_d1_cathedral',
@@ -39,7 +38,7 @@ export const DEMO_PIN_SPECS: PinSpec[] = [
     kind: 'poi',
     source: 'ai',
     ai_reason:
-      '42-storey Gothic Revival tower with the Nationality Rooms; free to walk in and the courtyard fountain is the classic photo.',
+      '42-storey Gothic Revival tower with the Nationality Rooms; free to walk in and the 36th floor has the best view of Oakland.',
   },
   {
     id: 'pin_pgh_d1_phipps',
@@ -54,7 +53,21 @@ export const DEMO_PIN_SPECS: PinSpec[] = [
     kind: 'poi',
     source: 'ai',
     ai_reason:
-      'Victorian glasshouse at the edge of Schenley Park; the rain chain under the glass roof is a quiet favourite.',
+      'Victorian glasshouse at the edge of Schenley Park; the seasonal show is a 90-minute loop.',
+  },
+  {
+    id: 'pin_pgh_d1_primanti',
+    name: 'Primanti Bros. (Oakland)',
+    place_id: 'osm:node/2710170992',
+    address: '3803 Forbes Ave, Pittsburgh, PA 15213',
+    lat: 40.44177,
+    lng: -79.95689,
+    day: 1,
+    start: '13:15',
+    end: '14:00',
+    kind: 'food',
+    source: 'user',
+    ai_reason: null,
   },
   {
     id: 'pin_pgh_d1_warhol',
@@ -69,13 +82,58 @@ export const DEMO_PIN_SPECS: PinSpec[] = [
     kind: 'poi',
     source: 'ai',
     ai_reason:
-      'Largest single-artist museum in North America; pop portraits on every wall and a black-and-white elephant in the doorway.',
+      'Largest single-artist museum in North America; the Silver Clouds room is the crowd favourite.',
+  },
+  {
+    id: 'pin_pgh_d1_point',
+    name: 'Point State Park',
+    place_id: 'osm:way/387635995',
+    address: '601 Commonwealth Pl, Pittsburgh, PA 15222',
+    lat: 40.44151,
+    lng: -80.01009,
+    day: 1,
+    start: '17:00',
+    end: '18:00',
+    kind: 'poi',
+    source: 'ai',
+    ai_reason:
+      'Where the Allegheny and Monongahela meet; the fountain and the three bridges in one frame.',
+  },
+  {
+    id: 'pin_pgh_d1_incline',
+    name: 'Duquesne Incline · Grandview overlook',
+    place_id: 'osm:way/54834750',
+    address: '1220 Grandview Ave, Pittsburgh, PA 15211',
+    lat: 40.4394,
+    lng: -80.0186,
+    day: 1,
+    start: '18:30',
+    end: '19:30',
+    kind: 'poi',
+    source: 'ai',
+    ai_reason:
+      '1877 cable car up Mount Washington; the skyline at sunset is the classic Pittsburgh photo.',
+  },
+  {
+    id: 'pin_pgh_d2_strip',
+    name: 'Strip District (Penn Ave)',
+    place_id: 'osm:relation/5127141',
+    address: 'Penn Ave & 21st St, Pittsburgh, PA 15222',
+    lat: 40.4516,
+    lng: -79.9834,
+    day: 2,
+    start: '09:00',
+    end: '10:30',
+    kind: 'food',
+    source: 'ai',
+    ai_reason:
+      'Saturday-morning market street: bakeries, pierogies and coffee before the day starts.',
   },
   {
     id: 'pin_pgh_d2_cmu',
-    name: 'CMU Spring Carnival',
+    name: 'Carnegie Mellon · The Fence',
     place_id: null,
-    address: 'The Cut, Carnegie Mellon University, Pittsburgh, PA 15213',
+    address: '5000 Forbes Ave, Pittsburgh, PA 15213',
     lat: 40.4428,
     lng: -79.943,
     day: 2,
@@ -84,6 +142,20 @@ export const DEMO_PIN_SPECS: PinSpec[] = [
     kind: 'custom',
     source: 'user',
     ai_reason: null,
+  },
+  {
+    id: 'pin_pgh_d2_schenley',
+    name: 'Schenley Park overlook',
+    place_id: 'osm:way/26321001',
+    address: 'Schenley Dr, Pittsburgh, PA 15213',
+    lat: 40.4374,
+    lng: -79.9433,
+    day: 2,
+    start: '18:30',
+    end: '19:30',
+    kind: 'poi',
+    source: 'ai',
+    ai_reason: 'Ten minutes from campus; the lawn above Panther Hollow catches the last light.',
   },
 ];
 
@@ -102,7 +174,7 @@ export function demoTrip(start_date: string = DEMO_DEFAULT_START): Trip {
     status: 'active',
     visibility: 'private',
     share_slug: null,
-    cover_media_id: 'media_pgh_01',
+    cover_media_id: 'media_pgh_11',
     center_lat: 40.4433,
     center_lng: -79.9436,
     created_at: DEMO_CREATED_AT,

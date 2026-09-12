@@ -6,7 +6,7 @@ import { loadEnv } from '../env';
 
 /**
  * Owner B. `pnpm seed [--reset] [--start YYYY-MM-DD] [--photos copy|generate|skip]`
- * Creates data/pinlog.db + data/files from the frozen fixtures (trip_pgh: 4 pins, 8 photos, 5 notes, a finished vlog).
+ * Creates data/pinlog.db + data/files from the frozen fixtures (trip_pgh: 9 pins, 21 photos, 8 notes, a finished vlog).
  */
 const { values } = parseArgs({
   options: {

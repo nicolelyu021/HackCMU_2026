@@ -19,7 +19,7 @@ Replace `@OWNER_A…D` in `.github/CODEOWNERS` and here with real GitHub handles
 - Contract PRs merge first; everyone rebases right after.
 
 ## Working alone (why the scaffold is shaped this way)
-- Contracts + fixtures are frozen: `demoFixtures()` is the same trip for everyone (`trip_pgh`, 9 pins, 18 photos, 7 notes, a hand-written vlog script).
+- Contracts + fixtures are frozen: `demoFixtures()` is the same trip for everyone (`trip_pgh`, 9 pins, 21 photos, 8 notes, a hand-written vlog script).
 - Every external provider has a mock; `pnpm dev` with no `.env` runs the whole loop with zero network calls.
 - A works with `pnpm dev:web` alone (fixture mode: `?fixture=1`), or against the API in mock mode.
 - B/C/D verify their routes with `curl` / `scripts/smoke.mjs` and unit tests against `createMemoryRepo` — no browser needed.

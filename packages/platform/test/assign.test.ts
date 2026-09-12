@@ -5,7 +5,7 @@ import { assignPhoto } from '../src/index';
 describe('auto-assign (MAP-4)', () => {
   const pins = demoPins();
 
-  it('lands every demo photo where the fixture expects', () => {
+  it('lands every demo photo where the fixture expects (19 pins, 2 tray)', () => {
     let assigned = 0;
     for (const spec of DEMO_PHOTO_SPECS) {
       const coords = photoCoords(spec);
@@ -17,15 +17,13 @@ describe('auto-assign (MAP-4)', () => {
       expect(r.pin_id, `${spec.id}: ${r.reason}`).toBe(spec.expected_pin_id);
       if (r.pin_id) assigned++;
     }
-    expect(assigned).toBe(DEMO_PHOTO_SPECS.length);
+    expect(assigned).toBe(19);
   });
 
   it('explains itself', () => {
-    const r = assignPhoto(pins, {
-      taken_at: '2026-09-11T20:30:00',
-      lat: 40.43889,
-      lng: -79.94871,
-    });
+    const phippsNight = DEMO_PHOTO_SPECS.find((s) => s.id === 'media_pgh_04')!;
+    const c = photoCoords(phippsNight)!;
+    const r = assignPhoto(pins, { taken_at: photoTakenAt(phippsNight), ...c });
     expect(r.reason).toMatch(/same day/);
     expect(r.distance_m).toBeLessThan(300);
     const noGps = assignPhoto(pins, { taken_at: '2026-09-11T12:05:00', lat: null, lng: null });

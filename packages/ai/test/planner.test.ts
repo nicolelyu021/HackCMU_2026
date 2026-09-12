@@ -100,10 +100,10 @@ describe('replan (mock providers)', () => {
     const p = { ...ports(), repo };
     const trip = (await repo.trips.get('trip_pgh'))!;
     const res = await replan(p, trip, { instruction: 'make day 2 lighter' });
-    expect(res.diff.removed.map((r) => r.pin_id)).toEqual(['pin_pgh_d1_warhol']);
-    expect(res.pins.some((x) => x.id === 'pin_pgh_d1_warhol')).toBe(false);
-    expect(res.pins.find((x) => x.id === 'pin_pgh_d1_phipps')?.planned_end).toBe(
-      '2026-09-11T12:30:00',
+    expect(res.diff.removed.map((r) => r.pin_id)).toEqual(['pin_pgh_d2_schenley']);
+    expect(res.pins.some((x) => x.id === 'pin_pgh_d2_schenley')).toBe(false);
+    expect(res.pins.find((x) => x.id === 'pin_pgh_d2_strip')?.planned_end).toBe(
+      '2026-09-12T10:00:00',
     );
   });
   it('refuses to touch user pins and resolves added stops', async () => {
@@ -136,7 +136,7 @@ describe('replan (mock providers)', () => {
             },
           ],
           changed: [],
-          removed: [{ pin_id: 'pin_pgh_d2_cmu', reason: 'user pin!' }],
+          removed: [{ pin_id: 'pin_pgh_d1_primanti', reason: 'user pin!' }],
         }),
     };
     await expect(
@@ -176,7 +176,7 @@ describe('replan (mock providers)', () => {
     expect(res.diff.summary).toMatch(/could not verify: Nowhere Café/);
     const added = res.pins.find((x) => x.name === 'Gaucho Parrilla Argentina')!;
     expect(added.day_index).toBe(2);
-    expect(added.order_index).toBe(1);
+    expect(added.order_index).toBe(3);
     expect(added.planned_start).toBe('2026-09-12T19:00:00');
   });
 });

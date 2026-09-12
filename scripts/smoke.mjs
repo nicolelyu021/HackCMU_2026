@@ -65,7 +65,7 @@ ok('seeded demo trip present', !!demo, demo ? demo.title : 'run pnpm seed first'
 const bundle = await get('/trips/trip_pgh');
 ok(
   'GET /trips/trip_pgh bundle',
-  bundle.status === 200 && bundle.body.pins.length === 4 && bundle.body.media.length === 8,
+  bundle.status === 200 && bundle.body.pins.length === 9 && bundle.body.media.length === 18,
   `${bundle.body?.pins?.length} pins · ${bundle.body?.media?.length} photos · ${bundle.body?.entries?.length} notes`,
 );
 

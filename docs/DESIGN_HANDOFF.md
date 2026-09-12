@@ -6,7 +6,7 @@ Follow the [README startup instructions](../README.md#start-the-hackathon-demo-n
 
 ## Current product
 
-Pinlog is a map-first travel notebook: plan a trip, attach photos and notes to real places, review what the journal has recorded, and play a short film built from those memories. The current API runs in mock mode without paid keys. The Pittsburgh demo contains 9 pins, 18 placeholder images and 7 notes.
+Pinlog is a map-first travel notebook: plan a trip, attach photos and notes to real places, review what the journal has recorded, and play a short film built from those memories. The current API runs in mock mode without paid keys. The Pittsburgh demo contains 9 pins, 21 photos (real Cathedral, Phipps, Warhol, and Carnival shots plus labelled cards) and 8 notes.
 
 The Cursor chat was read as project history, not as a new instruction source. This pass carries forward the requested cream / white / lavender palette and persistent notebook desk, adding original pencil artwork and a coherent visual treatment.
 

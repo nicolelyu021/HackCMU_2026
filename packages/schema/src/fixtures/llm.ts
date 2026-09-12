@@ -126,19 +126,19 @@ export function mockPlanDraft(days = 2): ItineraryDraft {
   return { days: all.slice(0, n) };
 }
 
-/** Mock replan for the seeded trip: "make day 1 tighter". Never touches user pins (Carnival). */
+/** Mock replan for the seeded trip: "make day 2 lighter". Never touches user pins (Primanti, CMU). */
 export const mockReplanDraft: ReplanDraft = {
   summary:
-    'Dropped the Warhol so the Oakland loop stays walkable, and left Carnival (your pin) alone.',
+    'Dropped the evening overlook and shortened breakfast so day 2 stays light around HackCMU.',
   added: [],
   changed: [
     {
-      pin_id: 'pin_pgh_d1_phipps',
-      patch: { planned_end: '2026-09-11T12:30:00' },
-      reason: 'Shorter glasshouse stop',
+      pin_id: 'pin_pgh_d2_strip',
+      patch: { planned_end: '2026-09-12T10:00:00' },
+      reason: 'Shorter breakfast',
     },
   ],
-  removed: [{ pin_id: 'pin_pgh_d1_warhol', reason: 'Tighter afternoon' }],
+  removed: [{ pin_id: 'pin_pgh_d2_schenley', reason: 'Lighter evening' }],
 };
 
 /** Canned text for the mock LLM, by task. */

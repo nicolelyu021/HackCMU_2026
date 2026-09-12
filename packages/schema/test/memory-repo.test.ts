@@ -7,7 +7,7 @@ describe('memory repo (reference behaviour for the sqlite repo)', () => {
     const repo = createMemoryRepo(demoFixtures());
     const bundle = await repo.trips.bundle('trip_pgh');
     expect(bundle?.pins.map((p) => p.id)[0]).toBe('pin_pgh_d1_cathedral');
-    expect(bundle?.media).toHaveLength(8);
+    expect(bundle?.media).toHaveLength(21);
     expect((await repo.messages.listByTrip('trip_pgh')).every((m) => m.pin_id === null)).toBe(true);
     expect(await repo.messages.listByPin('pin_pgh_d1_cathedral')).toHaveLength(2);
   });
@@ -49,14 +49,14 @@ describe('memory repo (reference behaviour for the sqlite repo)', () => {
   it('applies a replan diff and refuses to touch user pins', async () => {
     const repo = createMemoryRepo(demoFixtures());
     const pins = await repo.pins.applyDiff('trip_pgh', { ...mockReplanDraft, added: [] });
-    expect(pins.some((p) => p.id === 'pin_pgh_d1_warhol')).toBe(false);
-    expect(pins.find((p) => p.id === 'pin_pgh_d1_phipps')?.planned_end).toBe('2026-09-11T12:30:00');
+    expect(pins.some((p) => p.id === 'pin_pgh_d2_schenley')).toBe(false);
+    expect(pins.find((p) => p.id === 'pin_pgh_d2_strip')?.planned_end).toBe('2026-09-12T10:00:00');
     await expect(
       repo.pins.applyDiff('trip_pgh', {
         summary: '',
         added: [],
         changed: [],
-        removed: [{ pin_id: 'pin_pgh_d2_cmu' }],
+        removed: [{ pin_id: 'pin_pgh_d1_primanti' }],
       }),
     ).rejects.toBeInstanceOf(LockedPinError);
   });

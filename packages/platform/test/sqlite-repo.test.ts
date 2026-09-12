@@ -16,16 +16,16 @@ describe('sqlite repo (must match the memory repo spec)', () => {
     expect(bundle?.trip.title).toBe('Pittsburgh weekend');
     expect(bundle?.trip.party).toEqual({ size: 2, kind: 'friends' });
     expect(bundle?.pins.map((p) => p.id)[0]).toBe('pin_pgh_d1_cathedral');
-    expect(bundle?.pins.at(-1)?.id).toBe('pin_pgh_d2_cmu');
-    expect(bundle?.media).toHaveLength(8);
-    expect(bundle?.media[0]?.id).toBe('media_pgh_01'); // ordered by taken_at (10:12 day 1)
-    expect(bundle?.media.at(-1)?.id).toBe('media_pgh_08'); // 15:05 day 2
-    expect(bundle?.entries).toHaveLength(5);
+    expect(bundle?.pins.at(-1)?.id).toBe('pin_pgh_d2_schenley');
+    expect(bundle?.media).toHaveLength(21);
+    expect(bundle?.media[0]?.id).toBe('media_pgh_18_far'); // ordered by taken_at (08:10 day 1)
+    expect(bundle?.media.at(-1)?.id).toBe('media_pgh_21'); // 15:05 day 2 carnival
+    expect(bundle?.entries).toHaveLength(8);
     expect((await repo.messages.listByTrip('trip_pgh')).every((m) => m.pin_id === null)).toBe(true);
     expect(await repo.messages.listByPin('pin_pgh_d1_cathedral')).toHaveLength(2);
     const vlog = await repo.vlogs.get('vlog_pgh_demo');
     expect(vlog?.status).toBe('done');
-    expect(vlog?.script?.segments).toHaveLength(6);
+    expect(vlog?.script?.segments).toHaveLength(10);
     expect((await repo.vlogs.listByTrip('trip_pgh')).map((v) => v.id)).toEqual(['vlog_pgh_demo']);
   });
 
@@ -88,7 +88,7 @@ describe('sqlite repo (must match the memory repo spec)', () => {
     expect(m?.pin_id).toBeNull();
     expect(m?.assign_method).toBe('none');
     expect(await repo.entries.listByPin('pin_pgh_d1_phipps')).toEqual([]);
-    expect((await repo.trips.bundle('trip_pgh'))?.pins).toHaveLength(3);
+    expect((await repo.trips.bundle('trip_pgh'))?.pins).toHaveLength(8);
   });
 
   it('reorders atomically and rejects unknown pins', async () => {
@@ -109,17 +109,17 @@ describe('sqlite repo (must match the memory repo spec)', () => {
   it('applies a replan diff and refuses to touch user pins (rolled back)', async () => {
     const repo = await seeded();
     const pins = await repo.pins.applyDiff('trip_pgh', { ...mockReplanDraft, added: [] });
-    expect(pins.some((p) => p.id === 'pin_pgh_d1_warhol')).toBe(false);
-    expect(pins.find((p) => p.id === 'pin_pgh_d1_phipps')?.planned_end).toBe('2026-09-11T12:30:00');
+    expect(pins.some((p) => p.id === 'pin_pgh_d2_schenley')).toBe(false);
+    expect(pins.find((p) => p.id === 'pin_pgh_d2_strip')?.planned_end).toBe('2026-09-12T10:00:00');
     await expect(
       repo.pins.applyDiff('trip_pgh', {
         summary: '',
         added: [],
         changed: [],
-        removed: [{ pin_id: 'pin_pgh_d2_cmu' }],
+        removed: [{ pin_id: 'pin_pgh_d1_primanti' }],
       }),
     ).rejects.toBeInstanceOf(LockedPinError);
-    expect(await repo.pins.get('pin_pgh_d2_cmu')).not.toBeNull();
+    expect(await repo.pins.get('pin_pgh_d1_primanti')).not.toBeNull();
     const withAdd = await repo.pins.applyDiff('trip_pgh', {
       summary: 'add',
       changed: [],
@@ -146,13 +146,13 @@ describe('sqlite repo (must match the memory repo spec)', () => {
 
   it('media patching and vlog lifecycle', async () => {
     const repo = await seeded();
-    const moved = await repo.media.update('media_pgh_01', {
+    const moved = await repo.media.update('media_pgh_17_nogps', {
       pin_id: 'pin_pgh_d1_phipps',
       assign_method: 'manual',
     });
     expect(moved.pin_id).toBe('pin_pgh_d1_phipps');
     expect((await repo.media.listByPin('pin_pgh_d1_phipps')).map((m) => m.id)).toContain(
-      'media_pgh_01',
+      'media_pgh_17_nogps',
     );
     const v = await repo.vlogs.create({
       trip_id: 'trip_pgh',
