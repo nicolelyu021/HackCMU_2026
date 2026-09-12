@@ -20,6 +20,10 @@ pnpm smoke                          # in a second terminal: every route end to e
 
 Demo day: `pnpm seed:reset --start 2026-09-12` (the day before the demo) makes the seeded "Day 2" today.
 
+No install at all? Open [`docs/preview.html`](docs/preview.html) in any browser: a phone-shaped, zero-dependency prototype built
+from the same fixtures (map, pins, photo drop, tray, journal chat, vlog player) with the seven demo beats as buttons.
+Regenerate it after fixture changes with `pnpm preview`.
+
 Open http://localhost:3000 → the seeded trip. With no `.env` every provider is a mock ("Demo mode" badge).
 For real Claude / OpenAI TTS / Nominatim: `cp .env.example .env`, add keys, set `PINLOG_MODE=live`, restart.
 
@@ -45,6 +49,7 @@ For real Claude / OpenAI TTS / Nominatim: `cp .env.example .env`, add keys, set 
 | `pnpm smoke` | end-to-end check of every route against a running API |
 | `pnpm studio` | Remotion Studio on :3100 (run `pnpm seed` first; it serves `data/files`) |
 | `pnpm render -- --vlog <id>` | stretch: local MP4 render |
+| `pnpm preview` | rebuild `docs/preview.html`, the single-file clickable prototype (fixtures + embedded photos) |
 
 Ports: web 3000 · api 8787 · Remotion Studio 3100. Web fixture mode (no API at all): http://localhost:3000/?fixture=1
 

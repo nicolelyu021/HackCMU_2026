@@ -5,3 +5,5 @@ out
 pnpm-lock.yaml
 packages/schema/fixtures/photos
 *.md
+docs/preview.html
+scripts/preview/template.html

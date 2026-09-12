@@ -20,7 +20,8 @@
     "lint": "prettier --check .",
     "format": "prettier --write .",
     "render": "pnpm --filter @pinlog/video render",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "preview": "pnpm --filter @pinlog/platform exec tsx ../../scripts/preview/build.ts"
   },
   "devDependencies": {
     "@types/node": "catalog:",
