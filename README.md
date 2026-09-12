@@ -10,11 +10,15 @@ plan  ──►  pins on a map  ──►  photos auto-land on pins (EXIF)  ─�
 ## 60-second start (no keys needed)
 
 ```bash
-export PATH="$HOME/.local/bin:$PATH"   # if pnpm is not on your PATH (corepack shim)
+node --version                      # 24 or newer (25 works); node:sqlite is built in
+npm i -g pnpm@10.15.0               # once per laptop (Homebrew node has no corepack)
 pnpm install
-pnpm seed          # demo trip "Pittsburgh weekend": 9 pins, 18 photos, 7 notes, a finished vlog
-pnpm dev           # api http://localhost:8787 · web http://localhost:3000
+pnpm seed                           # demo trip "Pittsburgh weekend": 9 pins, 18 photos, 7 notes, a finished vlog
+pnpm dev                            # api http://localhost:8787 · web http://localhost:3000
+pnpm smoke                          # in a second terminal: every route end to end against the running api
 ```
+
+Demo day: `pnpm seed:reset --start 2026-09-12` (the day before the demo) makes the seeded "Day 2" today.
 
 Open http://localhost:3000 → the seeded trip. With no `.env` every provider is a mock ("Demo mode" badge).
 For real Claude / OpenAI TTS / Nominatim: `cp .env.example .env`, add keys, set `PINLOG_MODE=live`, restart.
@@ -36,7 +40,7 @@ For real Claude / OpenAI TTS / Nominatim: `cp .env.example .env`, add keys, set 
 | Command | Does |
 |---|---|
 | `pnpm dev` / `pnpm dev:api` / `pnpm dev:web` | run api + web (or one of them) |
-| `pnpm seed` / `pnpm seed:reset` | (re)create `data/pinlog.db` + `data/files` from the fixtures (`--start YYYY-MM-DD` shifts the demo dates) |
+| `pnpm seed` / `pnpm seed:reset` | (re)create `data/pinlog.db` + `data/files` from the fixtures (`--start YYYY-MM-DD` shifts the demo dates, `--photos generate` re-renders the demo JPEGs) |
 | `pnpm typecheck` · `pnpm test` · `pnpm lint` | what CI runs (tsc per package + dependency-direction check · vitest projects · prettier) |
 | `pnpm smoke` | end-to-end check of every route against a running API |
 | `pnpm studio` | Remotion Studio on :3100 (run `pnpm seed` first; it serves `data/files`) |

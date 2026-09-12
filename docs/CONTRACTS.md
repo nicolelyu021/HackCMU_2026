@@ -43,7 +43,7 @@ Source of truth: `packages/schema/src`. This page is the human index.
 | POST | `/trips/:id/chat` | C | `ChatRequest` → **SSE `AskEvent`** | 200 |
 | GET | `/trips/:id/messages` | C | → `{ messages }` (trip-level) | 200 |
 | POST | `/trips/:id/summary` | C | `SummaryRequest` → `SummaryResponse` | 200 |
-| POST | `/trips/:id/vlog` | D | `CreateVlogInput` (= `VlogSettings`) → `Vlog` | 202 / 409 |
+| POST | `/trips/:id/vlog` | D | `CreateVlogInput` (= `VlogSettings`) → `Vlog` (status queued; one job per trip at a time) | 202 / 409 |
 | GET | `/vlogs/:id` | D | → `Vlog` (poll every 1.5 s) | 200/404 |
 | GET | `/trips/:id/vlogs` | D | → `{ vlogs }` | 200 |
 | POST | `/vlogs/:id/regenerate` | D | `RegenerateVlogInput` → `Vlog` | 202 |
@@ -68,7 +68,15 @@ Wire: `event: <type>\ndata: <JSON of the whole event>\n\n`, `content-type: text/
 `LLMProvider { complete, completeJSON(schema), stream }` (with `task` and `inputs` so mocks/replays work) ·
 `PlacesProvider { geocode, search }` · `TTSProvider { synthesize } → WAV + measured duration` ·
 `StorageProvider { put, get, delete, exists, deletePrefix }` · `Repo { trips, pins, media, entries, messages, vlogs }`
-(async; `createMany`/`reorder`/`applyDiff` atomic; throws `NotFoundError` / `LockedPinError`).
+(async; `createMany`/`reorder`/`applyDiff` atomic; throws `NotFoundError` / `LockedPinError`;
+`importRows(RepoRows)` inserts fully-formed rows verbatim — ids and timestamps kept — for seeds/imports; `demoRows()` in
+fixtures produces the demo trip in that shape).
+
+## Query knobs (not part of the JSON contract)
+- `POST /trips/:id/vlog`, `/vlogs/:id/regenerate`, `PUT /vlogs/:id/script` accept `?wait=1` to return the finished job
+  (tests, smoke); the UI polls `GET /vlogs/:id` instead.
+- `POST /pins/:id/ask`, `/trips/:id/chat`, `/trips/:id/summary` accept `?now=YYYY-MM-DDTHH:mm:ss` to override the
+  trip-local clock (rehearsing "today" on another day).
 
 ## Changing a contract
 1. Open a PR titled `[contract] …` touching `packages/schema` only (plus fixtures/tests).

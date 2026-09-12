@@ -37,3 +37,10 @@ One line per decision. Add yours at the bottom with the hour (`H+9`).
 
 ## Log
 - H+0 · scaffold generated; contracts frozen; `main` tagged `scaffold`.
+- H+1 · `[contract]` additive: `Repo.importRows(RepoRows)` so the seed can insert the frozen fixture ids; `demoRows()` fixture helper.
+- H+1 · Demo photos are generated JPEG cards (gradient + label) with real EXIF (GPS + DateTimeOriginal via sharp `withExif`), committed under `packages/schema/fixtures/photos/` (632 KB) so `pnpm seed` is deterministic on every laptop.
+- H+1 · LLM JSON = Anthropic structured outputs through the SDK's `zodOutputFormat` (it strips unsupported zod constraints into descriptions and validates the reply); one retry with the validation error.
+- H+1 · Live LLM wraps as `replay(fallback(anthropic → mock))`: a timeout/5xx/refusal answers from the mock with a warning instead of failing the beat (docs/DEMO.md fallback matrix). Per-task timeouts in `packages/ai/src/llm/anthropic.ts`.
+- H+1 · Planner runs at `effort: low` for latency (target < 25 s incl. 1 req/s Nominatim); no replacement pass for dropped stops — the model is asked for 4–6 stops/day so ≥ 3 survive.
+- H+1 · Node 25.9 works (`node:sqlite` present, no warning); `engines >= 24` unchanged. pnpm was installed with `npm i -g pnpm@10.15.0` (corepack is not shipped with Homebrew node).
+- H+1 · Fixture timestamps (`demoMessages`, `demoEntries`) are fixed UTC instants on 2026-09-11/12; new rows created before then sort earlier in dev. Cosmetic; correct on demo day. Seed with `pnpm seed:reset --start <demo day − 1>` so "Day 2 is today".

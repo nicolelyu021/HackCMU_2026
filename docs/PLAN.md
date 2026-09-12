@@ -15,13 +15,13 @@ flowchart LR
   classDef blocked fill:#ffe3e3,stroke:#c92a2a,color:#212529
   classDef cut     fill:#f8f9fa,stroke:#adb5bd,color:#868e96,stroke-dasharray:4 2
 
-  subgraph I0["I0 · Skeleton (H+0) — generated scaffold"]
-    S1["S1 contracts + fixtures + mocks"]:::done
-    S2["S2 sqlite repo · storage · ingest · seed"]:::done
-    S3["S3 planner · ask · journal · script (mock + live adapters)"]:::done
+  subgraph I0["I0 · Skeleton (H+0 → H+1) — generated, all packages real, 69 tests, smoke green"]
+    S1["S1 contracts + fixtures + mocks + 18 EXIF demo photos"]:::done
+    S2["S2 sqlite repo · storage · ingest/assign · seed CLI"]:::done
+    S3["S3 planner · replan · ask · journal · summary · script (mock + Claude + replay/fallback)"]:::done
     S4["S4 Remotion composition · Player · TTS · vlog job"]:::done
-    S5["S5 web: trips · wizard · map · sheet · tray · chat · studio"]:::done
-    S6["S6 docs · CI · smoke"]:::done
+    S5["S5 web: trips · wizard · map · sheet · drop/HUD · tray · chat · studio"]:::done
+    S6["S6 docs · CI · smoke.mjs"]:::done
   end
 
   subgraph I1["I1 · Vertical slice on fakes (H+1 → H+6)"]
@@ -63,6 +63,14 @@ flowchart LR
   B4 --> X2
   A4 & C4 & D4 --> X1 --> X2 --> X3
 ```
+
+### What the generated skeleton does NOT do yet (honest list, H+1)
+- No music track (`music_url` is always null; VLOG-4 "music optional").
+- MP4 export CLI (`pnpm render`) is written but has not been run here (needs Remotion's headless Chrome download) — D4.
+- Drag a photo **onto a marker** is not built; the tray's "Move to pin" picker is (cut-list #5 already taken).
+- Drag-to-reorder pins is not built; delete / add manual pin / change time are (PLAN-3 in-lite).
+- Live planner + live TTS have been exercised only through the mocks; first real-key run is C1 / D3.
+- The web UI has been typechecked and built, not yet clicked through in a browser on this machine — A1 starts there.
 
 ## Demo readiness board (one node per beat of [DEMO.md](DEMO.md); A updates after each rehearsal)
 
