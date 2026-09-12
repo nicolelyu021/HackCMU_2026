@@ -12,3 +12,6 @@ coverage/
 *.log
 .remotion/
 packages/video/out/
+
+# video VO build artefacts
+tools/video-vo/build/
