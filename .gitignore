@@ -1,0 +1,14 @@
+node_modules/
+/data/
+.env
+.env.*
+!.env.example
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+.DS_Store
+*.log
+.remotion/
+packages/video/out/

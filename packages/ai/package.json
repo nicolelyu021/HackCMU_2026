@@ -1,0 +1,23 @@
+{
+  "name": "@pinlog/ai",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Owner C. LLM + places adapters (anthropic/nominatim + mocks), planner, replan, Ask, journal chat, captions, vlog script.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "catalog:",
+    "@pinlog/schema": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

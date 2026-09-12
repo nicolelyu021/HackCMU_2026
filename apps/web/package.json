@@ -1,0 +1,32 @@
+{
+  "name": "@pinlog/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Owner A. Next.js UI: trips, wizard, map home (pins, sheet, photos, tray, journal chat), vlog studio.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@pinlog/schema": "workspace:*",
+    "@pinlog/video": "workspace:*",
+    "exifr": "catalog:",
+    "maplibre-gl": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-map-gl": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@pinlog/platform",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Owner B. SQLite repo (node:sqlite), local/memory storage, photo ingest (EXIF, thumbs, auto-assign), seed.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@pinlog/schema": "workspace:*",
+    "exifr": "catalog:",
+    "sharp": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

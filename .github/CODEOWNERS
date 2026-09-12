@@ -1,0 +1,28 @@
+# Directory = owner. Replace the placeholders with GitHub handles (A Client, B Platform, C AI, D Video).
+/packages/schema/                         @OWNER_A @OWNER_B @OWNER_C @OWNER_D
+/docs/CONTRACTS.md                        @OWNER_A @OWNER_B @OWNER_C @OWNER_D
+/packages/platform/                       @OWNER_B
+/packages/ai/                             @OWNER_C
+/packages/tts/                            @OWNER_D
+/packages/video/                          @OWNER_D
+/apps/web/                                @OWNER_A
+/services/api/src/app.ts                  @OWNER_B
+/services/api/src/container.ts            @OWNER_B
+/services/api/src/env.ts                  @OWNER_B
+/services/api/src/cli/                    @OWNER_B
+/services/api/src/routes/health.ts        @OWNER_B
+/services/api/src/routes/files.ts         @OWNER_B
+/services/api/src/routes/trips.ts         @OWNER_B
+/services/api/src/routes/pins.ts          @OWNER_B
+/services/api/src/routes/entries.ts       @OWNER_B
+/services/api/src/routes/media.ts         @OWNER_B
+/services/api/src/routes/share.ts         @OWNER_B
+/services/api/src/routes/plan.ts          @OWNER_C
+/services/api/src/routes/ask.ts           @OWNER_C
+/services/api/src/routes/journal.ts       @OWNER_C
+/services/api/src/routes/vlogs.ts         @OWNER_D
+/services/api/src/jobs/                   @OWNER_D
+/scripts/                                 @OWNER_B
+/.github/                                 @OWNER_B
+/pnpm-workspace.yaml                      @OWNER_B
+/docs/                                    @OWNER_D

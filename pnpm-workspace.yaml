@@ -1,0 +1,44 @@
+packages:
+  - packages/*
+  - services/*
+  - apps/*
+
+# One version of everything, everywhere. Change a version here, nowhere else.
+catalog:
+  react: 19.3.0
+  react-dom: 19.3.0
+  '@types/react': 19.3.0
+  '@types/react-dom': 19.3.0
+  '@types/node': 24.13.4
+  typescript: 5.9.3
+  zod: 4.6.2
+  vitest: 5.0.0
+  tsx: 4.23.13
+  prettier: 3.9.6
+  concurrently: 10.0.5
+  remotion: 4.0.523
+  '@remotion/player': 4.0.523
+  '@remotion/cli': 4.0.523
+  '@remotion/bundler': 4.0.523
+  '@remotion/renderer': 4.0.523
+  next: 16.3.5
+  tailwindcss: 4.3.3
+  '@tailwindcss/postcss': 4.3.3
+  hono: 4.13.7
+  '@hono/node-server': 2.1.1
+  '@hono/zod-validator': 0.9.1
+  '@anthropic-ai/sdk': 0.125.0
+  openai: 7.15.0
+  exifr: 7.1.3
+  sharp: 0.35.4
+  maplibre-gl: 6.9.0
+  react-map-gl: 8.1.3
+
+# A single React copy (Next + Remotion Player + react-map-gl must share one).
+overrides:
+  react: 19.3.0
+  react-dom: 19.3.0
+
+onlyBuiltDependencies:
+  - esbuild
+  - sharp

@@ -1,0 +1,40 @@
+{
+  "name": "@pinlog/video",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Owner D. Remotion compositions (title, map flyover, Ken Burns, captions, outro), VlogPlayer for the web, render CLI.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "studio": "remotion studio",
+    "render": "tsx --env-file-if-exists=../../.env src/render/render.ts"
+  },
+  "dependencies": {
+    "@pinlog/schema": "workspace:*",
+    "@remotion/player": "catalog:",
+    "maplibre-gl": "catalog:",
+    "react-map-gl": "catalog:",
+    "remotion": "catalog:",
+    "zod": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@remotion/bundler": "catalog:",
+    "@remotion/cli": "catalog:",
+    "@remotion/renderer": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

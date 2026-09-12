@@ -1,0 +1,22 @@
+{
+  "name": "@pinlog/tts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Owner D. Text-to-speech adapters (openai + mock) producing WAV with measured durations. Node-only, no React.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@pinlog/schema": "workspace:*",
+    "openai": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

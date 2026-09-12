@@ -1,0 +1,22 @@
+{
+  "name": "@pinlog/schema",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Frozen contracts: zod schemas, port interfaces, fixtures, shared helpers. Changes are [contract] PRs.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./fixtures": "./src/fixtures/index.ts",
+    "./ports": "./src/ports/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
