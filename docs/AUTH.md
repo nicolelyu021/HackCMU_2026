@@ -1,6 +1,8 @@
 # Auth — Auth0 Universal Login
 
-Owner A · branch `feat/auth0-login` · entered for MLH's **Best Use of Auth0** prize.
+Owner A · entered for MLH's **Best Use of Auth0** prize.
+
+**Sponsor / judging write-up with the live login screenshots:** [AUTH0_SPONSOR.md](AUTH0_SPONSOR.md).
 
 Pinlog signs travellers in with [Auth0 Universal Login](https://auth0.com/docs/authenticate/login/auth0-universal-login):
 the browser leaves for the Auth0-hosted login page, comes back to `/auth/callback`, and the SDK keeps an encrypted

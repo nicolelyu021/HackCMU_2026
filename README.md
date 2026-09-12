@@ -88,7 +88,7 @@ For live providers, copy `.env.example` to `.env`, add your own keys, set `PINLO
 | `packages/tts` · `packages/video` | OpenAI/mock TTS; Remotion composition, `VlogPlayer`, render CLI | D |
 | `services/api` | Hono host: adapter selection, route files per owner, SSE, files, vlog jobs, seed CLI | B (host), each owner (routes) |
 | `apps/web` | Next.js UI: trips, wizard, map home, pin sheet, photo drop, tray, journal chat, vlog studio, **Auth0 sign-in** | A |
-| `docs/` | [ARCHITECTURE](docs/ARCHITECTURE.md) · [CONTRACTS](docs/CONTRACTS.md) · [AUTH](docs/AUTH.md) · [TEAM](docs/TEAM.md) · [PLAN](docs/PLAN.md) · [DEMO](docs/DEMO.md) · [DECISIONS](docs/DECISIONS.md) | D keeps PLAN honest |
+| `docs/` | [ARCHITECTURE](docs/ARCHITECTURE.md) · [CONTRACTS](docs/CONTRACTS.md) · [AUTH](docs/AUTH.md) · [AUTH0_SPONSOR](docs/AUTH0_SPONSOR.md) · [TEAM](docs/TEAM.md) · [PLAN](docs/PLAN.md) · [DEMO](docs/DEMO.md) · [DECISIONS](docs/DECISIONS.md) | D keeps PLAN honest |
 
 ## Scripts
 
