@@ -20,12 +20,12 @@ flowchart LR
     S2["S2 sqlite repo · storage · ingest/assign · seed CLI"]:::done
     S3["S3 planner · replan · ask · journal · summary · script (mock + Claude + replay/fallback)"]:::done
     S4["S4 Remotion composition · Player · TTS · vlog job"]:::done
-    S5["S5 web: trips · wizard · map · sheet · drop/HUD · tray · chat · studio"]:::done
+    S5["S5 web: notebook redesign 09-12 (shelf · map room · scrapbook · journal · film) — DESIGN_HANDOFF.md"]:::done
     S6["S6 docs · CI · smoke.mjs"]:::done
   end
 
   subgraph I1["I1 · Vertical slice on fakes (H+1 → H+6)"]
-    A1["A1 map home polish: day chips, route, now marker, plan ticker"]:::todo
+    A1["A1 phone shell verified in a real Chrome at 390×844 · map renders (worker fix) · done 09-12 01:50"]:::done
     B1["B1 seed the real demo trip (own photos, EXIF stamped, notes)"]:::todo
     C1["C1 live planner with keys: Kyoto 2 days ≥ 6 verified pins < 25 s; record replay"]:::todo
     D1["D1 MapLibre-in-Player spike: go/no-go by H+4 (fallback = static route card)"]:::todo
@@ -70,7 +70,7 @@ flowchart LR
 - Drag a photo **onto a marker** is not built; the tray's "Move to pin" picker is (cut-list #5 already taken).
 - Drag-to-reorder pins is not built; delete / add manual pin / change time are (PLAN-3 in-lite).
 - Live planner + live TTS have been exercised only through the mocks; first real-key run is C1 / D3.
-- The web UI has been built and rendered in headless Chrome (trips, wizard, map with pins/tray, vlog studio with the Player); basemap tiles and the live MapLibre flyover could not be verified headless — first thing to check in a real Chrome (A1). The Player falls back to the static route card when the map style does not load within 8 s.
+- ~~Basemap tiles and the live MapLibre flyover could not be verified headless~~ → they never rendered in *any* browser because MapLibre's web worker 404'd under Turbopack (docs/ARCHITECTURE.md gotcha 15). Fixed 09-12 01:40; map tiles, the pin sheet, journal, tray and the live flyover inside the Player were then verified in a real Chrome at 390×844 (A1). Not yet verified on a physical phone (see HANDOFF.md step 3).
 
 ## Demo readiness board (one node per beat of [DEMO.md](DEMO.md); A updates after each rehearsal)
 
@@ -81,12 +81,14 @@ flowchart LR
   classDef broken fill:#ffe3e3,stroke:#c92a2a
   classDef todo fill:#f1f3f5,stroke:#868e96
 
-  R1["1 open on the Pittsburgh map"]:::todo --> R2["2 Kyoto plan streams pins"]:::todo --> R3["3 pin sheet: photos, note, why"]:::todo
-  R3 --> R4["4 live photo lands on the CMU pin"]:::todo --> R5["5 no-GPS photo → tray → move"]:::todo --> R6["6 Summarize my day"]:::todo
-  R6 --> R7["7 Make vlog → stepper"]:::todo --> R8["8 Player: flyover + narration + note pill"]:::todo --> R9["9 outro + architecture slide"]:::todo
+  R1["1 open on the Pittsburgh map"]:::ok --> R2["2 Kyoto plan streams pins"]:::todo --> R3["3 pin sheet: photos, note, why"]:::ok
+  R3 --> R4["4 live photo lands on the CMU pin"]:::todo --> R5["5 no-GPS photo → tray → move"]:::todo --> R6["6 Summarize my day"]:::flaky
+  R6 --> R7["7 Make vlog → stepper"]:::todo --> R8["8 Player: flyover + narration + note pill"]:::flaky --> R9["9 outro + architecture slide"]:::todo
 ```
 
 Rule: a beat that is red at H+22 is removed from the script, not fixed on stage.
+
+_09-12 01:50: green = walked in a real Chrome (phone viewport, mock providers); yellow = renders but only exercised with mock answers / not yet on a physical phone or with keys._
 
 ## Cut order when behind (first cut → last cut)
 1. MP4 export via `remotion render` → screen-record the Player (QuickTime).

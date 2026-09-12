@@ -20,10 +20,20 @@ import { TopBar } from '@/components/TopBar';
 import { Button, Chip, Panel, Spinner, Toasts, cx } from '@/components/ui';
 
 // The Player (Remotion + MapLibre) touches window: client-only, never imported statically (docs/ARCHITECTURE.md gotcha 1-2).
-const VlogPlayer = dynamic(() => import('@pinlog/video').then((m) => m.VlogPlayer), {
-  ssr: false,
-  loading: () => <div className="aspect-[9/16] w-full animate-pulse rounded-[2rem] bg-slate-800" />,
-});
+// The MapLibre worker URL must be set before the flyover creates its map (src/lib/maplibre.ts) — done inside the loader.
+const VlogPlayer = dynamic(
+  () =>
+    import('@/lib/maplibre')
+      .then((m) => m.ensureMapLibreWorker())
+      .then(() => import('@pinlog/video'))
+      .then((m) => m.VlogPlayer),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="aspect-[9/16] w-full animate-pulse rounded-[2rem] bg-slate-800" />
+    ),
+  },
+);
 
 const STEPS: { status: VlogStatus; label: string; hint: string }[] = [
   { status: 'queued', label: 'Queued', hint: 'starting the job' },

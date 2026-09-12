@@ -8,3 +8,4 @@ packages/schema/fixtures/photos
 docs/preview.html
 scripts/preview/template.html
 apps/web/next-env.d.ts
+.claude/

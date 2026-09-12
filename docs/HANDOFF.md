@@ -1,6 +1,6 @@
 # Handoff — where Pinlog stands and what to do next
 
-> **Latest update:** use the [README startup guide](../README.md#start-the-hackathon-demo-no-api-keys-needed) and [frontend design handoff](DESIGN_HANDOFF.md). The historical green checks below predate the latest design changes; final build verification is outstanding. Smoke checks mutate demo data and should use an isolated API.
+> **Latest update:** use the [README startup guide](../README.md#start-the-hackathon-demo-no-api-keys-needed) and [frontend design handoff](DESIGN_HANDOFF.md). Smoke checks mutate demo data and should use an isolated API. **09-12 02:30:** the notebook redesign has been re-verified on the demo laptop (typecheck · 69 tests · lint · `next build` with Turbopack all green) and the street-map basemap works again — see §0 below.
 
 _Written 2026-09-12 ~00:30 ET, after two Claude sessions. Read this first, then [PLAN.md](PLAN.md) (the status board) and
 [DEMO.md](DEMO.md) (the 3-minute script). Owners: A Client · B Platform · C AI · D Video ([TEAM.md](TEAM.md))._
@@ -8,8 +8,32 @@ _Written 2026-09-12 ~00:30 ET, after two Claude sessions. Read this first, then 
 ## 一句话（中文速览）
 
 骨架全部做完：7 个包都有真实实现（不再是 TODO），69 个测试、端到端 smoke、`next build` 全绿；有一个零依赖的可点击手机形态原型 `docs/preview.html`；
-产品方向已定为**移动优先的 PWA**（路线 1），第一步（手机连 API、PWA 元信息）已完成，第二步（手机壳：底部 tab、底部面板）代码在 `main` 上但**手机截图还没复核**。
+产品方向已定为**移动优先的 PWA**（路线 1）；前端已换成 Nicole 的“旅行手账”设计（书架、地图房间、剪贴簿、小电影，见 DESIGN_HANDOFF.md）。地图之前在任何浏览器都不渲染是 MapLibre worker 在 Turbopack 下 404 的 bug，已修（第 0 节）；手机视口和桌面视口都在真实 Chrome 复核通过，`next build` 也过了；真机（相册上传、添加到主屏幕）还没测。
 下面每个人的下一步都列出来了；先跑 `pnpm install && pnpm seed && pnpm dev`，手机和电脑连同一个 Wi-Fi，打开启动日志里打印的 `http://<电脑IP>:3000`。
+
+## 0 · Update 09-12 02:30 ET — map bug fixed, redesign + phone shell verified, build green
+
+- **The map never rendered in any browser** (not a headless limitation, not the network): maplibre-gl 6 loads its module
+  web worker from a URL next to its own chunk, which is a 404 HTML page under Next/Turbopack → no tiles, no `load` event,
+  and both the trip map (8 s check → "street tiles unavailable") and the film's live flyover always fell back. Fix:
+  `apps/web/src/app/maplibre/[file]/route.ts` serves the worker + shared chunk from the installed package and
+  `apps/web/src/lib/maplibre.ts` calls `setWorkerUrl()` before any map (TripMap and the film Player loader).
+  ARCHITECTURE.md gotcha 15. This closes DESIGN_HANDOFF.md remaining item 2.
+- The trip map's availability check now flips to the sketch only if MapLibre never fires `load` within 8 s (or the style
+  fails before load). The old check (`isStyleLoaded()` + rendered-feature count, any tile error) sent a working map
+  back to the sketch mid-load on desktop.
+- **Verified in a real Chrome on the notebook redesign**, mock providers, 390×844 and 1280×800: shelf · trip page with the
+  route sketch · **Street map → real tiles** · pin sheet from the map · Journal · Scrapbook · Little film with the live
+  flyover, Ken Burns, captions and narration audio · clean console. `pnpm typecheck` · 69 tests · `pnpm lint` ·
+  `pnpm --filter @pinlog/web build` (Turbopack) pass on the demo laptop (macOS, Node 24.18, pnpm 10.15) — the
+  `patchErrorInspectNodeJS` failure in DESIGN_HANDOFF.md did not reproduce here (item 3 closed on this machine).
+- **Team decision left open:** the route sketch is still the default map (`useState(true)` for `sketch` in
+  `apps/web/src/app/trips/[id]/page.tsx`); it was chosen while tiles looked broken. Street tiles now work, so start on the
+  street map if you prefer "map-first" for the judges — one-line change.
+- Still not done anywhere: a physical phone (camera-roll upload with GPS, Add to Home Screen), real keys, MP4 export, music.
+- Lessons for anyone testing with browser automation: a background tab throttles `requestAnimationFrame` (the Player
+  stalls and the flyover "times out" there) — test in the foreground tab; start playback via the DOM play button; the
+  in-app browser is real Chrome with WebGL, so if tiles do not render it is a bug, not the environment.
 
 ## 1 · What exists (all on `main`)
 
@@ -21,12 +45,12 @@ _Written 2026-09-12 ~00:30 ET, after two Claude sessions. Read this first, then 
 | `packages/ai` (C) | LLM = `replay(fallback(anthropic → mock))`, Nominatim + mock places, planner (stream), replan (diff, locked pins), Ask/chat/summary (grounded, no tools), captions, vlog script (assembled deterministically) | tests |
 | `services/api` | every route in [CONTRACTS.md](CONTRACTS.md), in-process vlog job, `pnpm seed`, `pnpm smoke` | 12 route tests + smoke 19/19 |
 | `packages/video` (D) | Remotion composition (title · MapLibre flyover · Ken Burns · outro route), `VlogPlayer`, Studio root, render CLI; static-route fallback when the map style fails/times out (8 s) | tests; Player rendered in headless Chrome |
-| `apps/web` (A) | trips · wizard · map home (pins, plan streaming, photo drop + landing HUD, tray, pin sheet, journal chat) · vlog studio; **mobile-first shell WIP** (see §3) | `next build`; screenshots of all pages |
+| `apps/web` (A) | notebook redesign (DESIGN_HANDOFF.md): shelf · map room (sketch + street map) · pin sheet · scrapbook · journal · little film · new-trip page; phone dock + pull-up desk | `next build` (Turbopack) green 09-12; walked in a real Chrome at 390×844 and 1280×800 (§0) |
 | `docs/preview.html` | single-file clickable prototype from the fixtures (`pnpm preview`); also published as a claude.ai artifact | open it |
 
 Verified end to end on this laptop, mock mode: `pnpm typecheck` · `pnpm test` (69) · `pnpm smoke` (19 beats) · `pnpm build` (web).
-**Never exercised:** real keys (Claude / Nominatim / OpenAI TTS), basemap tiles + live MapLibre flyover in a real browser
-(headless Chrome has no WebGL/tiles), `pnpm render` (MP4), music.
+**Never exercised:** real keys (Claude / Nominatim / OpenAI TTS), a physical phone (camera-roll upload, Add to Home Screen),
+`pnpm render` (MP4), music. (Basemap tiles and the live flyover: verified in a real Chrome on 09-12, see §0.)
 
 ## 2 · Run it
 
@@ -48,9 +72,9 @@ Phone on the same Wi-Fi: open the LAN URL from the api log. The web app derives 
 | Step | State | Where |
 |---|---|---|
 | 1 · phone reaches the API automatically, LAN CORS, PWA manifest/icons/meta, safe-area utils | **done** `6d0a178` | `apps/web/src/lib/config.ts`, `services/api/src/app.ts`, `apps/web/public/*`, `layout.tsx` |
-| 2 · phone shell: bottom `TabBar`, `Sheet` (bottom sheet on phones, side panel on md+) for pin/journal/tray, day-chip strip, phone map padding + fit on load, studio single column, deep links `?pin=` `?panel=journal` | **code on main, WIP** | `apps/web/src/components/{TabBar,ui,TopBar,PinSheet,JournalDrawer,Tray,DayChips,PlanTicker,LandingHUD}.tsx`, `map/TripMap.tsx`, `app/trips/[id]/page.tsx`, `vlog/VlogStudio.tsx` |
-| 3 · verify on a real phone + fix | **todo (A)** | see checklist below |
-| 4 · docs: "run it on your phone", DEMO pre-warm with the phone | **todo (A/D)** | README, DEMO.md |
+| 2 · phone shell — now the notebook **Dock** + pull-up **desk** (pin/journal/tray/scrapbook/film as desk pages), day-chip strip, phone map padding, deep links `?pin=` `?panel=journal|scrapbook|vlog|tray` | **done — verified in Chrome at 390×844 (§0)** | `apps/web/src/components/{TabBar,ui,TopBar,PinSheet,JournalDrawer,Tray,DayChips,PlanTicker,LandingHUD}.tsx`, `map/TripMap.tsx`, `app/trips/[id]/page.tsx`, `vlog/VlogStudio.tsx` |
+| 3 · verify on a physical phone + fix (camera-roll upload with GPS, Add to Home Screen, Safari quirks) | **todo (A)** | checklist below; everything else is green in Chrome |
+| 4 · docs: "run it on your phone", DEMO pre-warm with the phone | **done** | README (phone paragraph), DEMO.md pre-warm 9 |
 
 Step-2 checklist for A (open http://<lan-ip>:3000/trips/trip_pgh on a phone, or Chrome devtools at 390×844):
 - Top bar: title pill must shrink so the "Demo" badge stays on screen (fix `min-w-0` is in, not re-screenshotted).
@@ -58,7 +82,7 @@ Step-2 checklist for A (open http://<lan-ip>:3000/trips/trip_pgh on a phone, or 
 - Vlog page must not scroll horizontally (grid is `minmax(0,1fr)`, columns `min-w-0`); check the phone bezel width.
 - Tab bar: Trips · Map · Journal (toggles the journal sheet) · Vlog; "Add photos" button and tray chip sit above it.
 - Photo upload from the phone camera roll: EXIF GPS survives only if iOS "Options → Location" is on; HEIC arrives as JPEG.
-- Then remove "WIP" from PLAN.md S5 and mark A1 done.
+- ~~Then remove "WIP" from PLAN.md S5 and mark A1 done.~~ done 09-12 (PLAN A1 green); step 3 = the physical-phone items only.
 
 ## 4 · Next steps per owner (mirrors PLAN.md I1 → I2)
 

@@ -27,7 +27,7 @@ Wait for the API to listen on **8787** and Next.js to report ready on **3000**. 
 - Pittsburgh demo: http://localhost:3000/trips/trip_pgh
 - API health: http://localhost:8787/health
 
-The demo has 9 stops, 18 placeholder photos, 7 notes and a prepared film. The map opens as a **local pencil route sketch with clickable real stops**; it does not wait for street tiles or start WebGL. The optional **Street map** button tries the online basemap. Select **All** in the day filter to show every stop. Try a pin → Scrapbook → Journal → Little film for a quick walkthrough. Mock narration is silent.
+The demo has 9 stops, 18 placeholder photos, 7 notes and a prepared film. The map opens as a **local pencil route sketch with clickable real stops**; it does not wait for street tiles or start WebGL. The **Street map** button switches to the online OpenFreeMap basemap (needs internet; the page returns to the sketch only if the map never loads within 8 s). Select **All** in the day filter to show every stop. Try a pin → Scrapbook → Journal → Little film for a quick walkthrough. Mock narration is silent.
 
 No `.env` is needed on a fresh checkout. If you already have one, set `PINLOG_MODE=mock` and remove any live per-provider overrides for a no-key demo. Data and uploads persist in `data/`; restarting does not erase them. Stop the app with **Ctrl+C**. On subsequent runs, just run `pnpm dev`.
 
@@ -53,16 +53,16 @@ Do not also run `pnpm dev` when these two servers are already running.
 - **API unavailable but Next.js works:** http://localhost:3000/trips/trip_pgh?fixture=1 provides a read-only fixture view; edits and uploads need the API.
 - **Need an emergency demo without either server:** open [docs/preview.html](docs/preview.html) directly in a browser. This is the older standalone prototype, not the new illustrated frontend. Rebuild it with `pnpm preview` after fixture changes.
 
-For a phone, connect to the laptop's Wi-Fi and open `http://<laptop-LAN-IP>:3000`. Both server ports must be reachable from the phone. The frontend derives the API host from the page URL.
+For a phone, connect to the laptop's Wi-Fi and open `http://<laptop-LAN-IP>:3000`. Both server ports must be reachable from the phone. The frontend derives the API host from the page URL. On iOS use Share → **Add to Home Screen** for the full-screen PWA. For photos to land on pins, shoot JPEG (Camera → Formats → Most Compatible) and keep **Location** on when picking from the camera roll; otherwise the EXIF GPS is stripped and the photo waits in the tray.
 
 ### Verification and handoff
 
-See [docs/DESIGN_HANDOFF.md](docs/DESIGN_HANDOFF.md) for the latest design changes, artwork attribution and exact verification status. Earlier checks passed 69 tests and 19 smoke checks; the final production build/type-check rerun remains unverified because of local dependency startup failures.
+See [docs/DESIGN_HANDOFF.md](docs/DESIGN_HANDOFF.md) for the latest design changes, artwork attribution and verification status, and [docs/HANDOFF.md](docs/HANDOFF.md) §0 for the latest verified state (typecheck, 69 tests, lint, `next build` with Turbopack — all green on the demo laptop on 09-12).
 
 ```bash
 pnpm test
 pnpm typecheck
-pnpm --filter @pinlog/web exec next build --webpack
+pnpm --filter @pinlog/web build              # Turbopack (default); `next build --webpack` also works
 ```
 
 `pnpm smoke` **mutates the seeded demo**, including chat/planning content. Run it against a separate seeded data directory/API, not the presentation database. It is not required to start the app.

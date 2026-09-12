@@ -35,11 +35,11 @@ A fresh final build did not complete: the local Next installation produced `patc
 ## Remaining demo work
 
 1. Replace the seeded placeholder image cards with the team's real travel photos. The generated artwork in this pass is interface decoration, not fabricated trip photography.
-2. Investigate the missing street tiles on the demo machine/network. Both the embedded browser and Chrome showed pins without the basemap. The new route sketch and existing film static-route fallback keep those surfaces usable.
-3. Re-run the production build and type check after resolving the local dependency-loading problem.
+2. ~~Investigate the missing street tiles on the demo machine/network.~~ **Resolved 09-12 02:30** — not the network: maplibre-gl's module web worker 404'd under Next/Turbopack, so no browser ever got tiles. The app now serves the worker itself (`apps/web/src/app/maplibre/[file]/route.ts` + `src/lib/maplibre.ts`); Street map and the film's live flyover render real tiles (HANDOFF.md §0, ARCHITECTURE.md gotcha 15). The sketch stays the default by design; flip `sketch` in `trips/[id]/page.tsx` to start on tiles.
+3. ~~Re-run the production build and type check after resolving the local dependency-loading problem.~~ **Done 09-12 02:30 on the demo laptop** (macOS, Node 24.18, pnpm 10.15): `pnpm typecheck`, 69 tests, `pnpm lint` and `pnpm --filter @pinlog/web build` (Turbopack) all pass; the `patchErrorInspectNodeJS` failure did not reproduce there.
 4. Rehearse live planning/narration only if the team wants live providers; no API keys were added or changed here. Music and MP4 export remain separate team work.
 5. Check camera-roll upload on a real phone, with GPS retained. Browser-size verification is not a physical-device EXIF check.
 
-The final demo change makes the existing route sketch the default. Diff whitespace checks passed; a fresh browser check was blocked because the web server refused connections and its restart stalled. This default-switch change has not received a successful fresh build.
+The final demo change makes the existing route sketch the default. Diff whitespace checks passed; a fresh browser check was blocked because the web server refused connections and its restart stalled. This default-switch change has not received a successful fresh build. _(09-12 02:30: built and browser-checked on the demo laptop, see HANDOFF.md §0.)_
 
 Existing unrelated/untracked agent guidance files were preserved outside the design commit.

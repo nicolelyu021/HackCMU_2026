@@ -28,6 +28,10 @@ fallback that looks identical on screen.
 6. `~/Desktop/demo-photos/` has `fence.jpg` (shot this morning, real EXIF, tested) and `nogps.jpg`.
 7. Audio: confirm the room can hear the laptop; the Player needs one click before audio plays (autoplay policy) — the driver knows.
 8. Backup video open in a second Chrome tab and on a phone.
+9. **Phone beats** (if the demo is driven from the phone): phone on the laptop's hotspot, PWA installed from the LAN URL
+   the api log prints, the trip page opened once so tiles are cached, the CMU pin tapped once (sheet works), the camera
+   set to JPEG + Location on. Mirror the phone to the projector (QuickTime → iPhone, or AirPlay) and rehearse the mirror
+   before walking on stage; keep the laptop browser open on the same trip as the fallback.
 
 ## Fallback matrix
 

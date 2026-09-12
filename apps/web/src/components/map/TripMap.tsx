@@ -9,6 +9,7 @@ import MapGL, {
 } from 'react-map-gl/maplibre';
 import type { ItineraryStop, TripBundle } from '@pinlog/schema';
 import { MAP_STYLE_URL } from '@/lib/config';
+import { ensureMapLibreWorker } from '@/lib/maplibre';
 import { dayColor } from '@/lib/format';
 import { RouteSketch } from './RouteSketch';
 import { cx } from '@/components/ui';
@@ -40,6 +41,10 @@ const lineFor = (points: { lng: number; lat: number }[]) => ({
   geometry: { type: 'LineString' as const, coordinates: points.map((p) => [p.lng, p.lat]) },
 });
 
+// Must run before the first street map is created (docs/ARCHITECTURE.md gotcha 15): without it MapLibre's web worker
+// 404s under Turbopack, no tiles ever load, and the 8 s check below always flips the page back to the sketch.
+ensureMapLibreWorker();
+
 /** MAP-1: pins, route per day, day filter, "now" marker. Client-only (MapLibre touches window). */
 export function TripMap({
   bundle,
@@ -55,6 +60,8 @@ export function TripMap({
   onUnavailable,
 }: TripMapProps) {
   const mapRef = useRef<MapRef>(null);
+  /** true once MapLibre fired `load` (style + first frame). Only a map that never gets there is "unavailable". */
+  const loadedRef = useRef(false);
   const pins = useMemo(
     () =>
       [...bundle.pins]
@@ -137,12 +144,13 @@ export function TripMap({
     });
   }, [selectedPinId, bundle.pins, deskFraction]);
 
+  // Fall back to the sketch only if the style never loads: `isStyleLoaded()` and rendered-feature counts are
+  // momentarily false/empty while tiles stream in, which used to flip a working map back to the sketch at 8 s.
   useEffect(() => {
     if (sketch) return;
+    loadedRef.current = false;
     const timer = setTimeout(() => {
-      const map = mapRef.current?.getMap();
-      if (!map || !map.isStyleLoaded() || map.queryRenderedFeatures().length === 0)
-        onUnavailable?.();
+      if (!loadedRef.current) onUnavailable?.();
     }, 8000);
     return () => clearTimeout(timer);
   }, [sketch, bundle.trip.id, onUnavailable]);
@@ -167,8 +175,17 @@ export function TripMap({
           initialViewState={{ longitude: center.lng, latitude: center.lat, zoom: 12.5 }}
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
           onClick={() => onSelectPin(null)}
-          onLoad={fit}
-          onError={() => onUnavailable?.()}
+          onLoad={() => {
+            loadedRef.current = true;
+            fit();
+          }}
+          // a single failed tile or sprite is not fatal; only a failure before `load` means "no street map"
+          onError={(e) => {
+            if (!loadedRef.current) {
+              console.warn('[map] street map unavailable', e.error?.message ?? e);
+              onUnavailable?.();
+            }
+          }}
         >
           <NavigationControl position="top-right" showCompass={false} />
           {days.map((d) => {
