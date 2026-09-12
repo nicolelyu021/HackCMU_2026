@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pinlog — a map-first travel diary</title>
+    <link rel="icon" href="../apps/web/public/icons/icon-192.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap"
+    />
+    <style>
+      :root {
+        /* Straight from apps/web/src/app/globals.css — keep the two in step. */
+        --paper: #f6f2e8;
+        --card: #fffcf5;
+        --ink: #48443e;
+        --muted: #787268;
+        --line: #cfc7b8;
+        --line-strong: #686258;
+        --accent: #796790;
+        --accent-soft: #e9e1ef;
+        --font-sans: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+        --font-display: 'Patrick Hand', 'Comic Sans MS', cursive;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+      }
+      body {
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+        /* faint ruled-paper texture, like the notebook pages */
+        background-image:
+          radial-gradient(circle at 20% 10%, rgba(121, 103, 144, 0.05), transparent 40%),
+          radial-gradient(circle at 85% 85%, rgba(121, 103, 144, 0.06), transparent 45%);
+      }
+
+      .stage {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 56px;
+        padding: 48px 32px;
+        flex-wrap: wrap;
+      }
+
+      /* ---- the phone ---------------------------------------------------- */
+      .phone {
+        position: relative;
+        width: 300px;
+        flex: none;
+        border-radius: 46px;
+        background: #10151a;
+        padding: 12px;
+        box-shadow:
+          0 40px 90px rgba(72, 68, 62, 0.28),
+          inset 0 0 0 2px #2b3138;
+      }
+      .phone::before {
+        /* the notch */
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 104px;
+        height: 26px;
+        background: #10151a;
+        border-radius: 18px;
+        z-index: 3;
+      }
+      .screen {
+        position: relative;
+        display: block;
+        width: 100%;
+        aspect-ratio: 9 / 19;
+        border-radius: 36px;
+        overflow: hidden;
+        background: #000;
+      }
+      .screen video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* the 16:9 reel fills the tall screen, cropped top/bottom */
+        display: block;
+      }
+      .screen .play-hint {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(16, 21, 26, 0.35);
+        cursor: pointer;
+        transition: opacity 0.25s;
+      }
+      .screen .play-hint[hidden] {
+        display: none;
+      }
+      .play-hint span {
+        width: 66px;
+        height: 66px;
+        border-radius: 50%;
+        background: var(--card);
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        padding-left: 5px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+      }
+      .phone-caption {
+        text-align: center;
+        font-family: var(--font-display);
+        font-size: 15px;
+        color: var(--muted);
+        margin-top: 14px;
+      }
+
+      /* ---- the intro ----------------------------------------------------- */
+      .intro {
+        max-width: 480px;
+        flex: 1 1 340px;
+        min-width: 300px;
+      }
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--font-display);
+        font-size: 40px;
+        line-height: 1;
+      }
+      .brand .dot {
+        color: var(--accent);
+      }
+      .stamp {
+        display: inline-block;
+        border: 1px solid #aaa091;
+        padding: 4px 10px;
+        border-radius: 5px 3px 6px 3px;
+        font-size: 10px;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        transform: rotate(2deg);
+        margin-left: 10px;
+        vertical-align: middle;
+      }
+      h1 {
+        font-family: var(--font-display);
+        font-size: 46px;
+        line-height: 1.02;
+        margin: 18px 0 12px;
+        letter-spacing: -0.01em;
+      }
+      .lede {
+        font-size: 17px;
+        line-height: 1.55;
+        color: var(--ink);
+        margin: 0 0 22px;
+      }
+
+      .steps {
+        list-style: none;
+        margin: 0 0 26px;
+        padding: 0;
+        display: grid;
+        gap: 12px;
+      }
+      .steps li {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 8px 12px 9px 6px;
+        padding: 12px 14px;
+        box-shadow: 1px 2px 0 rgba(104, 98, 88, 0.08);
+      }
+      .steps .n {
+        flex: none;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-family: var(--font-display);
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .steps b {
+        display: block;
+        font-size: 15px;
+      }
+      .steps span {
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .cta {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 46px;
+        padding: 10px 20px;
+        border: 1.5px solid var(--line-strong);
+        border-radius: 7px 12px 8px 10px / 10px 6px 12px 7px;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        color: var(--ink);
+        background: var(--card);
+        box-shadow: 1px 2px 0 rgba(104, 98, 88, 0.16);
+        transition:
+          transform 0.18s,
+          background 0.18s;
+      }
+      .btn:hover {
+        transform: translateY(-2px) rotate(-0.4deg);
+      }
+      .btn:active {
+        transform: translateY(1px);
+        box-shadow: none;
+      }
+      .btn.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+
+      .photos {
+        display: flex;
+        gap: 10px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .photos figure {
+        margin: 0;
+        width: 108px;
+        border: 1px solid var(--line);
+        border-radius: 6px 9px 7px 5px;
+        overflow: hidden;
+        background: var(--card);
+        box-shadow: 1px 2px 0 rgba(104, 98, 88, 0.1);
+        transform: rotate(-1deg);
+      }
+      .photos figure:nth-child(2n) {
+        transform: rotate(1.4deg);
+      }
+      .photos figure:nth-child(3n) {
+        transform: rotate(-0.6deg);
+      }
+      .photos img {
+        width: 100%;
+        height: 78px;
+        object-fit: cover;
+        display: block;
+      }
+      .photos figcaption {
+        font-family: var(--font-display);
+        font-size: 12px;
+        color: var(--muted);
+        padding: 5px 7px;
+        text-align: center;
+      }
+
+      .foot {
+        margin-top: 26px;
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      .foot code {
+        font-family: ui-monospace, Menlo, monospace;
+        font-size: 11px;
+        background: var(--accent-soft);
+        padding: 1px 5px;
+        border-radius: 4px;
+        color: var(--accent);
+      }
+
+      @media (max-width: 720px) {
+        .stage {
+          gap: 32px;
+          padding: 32px 20px;
+        }
+        h1 {
+          font-size: 38px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <!-- left: the phone, playing our own demo reel -->
+      <div>
+        <div class="phone">
+          <div class="screen">
+            <video
+              id="reel"
+              src="../Videos/pinlog_demo_concat_vo.mp4"
+              poster="assets/phipps.jpg"
+              preload="metadata"
+              playsinline
+              loop
+              muted
+            ></video>
+            <div class="play-hint" id="playHint"><span>▶</span></div>
+          </div>
+        </div>
+        <p class="phone-caption">the little film Pinlog cut from the trip</p>
+      </div>
+
+      <!-- right: the intro -->
+      <div class="intro">
+        <span class="brand">pinlog<span class="dot">.</span></span>
+        <span class="stamp">HackCMU 2026</span>
+
+        <h1>Go somewhere.<br />Keep a little of it.</h1>
+        <p class="lede">
+          Plan a trip as pins on a map, live it by dropping photos and notes onto those pins, then
+          relive it as an auto-generated vlog. Everything is a pin.
+        </p>
+
+        <ul class="steps">
+          <li>
+            <span class="n">1</span>
+            <div>
+              <b>Plan as pins</b>
+              <span>Drop stops on the map; the planner turns them into a day-by-day route.</span>
+            </div>
+          </li>
+          <li>
+            <span class="n">2</span>
+            <div>
+              <b>Photos land themselves</b>
+              <span
+                >Shoot as you go — EXIF GPS puts each photo on the right pin automatically.</span
+              >
+            </div>
+          </li>
+          <li>
+            <span class="n">3</span>
+            <div>
+              <b>One tap, a little film</b>
+              <span>Your pins, photos and notes become a narrated vlog. No editing.</span>
+            </div>
+          </li>
+        </ul>
+
+        <div class="cta">
+          <a class="btn primary" href="http://localhost:3000">Open the app</a>
+          <a class="btn" href="../Videos/pinlog_demo_concat_vo.mp4" target="_blank" rel="noopener">
+            Watch the full reel
+          </a>
+        </div>
+
+        <!-- our own photos from the Pittsburgh trip -->
+        <div class="photos">
+          <figure>
+            <img src="assets/phipps.jpg" alt="Phipps Conservatory, Pittsburgh" />
+            <figcaption>Phipps</figcaption>
+          </figure>
+          <figure>
+            <img src="assets/phipps2.jpg" alt="Inside the conservatory" />
+            <figcaption>the glasshouse</figcaption>
+          </figure>
+          <figure>
+            <img src="assets/cathy.jpg" alt="Cathy, the university mascot" />
+            <figcaption>Cathy</figcaption>
+          </figure>
+          <figure>
+            <img src="assets/andy-warhol.jpg" alt="The Andy Warhol Museum" />
+            <figcaption>Warhol</figcaption>
+          </figure>
+        </div>
+
+        <p class="foot">
+          Built at HackCMU 2026. Sign-in by Auth0 · map by MapLibre + OpenFreeMap · narration by
+          Claude + OpenAI · film by Remotion. Run it yourself with <code>pnpm dev</code>, then open
+          <code>localhost:3000</code>.
+        </p>
+      </div>
+    </div>
+
+    <script>
+      // The reel is muted so it can autoplay; the overlay is the fallback for browsers that block it.
+      const video = document.getElementById('reel');
+      const hint = document.getElementById('playHint');
+      const tryPlay = () =>
+        video
+          .play()
+          .then(() => hint.setAttribute('hidden', ''))
+          .catch(() => hint.removeAttribute('hidden'));
+      tryPlay();
+      hint.addEventListener('click', () => {
+        video.muted = false; // a tap is a user gesture, so sound is allowed from here
+        tryPlay();
+      });
+    </script>
+  </body>
+</html>
