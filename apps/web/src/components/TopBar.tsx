@@ -26,13 +26,13 @@ export function TopBar({ title, right }: { title?: React.ReactNode; right?: Reac
       <div className="pointer-events-auto flex items-center gap-3">
         <Link
           href={fixture ? '/?fixture=1' : '/'}
-          className="flex items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 shadow border border-slate-200/70 backdrop-blur"
+          className="flex items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 text-slate-900 shadow border border-slate-200/70 backdrop-blur"
         >
           <span className="text-lg">📍</span>
           <span className="font-bold tracking-tight">Pinlog</span>
         </Link>
         {title && (
-          <div className="rounded-full bg-white/90 px-3 py-1.5 text-sm font-medium shadow border border-slate-200/70 backdrop-blur">
+          <div className="rounded-full bg-white/90 px-3 py-1.5 text-sm font-medium text-slate-900 shadow border border-slate-200/70 backdrop-blur">
             {title}
           </div>
         )}

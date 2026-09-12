@@ -175,7 +175,7 @@ export function VlogStudio({ tripId }: { tripId: string }) {
       <div className="mx-auto grid max-w-7xl gap-6 px-6 pb-16 pt-24 lg:grid-cols-[320px_minmax(0,1fr)_360px]">
         {/* left: settings + stepper + history */}
         <div className="space-y-4">
-          <Panel className="bg-slate-900/80 border-slate-800 p-4 text-slate-100">
+          <Panel dark className="p-4">
             <h2 className="text-lg font-bold">One-tap vlog</h2>
             <p className="mt-1 text-xs text-slate-400">
               The video is a pure function of your pins, photos and notes. Narration only says what
@@ -200,15 +200,7 @@ export function VlogStudio({ tripId }: { tripId: string }) {
               <div className="text-xs text-slate-400">Voice</div>
               <div className="mt-1 flex gap-1.5">
                 {VOICES.map((v) => (
-                  <Chip
-                    key={v.id}
-                    active={voice === v.id}
-                    onClick={() => setVoice(v.id)}
-                    className={cx(
-                      voice !== v.id &&
-                        'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700',
-                    )}
-                  >
+                  <Chip dark key={v.id} active={voice === v.id} onClick={() => setVoice(v.id)}>
                     {v.label}
                   </Chip>
                 ))}
@@ -217,17 +209,12 @@ export function VlogStudio({ tripId }: { tripId: string }) {
             <div className="mt-3">
               <div className="text-xs text-slate-400">Days</div>
               <div className="mt-1 flex flex-wrap gap-1.5">
-                <Chip
-                  active={!days}
-                  onClick={() => setDays(undefined)}
-                  className={cx(
-                    days && 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700',
-                  )}
-                >
+                <Chip dark active={!days} onClick={() => setDays(undefined)}>
                   Whole trip
                 </Chip>
                 {Array.from({ length: nDays }, (_, i) => i + 1).map((d) => (
                   <Chip
+                    dark
                     key={d}
                     active={days?.includes(d) ?? false}
                     onClick={() =>
@@ -239,10 +226,6 @@ export function VlogStudio({ tripId }: { tripId: string }) {
                           : [...(xs ?? []), d].sort(),
                       )
                     }
-                    className={cx(
-                      !days?.includes(d) &&
-                        'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700',
-                    )}
                   >
                     Day {d}
                   </Chip>
@@ -271,7 +254,7 @@ export function VlogStudio({ tripId }: { tripId: string }) {
           </Panel>
 
           {(running || (active && active.id === vlogs[0]?.id && active.status === 'failed')) && (
-            <Panel className="bg-slate-900/80 border-slate-800 p-4 text-slate-100">
+            <Panel dark className="p-4">
               <ol className="space-y-2">
                 {STEPS.map((s, i) => {
                   const state = running
@@ -315,7 +298,7 @@ export function VlogStudio({ tripId }: { tripId: string }) {
           )}
 
           {vlogs.length > 0 && (
-            <Panel className="bg-slate-900/80 border-slate-800 p-3 text-slate-100">
+            <Panel dark className="p-3">
               <div className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
                 Vlogs of this trip
               </div>
@@ -324,13 +307,6 @@ export function VlogStudio({ tripId }: { tripId: string }) {
                   <li key={v.id}>
                     <button
                       onClick={() => v.status === 'done' && (setActiveId(v.id), setSegmentIndex(0))}
-                      className={cx(
-                        'flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-xs',
-                        v.id === activeId
-                          ? 'bg-orange-500/20 text-orange-200'
-                          : 'hover:bg-slate-800',
-                        v.status !== 'done' && 'opacity-70',
-                      )}
                     >
                       <span className="truncate">
                         {new Date(v.created_at).toLocaleTimeString('en-US', {
@@ -386,20 +362,10 @@ export function VlogStudio({ tripId }: { tripId: string }) {
           </div>
           <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
             <span>Map:</span>
-            <Chip
-              active={mapMode === 'maplibre'}
-              onClick={() => setMapMode('maplibre')}
-              className={cx(
-                mapMode !== 'maplibre' && 'bg-slate-800 text-slate-200 border-slate-700',
-              )}
-            >
+            <Chip dark active={mapMode === 'maplibre'} onClick={() => setMapMode('maplibre')}>
               Live flyover
             </Chip>
-            <Chip
-              active={mapMode === 'static'}
-              onClick={() => setMapMode('static')}
-              className={cx(mapMode !== 'static' && 'bg-slate-800 text-slate-200 border-slate-700')}
-            >
+            <Chip dark active={mapMode === 'static'} onClick={() => setMapMode('static')}>
               Static route
             </Chip>
             {active?.video_path && (
@@ -418,7 +384,7 @@ export function VlogStudio({ tripId }: { tripId: string }) {
         {/* right: current segment + script */}
         <div className="space-y-4">
           {seg && (
-            <Panel className="bg-slate-900/80 border-slate-800 p-4 text-slate-100">
+            <Panel dark className="p-4">
               <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                 Now playing · segment {segmentIndex + 1}/{active?.script?.segments.length}
               </div>
@@ -467,7 +433,7 @@ export function VlogStudio({ tripId }: { tripId: string }) {
           )}
 
           {active?.script && (
-            <Panel className="bg-slate-900/80 border-slate-800 p-3 text-slate-100">
+            <Panel dark className="p-3">
               <div className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
                 Script
               </div>
@@ -495,7 +461,7 @@ export function VlogStudio({ tripId }: { tripId: string }) {
           )}
 
           {active && (
-            <Panel className="bg-slate-900/80 border-slate-800 p-4 text-slate-100">
+            <Panel dark className="p-4">
               <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                 Regenerate with instructions
               </div>

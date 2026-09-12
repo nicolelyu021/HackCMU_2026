@@ -35,31 +35,46 @@ export function Button({
   );
 }
 
+/** Pill toggle. `dark` = the vlog studio theme (never override the background via className: Tailwind order wins). */
 export function Chip({
   active,
+  dark,
   className,
   ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean }) {
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean; dark?: boolean }) {
   return (
     <button
       {...props}
       className={cx(
         'rounded-full border px-3 py-1 text-xs font-medium transition',
         active
-          ? 'bg-slate-900 text-white border-slate-900'
-          : 'bg-white/90 text-slate-700 border-slate-200 hover:bg-white',
+          ? dark
+            ? 'bg-orange-500 text-white border-orange-500'
+            : 'bg-slate-900 text-white border-slate-900'
+          : dark
+            ? 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700'
+            : 'bg-white/90 text-slate-700 border-slate-200 hover:bg-white',
         className,
       )}
     />
   );
 }
 
-export function Panel({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+/** Floating card. `dark` = the vlog studio theme. */
+export function Panel({
+  className,
+  dark,
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & { dark?: boolean }) {
   return (
     <div
       {...props}
       className={cx(
-        'rounded-2xl bg-white/90 backdrop-blur shadow-lg border border-slate-200/70',
+        'rounded-2xl backdrop-blur shadow-lg border',
+        dark
+          ? 'bg-slate-900/85 border-slate-800 text-slate-100'
+          : 'bg-white/90 border-slate-200/70 text-slate-900',
         className,
       )}
     >
