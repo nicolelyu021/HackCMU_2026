@@ -54,9 +54,43 @@ auth0 apps update <client-id> \
 | `apps/web/src/app/profile/page.tsx` | `/profile`, rendered from the session cookie server-side |
 | `apps/web/src/app/layout.tsx` | `<Auth0Provider>` seeded with the server session |
 | `scripts/auth0-setup.mjs` | `pnpm auth0:setup` |
+| `scripts/auth0-branding.mjs` | `pnpm auth0:brand` — the Universal Login palette and copy |
 
 Routes the SDK mounts for free: `/auth/login`, `/auth/logout`, `/auth/callback`, `/auth/profile` (JSON).
 Note there is no `/api` prefix — that was v3.
+
+## The login page wears Pinlog's colours
+
+`pnpm auth0:brand` styles Auth0's hosted login page to match the shelf: paper background, cream widget,
+`#796790` buttons, soft corners, and copy in Pinlog's voice ("Welcome back, traveller" → "Open my shelf").
+`scripts/auth0-branding.mjs` **is** the config — edit `PALETTE` or `COPY` at the top and re-run. It is
+idempotent: the first run creates the tenant's theme, later runs update it.
+
+```bash
+pnpm auth0:brand --dry-run   # print the theme, copy and contrast ratios, write nothing
+pnpm auth0:brand             # apply to whichever tenant the Auth0 CLI is logged into
+```
+
+Because the branding lives in the repo rather than only in the dashboard, a teammate who runs
+`auth0 login` against their own tenant gets the same login page with one command.
+
+The script refuses to make the page unreadable quietly: it prints the WCAG contrast ratio for the button
+label, body text and placeholders before writing (currently 5.05:1, 9.44:1 and 4.65:1 — all above the AA
+threshold of 4.5:1).
+
+**Deliberately asset-free.** Auth0 fetches logos and fonts from the public internet, so a demo on
+`localhost` has nowhere to serve them from. Two consequences:
+
+- The widget shows **no logo** (`logo_position: 'none'`). Left blank, Auth0 substitutes its own blue mark,
+  and the PWA icon is a dark navy tile that fights the cream card — so the headline leads instead.
+- The widget uses the **system font**, not Patrick Hand. To change that, host a WOFF on a CORS-enabled
+  host and set `fonts.font_url`.
+
+### What you cannot restyle
+
+Rearranging the page — say, putting `travel-desk.png` in a panel beside the widget — needs a Liquid
+**page template**, which requires a custom domain and therefore a paid plan. Same for ACUL (fully custom
+screens). On the free tenant the widget can be recoloured and reworded, but not restructured.
 
 ## Who can see what
 

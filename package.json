@@ -13,6 +13,7 @@
     "dev:web": "pnpm --filter @pinlog/web dev",
     "studio": "pnpm --filter @pinlog/video studio",
     "auth0:setup": "node scripts/auth0-setup.mjs",
+    "auth0:brand": "node scripts/auth0-branding.mjs",
     "seed": "pnpm --filter @pinlog/api seed",
     "seed:reset": "pnpm --filter @pinlog/api seed --reset",
     "typecheck": "pnpm -r --parallel --no-bail typecheck && node scripts/check-deps.mjs",

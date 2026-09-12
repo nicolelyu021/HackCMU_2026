@@ -96,6 +96,7 @@ For live providers, copy `.env.example` to `.env`, add your own keys, set `PINLO
 |---|---|
 | `pnpm dev` / `pnpm dev:api` / `pnpm dev:web` | run api + web (or one of them) |
 | `pnpm auth0:setup` | create the Auth0 application and write `apps/web/.env.local` ([docs/AUTH.md](docs/AUTH.md)) |
+| `pnpm auth0:brand` | dress the Auth0 login page in Pinlog's colours and copy (`--dry-run` to preview) |
 | `pnpm seed` / `pnpm seed:reset` | (re)create `data/pinlog.db` + `data/files` from the fixtures (`--start YYYY-MM-DD` shifts the demo dates, `--photos generate` re-renders the demo JPEGs) |
 | `pnpm typecheck` · `pnpm test` · `pnpm lint` | what CI runs (tsc per package + dependency-direction check · vitest projects · prettier) |
 | `pnpm smoke` | end-to-end check of every route against a running API |
