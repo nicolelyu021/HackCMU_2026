@@ -73,6 +73,19 @@ export interface VlogsRepo {
   ): Promise<Vlog>;
 }
 
+/**
+ * Fully-formed rows to insert verbatim — ids and timestamps preserved (seed, fixtures, imports).
+ * Adapters insert in dependency order (trips → pins → media → entries → messages → vlogs), atomically.
+ */
+export interface RepoRows {
+  trips?: Trip[];
+  pins?: Pin[];
+  media?: Media[];
+  entries?: Entry[];
+  messages?: Message[];
+  vlogs?: Vlog[];
+}
+
 export interface Repo {
   trips: TripsRepo;
   pins: PinsRepo;
@@ -80,5 +93,7 @@ export interface Repo {
   entries: EntriesRepo;
   messages: MessagesRepo;
   vlogs: VlogsRepo;
+  /** Seed / import: rows are stored as given (fixture ids like 'pin_pgh_d1_phipps'). Atomic. Added H+1, additive. */
+  importRows(rows: RepoRows): Promise<void>;
   close(): void;
 }

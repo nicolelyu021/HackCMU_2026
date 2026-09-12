@@ -1,4 +1,5 @@
 import type { TripBundle } from '../api';
+import type { RepoRows } from '../ports/repo';
 export * from './demo-trip';
 export * from './demo-media';
 export * from './demo-entries';
@@ -18,6 +19,18 @@ export function demoBundle(start_date: string = DEMO_DEFAULT_START): TripBundle 
     pins: demoPins(start_date),
     media: demoMedia(start_date),
     entries: demoEntries,
+  };
+}
+
+/** The seeded rows in Repo.importRows() shape. */
+export function demoRows(start_date: string = DEMO_DEFAULT_START): RepoRows {
+  return {
+    trips: [demoTrip(start_date)],
+    pins: demoPins(start_date),
+    media: demoMedia(start_date),
+    entries: demoEntries,
+    messages: demoMessages,
+    vlogs: [demoVlog(start_date)],
   };
 }
 

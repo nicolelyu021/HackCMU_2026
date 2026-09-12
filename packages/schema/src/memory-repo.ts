@@ -5,7 +5,7 @@ import type { ReplanDiff } from './itinerary';
 import type { Media, NewMedia } from './media';
 import type { Message, NewMessage } from './message';
 import type { NewPin, Pin, ReorderPinsInput, UpdatePinInput } from './pin';
-import type { Repo } from './ports/repo';
+import type { Repo, RepoRows } from './ports/repo';
 import type { CreateTripInput, Trip, UpdateTripInput } from './trip';
 import type { Vlog, VlogSettings } from './vlog';
 
@@ -13,15 +13,9 @@ import type { Vlog, VlogSettings } from './vlog';
  * Reference Repo implementation backed by arrays. Used by unit tests in every package and as the behavioural
  * spec for the SQLite repo (same ordering, same errors). Not for production data.
  */
-export interface MemoryRepoSeed {
+export interface MemoryRepoSeed extends RepoRows {
   trip?: Trip;
-  trips?: Trip[];
-  pins?: Pin[];
-  media?: Media[];
-  entries?: Entry[];
-  messages?: Message[];
   vlog?: Vlog;
-  vlogs?: Vlog[];
 }
 
 const now = () => new Date().toISOString();
@@ -255,6 +249,14 @@ export function createMemoryRepo(seed: MemoryRepoSeed = {}): Repo {
         Object.assign(v, patch, { updated_at: now() });
         return v;
       },
+    },
+    async importRows(rows: RepoRows) {
+      trips.push(...(rows.trips ?? []));
+      pins.push(...(rows.pins ?? []));
+      media.push(...(rows.media ?? []));
+      entries.push(...(rows.entries ?? []));
+      messages.push(...(rows.messages ?? []));
+      vlogs.push(...(rows.vlogs ?? []));
     },
     close() {},
   };
