@@ -4,30 +4,31 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Pinlog</title>
-<meta name="description" content="Pinlog — a map-first travel diary. Plan as pins, drop photos onto them, get a hand-drawn journal and a narrated little film. HackCMU 2026." />
+<meta name="description" content="Your camera roll is not a diary. Pinlog turns a trip into a hand-drawn journal and a little film, made only from what you saw and wrote." />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Nunito:wght@400;600;700;800&display=swap" />
 <style>
   :root {
     --paper: #f6f2e8;
-    --paper-deep: #efe9db;
+    --paper-deep: #ede7d9;
     --card: #fffcf5;
     --ink: #48443e;
     --ink-soft: #625d55;
     --muted: #7d766b;
     --line: #cfc7b8;
-    --line-strong: #8c8578;
     --accent: #796790;
     --accent-ink: #5e4d75;
     --accent-soft: #e9e1ef;
     --sage: #7f9078;
+    --blush: #f3e4e0;
+    --butter: #f6ecc9;
     --tape: rgba(233, 225, 239, 0.82);
     --font-sans: 'Nunito', ui-sans-serif, system-ui, -apple-system, sans-serif;
     --font-hand: 'Patrick Hand', 'Marker Felt', 'Comic Sans MS', cursive;
-    --measure: 62ch;
-    --radius: 6px;
+    --measure: 60ch;
   }
   * { box-sizing: border-box; }
-  html { color-scheme: light; }
+  html { color-scheme: light; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   body {
     margin: 0;
     background: var(--paper);
@@ -43,278 +44,254 @@
   a { color: var(--accent-ink); text-decoration-thickness: 1px; text-underline-offset: 3px; }
   a:focus-visible, button:focus-visible, video:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   img, video { max-width: 100%; display: block; }
-  .wrap { max-width: 1120px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
+  .wrap { max-width: 1100px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
 
-  /* --- masthead -------------------------------------------------- */
-  .mast {
-    display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap;
-    padding-block: 22px 8px;
-    border-bottom: 1px dashed var(--line);
-  }
+  .mast { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-block: 22px 8px; border-bottom: 1px dashed var(--line); }
   .wordmark { font-family: var(--font-hand); font-size: 30px; letter-spacing: 0.5px; color: var(--ink); text-decoration: none; }
   .wordmark .pin { color: var(--accent); }
   .mast nav { display: flex; gap: 18px; flex-wrap: wrap; font-size: 14px; font-weight: 600; }
   .mast nav a { color: var(--muted); text-decoration: none; }
   .mast nav a:hover { color: var(--accent-ink); }
-  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 0; }
+  .hand { font-family: var(--font-hand); }
 
-  /* --- hero ------------------------------------------------------ */
-  .hero {
-    display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(24px, 4vw, 56px);
-    align-items: center; padding-block: clamp(36px, 6vw, 72px) clamp(28px, 4vw, 48px);
-  }
-  .hero h1 {
-    font-family: var(--font-hand); font-weight: 400; font-size: clamp(42px, 5.4vw, 64px); line-height: 1.04;
-    margin: 10px 0 18px; text-wrap: balance; color: var(--ink);
-  }
+  /* --- hero: the confession ------------------------------------- */
+  .hero { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(24px, 4vw, 56px); align-items: center; padding-block: clamp(36px, 6vw, 72px) clamp(28px, 4vw, 48px); }
+  .hero h1 { font-family: var(--font-hand); font-weight: 400; font-size: clamp(42px, 5.4vw, 64px); line-height: 1.04; margin: 10px 0 18px; text-wrap: balance; }
   .hero h1 em { font-style: normal; color: var(--accent-ink); position: relative; white-space: nowrap; }
-  .hero h1 em::after {
-    content: ''; position: absolute; left: 0; right: 0; bottom: 0.04em; height: 0.16em;
-    background: var(--accent-soft); z-index: -1; border-radius: 2px;
-  }
-  .lede { font-size: 19px; max-width: 36ch; margin: 0 0 22px; color: var(--ink-soft); text-wrap: pretty; }
-  .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-family: var(--font-hand); font-size: 20px; color: var(--ink-soft); margin: 0 0 26px; }
-  .flow span { padding: 2px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); }
-  .flow i { color: var(--accent); font-style: normal; }
+  .hero h1 em::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0.04em; height: 0.16em; background: var(--accent-soft); z-index: -1; border-radius: 2px; }
+  .lede { font-size: 19px; max-width: 34ch; margin: 0 0 24px; color: var(--ink-soft); text-wrap: pretty; }
   .cta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-  .btn {
-    display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px;
-    font-weight: 700; font-size: 15px; text-decoration: none; border: 1.5px solid var(--accent-ink);
-    color: var(--accent-ink); background: transparent; cursor: pointer; font-family: var(--font-sans);
-  }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px; font-weight: 700; font-size: 15px; text-decoration: none; border: 1.5px solid var(--accent-ink); color: var(--accent-ink); background: transparent; cursor: pointer; font-family: var(--font-sans); }
   .btn.primary { background: var(--accent-ink); color: var(--card); }
   .btn:hover { filter: brightness(1.08); }
   .cta small { color: var(--muted); font-size: 13px; }
 
-  /* the reel sits on the desk like a taped photo */
-  .reel { position: relative; padding: 14px 14px 46px; background: var(--card); border: 1px solid var(--line); box-shadow: 0 24px 50px -28px rgba(72, 68, 62, 0.45), 0 2px 0 rgba(72, 68, 62, 0.04); transform: rotate(-0.6deg); }
-  .reel::before, .reel::after {
-    content: ''; position: absolute; width: 92px; height: 26px; background: var(--tape); border: 1px solid rgba(121, 103, 144, 0.25);
-    top: -12px; transform: rotate(-4deg); left: 26px; backdrop-filter: blur(1px);
-  }
+  .reel { position: relative; margin: 0; padding: 14px 14px 46px; background: var(--card); border: 1px solid var(--line); box-shadow: 0 24px 50px -28px rgba(72, 68, 62, 0.45); transform: rotate(-0.6deg); }
+  .reel::before, .reel::after { content: ''; position: absolute; width: 92px; height: 26px; background: var(--tape); border: 1px solid rgba(121, 103, 144, 0.25); top: -12px; transform: rotate(-4deg); left: 26px; }
   .reel::after { left: auto; right: 26px; transform: rotate(5deg); }
   .reel video { width: 100%; aspect-ratio: 16 / 9; background: #2a2622; border-radius: 2px; }
   .reel figcaption { position: absolute; left: 18px; right: 18px; bottom: 12px; display: flex; justify-content: space-between; gap: 12px; font-family: var(--font-hand); font-size: 18px; color: var(--ink-soft); }
   .reel figcaption span:last-child { color: var(--muted); font-size: 16px; }
 
-  /* --- sections --------------------------------------------------- */
   section { padding-block: clamp(40px, 6vw, 72px); border-top: 1px dashed var(--line); }
-  h2 { font-family: var(--font-hand); font-weight: 400; font-size: clamp(32px, 4vw, 44px); line-height: 1.1; margin: 8px 0 10px; text-wrap: balance; }
+  h2 { font-family: var(--font-hand); font-weight: 400; font-size: clamp(32px, 4vw, 46px); line-height: 1.1; margin: 8px 0 10px; text-wrap: balance; }
   .sub { color: var(--ink-soft); max-width: var(--measure); margin: 0 0 30px; font-size: 17px; text-wrap: pretty; }
 
-  /* pencil route: four stops on a dashed lavender line */
-  .route { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; margin-top: 14px; }
-  .route::before {
-    content: ''; position: absolute; left: 6%; right: 6%; top: 18px; height: 0;
-    border-top: 2px dashed var(--accent); opacity: 0.55;
-  }
-  .stop { position: relative; padding-top: 44px; }
-  .stop .dot {
-    position: absolute; top: 8px; left: 0; width: 22px; height: 22px; border-radius: 50%;
-    background: var(--accent); box-shadow: 0 0 0 5px var(--paper), 0 0 0 6px var(--accent-soft);
-  }
-  .stop .dot::after { content: ''; position: absolute; inset: 7px; border-radius: 50%; background: var(--card); }
-  .stop h3 { font-family: var(--font-hand); font-weight: 400; font-size: 26px; margin: 0 0 6px; }
-  .stop p { margin: 0; color: var(--ink-soft); font-size: 15.5px; }
-  .stop .detail { display: block; margin-top: 10px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  /* --- the problem: three scraps on the desk --------------------- */
+  .scraps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(18px, 3vw, 32px); align-items: start; }
+  .scrap { position: relative; padding: 22px 22px 20px; border: 1px solid var(--line); box-shadow: 0 16px 30px -24px rgba(72, 68, 62, 0.6); }
+  .scrap::before { content: ''; position: absolute; top: -10px; left: 50%; width: 76px; height: 20px; transform: translateX(-50%) rotate(-3deg); background: var(--tape); border: 1px solid rgba(121, 103, 144, 0.22); }
+  .scrap.chat { background: var(--card); transform: rotate(-1.4deg); }
+  .scrap.roll { background: var(--butter); transform: rotate(0.9deg); }
+  .scrap.later { background: var(--blush); transform: rotate(-0.6deg); }
+  .scrap h3 { font-family: var(--font-hand); font-weight: 400; font-size: 24px; margin: 0 0 10px; }
+  .scrap p { margin: 0; font-size: 15px; color: var(--ink-soft); }
+  .bubble { display: inline-block; margin: 0 0 6px; padding: 6px 12px; border-radius: 14px; background: var(--paper-deep); font-size: 14px; max-width: 100%; }
+  .bubble.me { background: var(--accent-soft); color: var(--accent-ink); }
+  .scrap .stack-count { font-family: var(--font-hand); font-size: 52px; line-height: 1; color: var(--ink); margin: 4px 0 2px; font-variant-numeric: tabular-nums; }
+  .strike { text-decoration: line-through; text-decoration-color: var(--accent); text-decoration-thickness: 2px; color: var(--muted); }
+  .margin-note { font-family: var(--font-hand); font-size: 20px; color: var(--accent-ink); margin: 28px 0 0; max-width: 46ch; text-wrap: pretty; }
 
-  /* scrapbook: three signature moments, real photos taped in */
-  .book { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(18px, 3vw, 34px); }
-  .entry { display: flex; flex-direction: column; gap: 14px; }
+  /* --- the story: one weekend, four beats on a pencil route ------- */
+  .beats { position: relative; display: grid; gap: clamp(28px, 4vw, 48px); margin-top: 10px; }
+  .beats::before { content: ''; position: absolute; left: 13px; top: 24px; bottom: 24px; border-left: 2px dashed var(--accent); opacity: 0.5; }
+  .beat { display: grid; grid-template-columns: 28px minmax(0, 1fr) minmax(0, 300px); gap: 0 clamp(18px, 3vw, 40px); align-items: center; }
+  .beat .dot { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 5px var(--paper); position: relative; align-self: start; margin-top: 6px; }
+  .beat .dot::after { content: ''; position: absolute; inset: 9px; border-radius: 50%; background: var(--card); }
+  .beat .when { font-family: var(--font-hand); font-size: 20px; color: var(--accent-ink); margin: 0 0 2px; }
+  .beat h3 { font-family: var(--font-hand); font-weight: 400; font-size: clamp(26px, 3vw, 32px); margin: 0 0 8px; line-height: 1.15; }
+  .beat p { margin: 0; color: var(--ink-soft); max-width: 52ch; text-wrap: pretty; }
+  .beat .aside { display: inline-block; margin-top: 12px; padding: 6px 12px; border-radius: 4px; background: var(--card); border: 1px solid var(--line); font-family: var(--font-hand); font-size: 17px; color: var(--ink-soft); }
+  .beat .aside b { color: var(--accent-ink); font-weight: 400; }
   .photo { position: relative; background: var(--card); padding: 10px 10px 34px; border: 1px solid var(--line); box-shadow: 0 14px 30px -22px rgba(72, 68, 62, 0.6); }
   .photo img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
   .photo::before { content: ''; position: absolute; top: -10px; left: 50%; width: 84px; height: 22px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); border: 1px solid rgba(121, 103, 144, 0.25); }
   .photo .note { position: absolute; left: 12px; right: 12px; bottom: 8px; font-family: var(--font-hand); font-size: 16px; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .entry:nth-child(1) .photo { transform: rotate(-1.2deg); }
-  .entry:nth-child(2) .photo { transform: rotate(0.8deg); }
-  .entry:nth-child(3) .photo { transform: rotate(-0.5deg); }
-  .entry h3 { font-family: var(--font-hand); font-weight: 400; font-size: 26px; margin: 4px 0 0; }
-  .entry p { margin: 0; color: var(--ink-soft); font-size: 15.5px; text-wrap: pretty; }
-  .pill { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-ink); font-size: 12.5px; font-weight: 700; }
-  .pill::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+  .beat:nth-child(odd) .photo { transform: rotate(1.1deg); }
+  .beat:nth-child(even) .photo { transform: rotate(-1deg); }
 
-  /* journal spread: postcard + the "only what you wrote" promise */
-  .spread { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 6fr); gap: clamp(20px, 4vw, 48px); align-items: center; }
-  .spread img { border: 1px solid var(--line); background: var(--card); padding: 8px; transform: rotate(0.8deg); box-shadow: 0 18px 36px -26px rgba(72, 68, 62, 0.6); }
-  .quote { font-family: var(--font-hand); font-size: clamp(24px, 2.6vw, 30px); line-height: 1.3; margin: 0 0 14px; color: var(--ink); text-wrap: balance; }
-  .quote small { display: block; font-family: var(--font-sans); font-size: 13px; color: var(--muted); margin-top: 8px; letter-spacing: 0.04em; }
-  .facts { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 10px; }
+  /* --- the promise ----------------------------------------------- */
+  .promise { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 6fr); gap: clamp(20px, 4vw, 48px); align-items: center; }
+  .promise img { border: 1px solid var(--line); background: var(--card); padding: 8px; transform: rotate(0.8deg); box-shadow: 0 18px 36px -26px rgba(72, 68, 62, 0.6); }
+  .quote { font-family: var(--font-hand); font-size: clamp(24px, 2.6vw, 30px); line-height: 1.3; margin: 0 0 16px; text-wrap: balance; }
+  .facts { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
   .facts li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; color: var(--ink-soft); font-size: 15.5px; }
   .facts li::before { content: '✓'; color: var(--sage); font-weight: 800; }
 
-  /* stack: a materials list, not a logo wall */
-  .stack { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px 28px; margin: 0; padding: 0; list-style: none; }
-  .stack li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
-  .stack li span:first-child { font-weight: 700; }
-  .stack li span:last-child { color: var(--muted); text-align: right; }
+  /* --- closing --------------------------------------------------- */
+  .close { text-align: center; padding-block: clamp(48px, 7vw, 88px); }
+  .close h2 { font-size: clamp(36px, 5vw, 56px); margin-bottom: 14px; }
+  .close p { color: var(--ink-soft); max-width: 44ch; margin: 0 auto 26px; text-wrap: pretty; }
+  .close .cta { justify-content: center; }
 
-  /* footer */
-  footer { padding-block: 34px 44px; border-top: 1px dashed var(--line); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; color: var(--muted); font-size: 14px; }
-  footer .hand { font-family: var(--font-hand); font-size: 20px; color: var(--ink-soft); }
+  footer { padding-block: 30px 44px; border-top: 1px dashed var(--line); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; color: var(--muted); font-size: 13.5px; }
 
   @media (max-width: 880px) {
-    .hero { grid-template-columns: 1fr; }
-    .route { grid-template-columns: 1fr 1fr; }
-    .route::before { display: none; }
-    .stop { padding-top: 40px; }
-    .book { grid-template-columns: 1fr; }
-    .spread { grid-template-columns: 1fr; }
+    .hero, .promise { grid-template-columns: 1fr; }
+    .scraps { grid-template-columns: 1fr; }
+    .beat { grid-template-columns: 28px minmax(0, 1fr); }
+    .beat .photo { grid-column: 2; margin-top: 18px; max-width: 360px; }
   }
   @media (max-width: 520px) {
-    .route { grid-template-columns: 1fr; }
     .reel { transform: none; padding-bottom: 50px; }
     .reel figcaption { flex-direction: column; gap: 2px; }
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .btn, .mast nav a { transition: filter 120ms ease, color 120ms ease; }
   }
 </style>
 </head>
 <body>
-
 <div class="wrap">
   <header class="mast">
     <a class="wordmark" href="#top">pin<span class="pin">•</span>log</a>
     <nav aria-label="Sections">
-      <a href="#how">How it works</a>
-      <a href="#moments">Signature moments</a>
-      <a href="#journal">The journal</a>
-      <a href="#stack">Under the hood</a>
+      <a href="#problem">The problem</a>
+      <a href="#weekend">One weekend</a>
+      <a href="#promise">The promise</a>
     </nav>
   </header>
 
   <main id="top">
     <section class="hero" style="border-top: 0">
       <div>
-        <p class="eyebrow">HackCMU 2026 · a map-first travel diary</p>
-        <h1>Every trip is <em>a map of pins.</em> Pinlog turns them into a story.</h1>
-        <p class="lede">Plan a trip as pins. Live it by dropping photos and notes onto those pins. Relive it as a hand-drawn journal and a narrated little film, made only from what you actually saw and wrote.</p>
-        <p class="flow" aria-label="Flow"><span>plan</span><i>→</i><span>pins on a map</span><i>→</i><span>photos land by EXIF</span><i>→</i><span>one-tap film</span></p>
+        <p class="eyebrow">A travel diary that writes itself</p>
+        <h1>Your camera roll is <em>not a diary.</em></h1>
+        <p class="lede">You took 400 photos and remember about six of them. Pinlog puts every trip on a map, catches your photos as they happen, and hands you back a hand-drawn journal and a little film in your own words.</p>
         <div class="cta">
-          <button class="btn primary" type="button" id="play-reel">Watch the 30-second reel</button>
-          <a class="btn" href="#how">See how it works</a>
-          <small>Our real Pittsburgh weekend, narrated.</small>
+          <button class="btn primary" type="button" id="play-reel">Watch our weekend (0:30)</button>
+          <a class="btn" href="#problem">Sound familiar?</a>
         </div>
       </div>
-      <figure class="reel" style="margin: 0">
+      <figure class="reel">
         <video id="reel" controls playsinline preload="metadata" poster="assets/reel-poster.jpg">
           <source src="assets/reel.mp4" type="video/mp4" />
           Your browser cannot play this video. Open assets/reel.mp4 directly.
         </video>
-        <figcaption><span>Pittsburgh · Cathedral, Phipps, Warhol, Carnival, Kennywood</span><span>0:30 · voiced</span></figcaption>
+        <figcaption><span>One real weekend in Pittsburgh, made by Pinlog</span><span>0:30 · voiced</span></figcaption>
       </figure>
     </section>
 
-    <section id="how">
-      <p class="eyebrow">How it works</p>
-      <h2>Everything is a pin.</h2>
-      <p class="sub">Planning, photos and the recap usually live in three apps. In Pinlog they hang off one map, so the diary writes itself while you travel.</p>
-      <div class="route">
-        <article class="stop">
-          <span class="dot" aria-hidden="true"></span>
-          <h3>Plan</h3>
-          <p>Say "Kyoto, two days, temples and food." Pins drop onto the map one by one, each with the reason it was picked.</p>
-          <span class="detail">Every pin is verified on OpenStreetMap before it lands. Unverified places never appear.</span>
+    <section id="problem">
+      <p class="eyebrow">The problem</p>
+      <h2>Every trip ends the same way.</h2>
+      <p class="sub">Not badly. Just… nowhere. The plan lived in a group chat, the photos went into the roll, and the video you were going to make is still "going to be made."</p>
+      <div class="scraps">
+        <article class="scrap chat">
+          <h3>The plan</h3>
+          <p><span class="bubble">ok so phipps then warhol??</span><br /><span class="bubble me">wait is the cathedral open sat</span><br /><span class="bubble">idk i screenshotted a blog</span><br /><span class="bubble me">send it</span></p>
+          <p style="margin-top: 12px">Fourteen screenshots, one Google Doc nobody opened again, and a group chat named PGH!!!</p>
         </article>
-        <article class="stop">
-          <span class="dot" aria-hidden="true"></span>
-          <h3>Pin</h3>
-          <p>Each stop carries its day, a time window, notes and a "why this pin." Lock the ones you love, replan the rest.</p>
-          <span class="detail">Route lines, day chips, and a "today" marker on the day you are there.</span>
+        <article class="scrap roll">
+          <h3>The photos</h3>
+          <p class="stack-count">412</p>
+          <p>photos. Zero captions. Three of the same fern. Which greenhouse was the fern in? Was that Saturday? Who took the one with the rollercoaster?</p>
         </article>
-        <article class="stop">
-          <span class="dot" aria-hidden="true"></span>
-          <h3>Drop photos</h3>
-          <p>Drag a photo onto the map. The browser reads its EXIF and it lands on the right pin before anything uploads.</p>
-          <span class="detail">Within 300 m and 2 h, in the trip's time zone. No GPS? It waits in the tray, nothing is lost.</span>
+        <article class="scrap later">
+          <h3>The recap</h3>
+          <p><span class="strike">Make a trip video this weekend</span><br /><span class="strike">Make a trip video this month</span><br /><span class="strike">Make a trip video</span></p>
+          <p style="margin-top: 12px">You had the footage. You had the feelings. You did not have four hours and a video editor.</p>
         </article>
-        <article class="stop">
+      </div>
+      <p class="margin-note">So we built the thing we wanted on the way home: a diary that keeps up with the trip, instead of waiting for you after it.</p>
+    </section>
+
+    <section id="weekend">
+      <p class="eyebrow">One weekend, the Pinlog way</p>
+      <h2>Here is how ours actually went.</h2>
+      <p class="sub">Pittsburgh, two days, four friends, one app. Everything below happened; the reel at the top is what came out the other end.</p>
+
+      <div class="beats">
+        <article class="beat">
           <span class="dot" aria-hidden="true"></span>
-          <h3>Relive</h3>
-          <p>One tap writes the script, records the voice and plays a film: title, flyover between pins, your photos, captions.</p>
-          <span class="detail">The film is a pure function of the trip data. Remotion drives the map frame by frame.</span>
+          <div>
+            <p class="when">Friday, 11 pm, on the couch</p>
+            <h3>We typed "Pittsburgh, two days, art and gardens."</h3>
+            <p>Pins dropped onto the map one by one, each with a reason: the Cathedral for the view, Phipps for the glasshouse, the Warhol because it's the Warhol. Every pin was checked against a real map before it landed, so nothing was made up.</p>
+            <span class="aside">Tap a pin → <b>why this pin</b> · verified on OpenStreetMap</span>
+          </div>
+          <div class="photo"><img src="assets/pittsburgh-postcard.jpg" alt="Hand-drawn pencil postcard of Pittsburgh" loading="lazy" /><span class="note">The plan, as a route on paper</span></div>
+        </article>
+
+        <article class="beat">
+          <span class="dot" aria-hidden="true"></span>
+          <div>
+            <p class="when">Saturday, 10:40 am</p>
+            <h3>The photo knew where it belonged.</h3>
+            <p>One of us took the classic shot of the Cathedral and dropped it in. Pinlog read where and when it was taken and slid it onto the right pin before we crossed the street. No albums, no sorting, no "which one is this."</p>
+            <span class="aside">"<b>60 m</b> from the Cathedral · within your window" · a photo with no GPS just waits in the tray</span>
+          </div>
+          <div class="photo"><img src="assets/cathy.jpg" alt="Cathedral of Learning against a blue sky" loading="lazy" /><span class="note">Cathedral of Learning · landed on its pin</span></div>
+        </article>
+
+        <article class="beat">
+          <span class="dot" aria-hidden="true"></span>
+          <div>
+            <p class="when">Saturday, 2 pm, inside the glasshouse</p>
+            <h3>We wrote one line at Phipps. It came back as a sentence.</h3>
+            <p>"$3 extra for the fern room, worth it." That was the whole note. When the film was made on Sunday, the narration said exactly that, and pointed at the note it came from. It never says anything we didn't.</p>
+            <span class="aside">Narration cites <b>the note it came from</b>, right under the player</span>
+          </div>
+          <div class="photo"><img src="assets/phipps2.jpg" alt="Phipps Conservatory glasshouse" loading="lazy" /><span class="note">Phipps · "$3 extra for the fern room"</span></div>
+        </article>
+
+        <article class="beat">
+          <span class="dot" aria-hidden="true"></span>
+          <div>
+            <p class="when">Sunday, 9 pm, back home</p>
+            <h3>One tap. A film, a journal, and our route drawn in pencil.</h3>
+            <p>Title, a flyover from the Cathedral to Phipps, our photos with a slow drift, a voice reading our own notes, and an outro that draws the whole route: 12 km, 9 places, 16 photos. The scrapbook pages were already waiting under each pin.</p>
+            <span class="aside">Ask the journal "<b>summarize my day</b>" and it answers from your notes only</span>
+          </div>
+          <div class="photo"><img src="assets/andy-warhol.jpg" alt="Gallery wall at the Andy Warhol Museum" loading="lazy" /><span class="note">The Warhol · Day 1, on the scrapbook page</span></div>
         </article>
       </div>
     </section>
 
-    <section id="moments">
-      <p class="eyebrow">Signature moments</p>
-      <h2>Three things you will remember from the demo.</h2>
-      <p class="sub">Shot on our own weekend in Pittsburgh. These are the photos in the seeded demo, not stock.</p>
-      <div class="book">
-        <article class="entry">
-          <div class="photo"><img src="assets/cathy.jpg" alt="Cathedral of Learning against a blue sky" loading="lazy" /><span class="note">Cathedral of Learning · Day 1, 10:40</span></div>
-          <span class="pill">Photo landing HUD</span>
-          <h3>The photo knows where it goes.</h3>
-          <p>Drop a shot from this morning and the map answers: "60 m from Carnegie Mellon · within window." The marker pulses and the count ticks up. The EXIF math is visible, not hidden.</p>
-        </article>
-        <article class="entry">
-          <div class="photo"><img src="assets/phipps2.jpg" alt="Phipps Conservatory glasshouse from the lawn" loading="lazy" /><span class="note">Phipps · "$3 extra for the fern room"</span></div>
-          <span class="pill">Narration you can trust</span>
-          <h3>It only says what you wrote.</h3>
-          <p>Every line of narration cites the note it came from, shown as a pill under the player. No web search, no invented weather. It is your diary talking back.</p>
-        </article>
-        <article class="entry">
-          <div class="photo"><img src="assets/andy-warhol.jpg" alt="Gallery wall of portraits at the Andy Warhol Museum" loading="lazy" /><span class="note">The Andy Warhol Museum · Day 1</span></div>
-          <span class="pill">Pins while it thinks</span>
-          <h3>Watch the plan arrive.</h3>
-          <p>Pins stream onto the map while the model is still writing. Tap one and read "why this pin" with the OpenStreetMap match that proves the place exists.</p>
-        </article>
-      </div>
-    </section>
-
-    <section id="journal">
-      <div class="spread">
-        <img src="assets/pittsburgh-postcard.jpg" alt="Hand-drawn pencil postcard of Pittsburgh: bridge, river, Gothic tower" loading="lazy" />
+    <section id="promise">
+      <div class="promise">
         <div>
-          <p class="eyebrow">The journal</p>
-          <h2>A notebook, not a feed.</h2>
-          <p class="quote">"Summarize my day." → three sentences, ending with the notes they came from.<small>Journal chat, grounded only in pins, notes and captions</small></p>
+          <p class="eyebrow">The promise</p>
+          <h2>It only knows what you saw and wrote.</h2>
+          <p class="quote">No stock footage. No invented weather. No "vibrant city known for its bridges." Your photos, your notes, your route, in your words.</p>
           <ul class="facts">
-            <li>Shelf of trips drawn as a traveler's desk; each trip opens as a map room with a pencil route sketch.</li>
-            <li>Scrapbook per pin: photos, notes and AI captions on cream paper with lavender tape.</li>
-            <li>Little film: title, MapLibre flyover Cathedral → Phipps, Ken Burns over your photos, outro "12 km · 9 places · 16 photos."</li>
-            <li>Works on a phone as a PWA. Add to Home Screen, shoot JPEG with Location on, and photos land on pins.</li>
+            <li>Places are real: a pin only appears if it exists on the map.</li>
+            <li>Photos land by where and when they were taken, before they even upload.</li>
+            <li>Every line the film says points back to the note that said it.</li>
+            <li>Lives on your phone as a web app. Add to Home Screen and go.</li>
           </ul>
         </div>
+        <img src="assets/travel-desk.jpg" alt="Hand-drawn traveler's desk with an open notebook, camera and tea" loading="lazy" />
       </div>
     </section>
 
-    <section id="stack">
-      <p class="eyebrow">Under the hood</p>
-      <h2>Runs with zero keys. Better with a few.</h2>
-      <p class="sub">Every provider sits behind a port with a mock, so the whole app runs offline for rehearsal. Live keys switch on Claude planning, real geocoding and a real voice. Sign-in is Auth0 Universal Login.</p>
-      <ul class="stack">
-        <li><span>Next.js 16 + React 19</span><span>web app, PWA</span></li>
-        <li><span>MapLibre GL + OpenFreeMap</span><span>keyless map tiles</span></li>
-        <li><span>Hono + SQLite</span><span>API, jobs, files</span></li>
-        <li><span>Claude API</span><span>planner, captions, journal chat</span></li>
-        <li><span>Nominatim / OSM</span><span>every pin verified</span></li>
-        <li><span>Remotion 4</span><span>the little film</span></li>
-        <li><span>OpenAI TTS · ElevenLabs</span><span>in-app voice · this reel</span></li>
-        <li><span>Auth0</span><span>sign in</span></li>
-      </ul>
+    <section class="close">
+      <h2 class="hand">Start your next trip as a map.</h2>
+      <p>Pinlog is a HackCMU 2026 project. Come find us and plan a trip on your own phone in under a minute, then watch it become a film before you leave the table.</p>
+      <div class="cta">
+        <button class="btn primary" type="button" id="play-reel-2">Watch the reel again</button>
+      </div>
     </section>
   </main>
 
   <footer>
-    <span class="hand">Built in 24 hours by four people at HackCMU 2026.</span>
+    <span class="hand" style="font-size: 19px; color: var(--ink-soft)">Made in 24 hours by four people who take too many photos.</span>
     <span>Map data © OpenStreetMap contributors · OpenFreeMap. Artwork is original pencil illustration for Pinlog.</span>
   </footer>
 </div>
 
 <script>
   (function () {
-    var btn = document.getElementById('play-reel');
     var video = document.getElementById('reel');
-    if (!btn || !video) return;
-    btn.addEventListener('click', function () {
-      video.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      var p = video.play();
-      if (p && p.catch) p.catch(function () { video.focus(); });
+    if (!video) return;
+    ['play-reel', 'play-reel-2'].forEach(function (id) {
+      var btn = document.getElementById(id);
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        video.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        var p = video.play();
+        if (p && p.catch) p.catch(function () { video.focus(); });
+      });
     });
   })();
 </script>
-
 </body>
 </html>
