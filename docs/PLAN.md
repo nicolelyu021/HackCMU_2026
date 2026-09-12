@@ -70,7 +70,7 @@ flowchart LR
 - Drag a photo **onto a marker** is not built; the tray's "Move to pin" picker is (cut-list #5 already taken).
 - Drag-to-reorder pins is not built; delete / add manual pin / change time are (PLAN-3 in-lite).
 - Live planner + live TTS have been exercised only through the mocks; first real-key run is C1 / D3.
-- The web UI has been typechecked and built, not yet clicked through in a browser on this machine — A1 starts there.
+- The web UI has been built and rendered in headless Chrome (trips, wizard, map with pins/tray, vlog studio with the Player); basemap tiles and the live MapLibre flyover could not be verified headless — first thing to check in a real Chrome (A1). The Player falls back to the static route card when the map style does not load within 8 s.
 
 ## Demo readiness board (one node per beat of [DEMO.md](DEMO.md); A updates after each rehearsal)
 
