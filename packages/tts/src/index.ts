@@ -1,19 +1,20 @@
-// Owner D — public surface of @pinlog/tts. Signatures are part of the frozen contract; implementations are D's.
+// Owner D — public surface of @pinlog/tts. Signatures are part of the frozen contract (services/api/src/container.ts).
 import type { TTSProvider } from '@pinlog/schema';
+import { createMockTTS } from './mock';
+import { createOpenAITTS } from './openai';
+
+export { estimateSpeechSeconds, silentWav, wavDuration, wavInfo } from './wav';
+export type { WavInfo } from './wav';
+export { OPENAI_VOICES } from './voices';
 
 export type TTSKind = 'mock' | 'openai';
 export interface TTSOptions {
   api_key?: string;
   model?: string;
 }
-export function createTTS(_kind: TTSKind, _opts: TTSOptions = {}): TTSProvider {
-  throw new Error('TODO(D): createTTS not implemented');
-}
-/** 16-bit mono PCM WAV of silence (used by the mock adapter and the seed). */
-export function silentWav(_duration_s: number, _sample_rate = 24000): Uint8Array {
-  throw new Error('TODO(D): silentWav not implemented');
-}
-/** Duration in seconds read from a PCM WAV header. */
-export function wavDuration(_bytes: Uint8Array): number {
-  throw new Error('TODO(D): wavDuration not implemented');
+
+export function createTTS(kind: TTSKind, opts: TTSOptions = {}): TTSProvider {
+  if (kind === 'mock') return createMockTTS();
+  if (!opts.api_key) throw new Error('createTTS("openai") needs api_key (OPENAI_API_KEY)');
+  return createOpenAITTS({ api_key: opts.api_key, model: opts.model });
 }
