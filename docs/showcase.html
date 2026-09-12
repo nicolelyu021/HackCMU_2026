@@ -19,32 +19,42 @@
     --accent-ink: #5e4d75;
     --accent-soft: #e9e1ef;
     --sage: #7f9078;
+    --sage-soft: #e3e9df;
     --blush: #f3e4e0;
     --butter: #f6ecc9;
+    --river: #c9d3dc;
     --tape: rgba(233, 225, 239, 0.82);
     --font-sans: 'Nunito', ui-sans-serif, system-ui, -apple-system, sans-serif;
     --font-hand: 'Patrick Hand', 'Marker Felt', 'Comic Sans MS', cursive;
     --measure: 60ch;
+    --t: 420ms;
   }
   * { box-sizing: border-box; }
   html { color-scheme: light; scroll-behavior: smooth; }
-  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   body {
-    margin: 0;
-    background: var(--paper);
-    color: var(--ink);
-    font-family: var(--font-sans);
-    font-size: 17px;
-    line-height: 1.55;
-    -webkit-font-smoothing: antialiased;
+    margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-sans);
+    font-size: 17px; line-height: 1.55; -webkit-font-smoothing: antialiased;
     background-image:
       radial-gradient(circle at 12% 8%, rgba(121, 103, 144, 0.06), transparent 40%),
       radial-gradient(circle at 90% 92%, rgba(127, 144, 120, 0.07), transparent 44%);
   }
   a { color: var(--accent-ink); text-decoration-thickness: 1px; text-underline-offset: 3px; }
-  a:focus-visible, button:focus-visible, video:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  a:focus-visible, button:focus-visible, video:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   img, video { max-width: 100%; display: block; }
+  button { font: inherit; }
   .wrap { max-width: 1100px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
+  .hand { font-family: var(--font-hand); }
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 0; }
+
+  /* progress + presenter bar */
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: var(--accent); z-index: 50; transition: width var(--t) ease; }
+  .presenter { position: fixed; right: 16px; bottom: 16px; z-index: 40; display: flex; align-items: center; gap: 10px; padding: 8px 10px 8px 14px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 14px 30px -18px rgba(72, 68, 62, 0.5); font-size: 13px; color: var(--muted); }
+  .presenter .clock { font-family: var(--font-hand); font-size: 22px; color: var(--ink); font-variant-numeric: tabular-nums; min-width: 4ch; }
+  .presenter .clock.over { color: #b3554a; }
+  .presenter .step { font-variant-numeric: tabular-nums; }
+  .presenter button { border: 1px solid var(--line); background: var(--paper); color: var(--ink-soft); border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .presenter button:hover { border-color: var(--accent); color: var(--accent-ink); }
+  .presenter kbd { font-family: var(--font-sans); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; font-size: 11px; background: var(--paper); }
 
   .mast { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-block: 22px 8px; border-bottom: 1px dashed var(--line); }
   .wordmark { font-family: var(--font-hand); font-size: 30px; letter-spacing: 0.5px; color: var(--ink); text-decoration: none; }
@@ -52,21 +62,26 @@
   .mast nav { display: flex; gap: 18px; flex-wrap: wrap; font-size: 14px; font-weight: 600; }
   .mast nav a { color: var(--muted); text-decoration: none; }
   .mast nav a:hover { color: var(--accent-ink); }
-  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 0; }
-  .hand { font-family: var(--font-hand); }
 
-  /* --- hero: the confession ------------------------------------- */
-  .hero { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(24px, 4vw, 56px); align-items: center; padding-block: clamp(36px, 6vw, 72px) clamp(28px, 4vw, 48px); }
+  /* --- steps: at rest everything shows; in pitch mode future steps are held back */
+  .step-block { transition: opacity var(--t) ease, transform var(--t) ease; }
+  body.pitch .step-block:not(.on) { opacity: 0.12; transform: translateY(8px); pointer-events: none; }
+  section { padding-block: clamp(40px, 6vw, 72px); border-top: 1px dashed var(--line); scroll-margin-top: 12px; }
+  h2 { font-family: var(--font-hand); font-weight: 400; font-size: clamp(32px, 4vw, 46px); line-height: 1.1; margin: 8px 0 10px; text-wrap: balance; }
+  .sub { color: var(--ink-soft); max-width: var(--measure); margin: 0 0 26px; font-size: 17px; text-wrap: pretty; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px; font-weight: 700; font-size: 15px; text-decoration: none; border: 1.5px solid var(--accent-ink); color: var(--accent-ink); background: transparent; cursor: pointer; }
+  .btn.primary { background: var(--accent-ink); color: var(--card); }
+  .btn:hover { filter: brightness(1.08); }
+  .btn[disabled] { opacity: 0.55; cursor: default; filter: none; }
+  .cta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .cta small { color: var(--muted); font-size: 13px; }
+
+  /* --- hero --------------------------------------------------------- */
+  .hero { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(24px, 4vw, 56px); align-items: center; padding-block: clamp(36px, 6vw, 72px) clamp(28px, 4vw, 48px); border-top: 0; }
   .hero h1 { font-family: var(--font-hand); font-weight: 400; font-size: clamp(42px, 5.4vw, 64px); line-height: 1.04; margin: 10px 0 18px; text-wrap: balance; }
   .hero h1 em { font-style: normal; color: var(--accent-ink); position: relative; white-space: nowrap; }
   .hero h1 em::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0.04em; height: 0.16em; background: var(--accent-soft); z-index: -1; border-radius: 2px; }
   .lede { font-size: 19px; max-width: 34ch; margin: 0 0 24px; color: var(--ink-soft); text-wrap: pretty; }
-  .cta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px; font-weight: 700; font-size: 15px; text-decoration: none; border: 1.5px solid var(--accent-ink); color: var(--accent-ink); background: transparent; cursor: pointer; font-family: var(--font-sans); }
-  .btn.primary { background: var(--accent-ink); color: var(--card); }
-  .btn:hover { filter: brightness(1.08); }
-  .cta small { color: var(--muted); font-size: 13px; }
-
   .reel { position: relative; margin: 0; padding: 14px 14px 46px; background: var(--card); border: 1px solid var(--line); box-shadow: 0 24px 50px -28px rgba(72, 68, 62, 0.45); transform: rotate(-0.6deg); }
   .reel::before, .reel::after { content: ''; position: absolute; width: 92px; height: 26px; background: var(--tape); border: 1px solid rgba(121, 103, 144, 0.25); top: -12px; transform: rotate(-4deg); left: 26px; }
   .reel::after { left: auto; right: 26px; transform: rotate(5deg); }
@@ -74,17 +89,15 @@
   .reel figcaption { position: absolute; left: 18px; right: 18px; bottom: 12px; display: flex; justify-content: space-between; gap: 12px; font-family: var(--font-hand); font-size: 18px; color: var(--ink-soft); }
   .reel figcaption span:last-child { color: var(--muted); font-size: 16px; }
 
-  section { padding-block: clamp(40px, 6vw, 72px); border-top: 1px dashed var(--line); }
-  h2 { font-family: var(--font-hand); font-weight: 400; font-size: clamp(32px, 4vw, 46px); line-height: 1.1; margin: 8px 0 10px; text-wrap: balance; }
-  .sub { color: var(--ink-soft); max-width: var(--measure); margin: 0 0 30px; font-size: 17px; text-wrap: pretty; }
-
-  /* --- the problem: three scraps on the desk --------------------- */
+  /* --- problem scraps ------------------------------------------------ */
   .scraps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(18px, 3vw, 32px); align-items: start; }
-  .scrap { position: relative; padding: 22px 22px 20px; border: 1px solid var(--line); box-shadow: 0 16px 30px -24px rgba(72, 68, 62, 0.6); }
+  .scrap { position: relative; padding: 22px 22px 20px; border: 1px solid var(--line); box-shadow: 0 16px 30px -24px rgba(72, 68, 62, 0.6); transition: opacity var(--t) ease, transform var(--t) ease; }
   .scrap::before { content: ''; position: absolute; top: -10px; left: 50%; width: 76px; height: 20px; transform: translateX(-50%) rotate(-3deg); background: var(--tape); border: 1px solid rgba(121, 103, 144, 0.22); }
-  .scrap.chat { background: var(--card); transform: rotate(-1.4deg); }
-  .scrap.roll { background: var(--butter); transform: rotate(0.9deg); }
-  .scrap.later { background: var(--blush); transform: rotate(-0.6deg); }
+  .scrap.chat { background: var(--card); --rot: -1.4deg; }
+  .scrap.roll { background: var(--butter); --rot: 0.9deg; }
+  .scrap.later { background: var(--blush); --rot: -0.6deg; }
+  .scrap { transform: rotate(var(--rot)); }
+  body.pitch .scrap.hidden { opacity: 0; transform: rotate(var(--rot)) translateY(-24px); }
   .scrap h3 { font-family: var(--font-hand); font-weight: 400; font-size: 24px; margin: 0 0 10px; }
   .scrap p { margin: 0; font-size: 15px; color: var(--ink-soft); }
   .bubble { display: inline-block; margin: 0 0 6px; padding: 6px 12px; border-radius: 14px; background: var(--paper-deep); font-size: 14px; max-width: 100%; }
@@ -93,99 +106,166 @@
   .strike { text-decoration: line-through; text-decoration-color: var(--accent); text-decoration-thickness: 2px; color: var(--muted); }
   .margin-note { font-family: var(--font-hand); font-size: 20px; color: var(--accent-ink); margin: 28px 0 0; max-width: 46ch; text-wrap: pretty; }
 
-  /* --- the story: one weekend, four beats on a pencil route ------- */
-  .beats { position: relative; display: grid; gap: clamp(28px, 4vw, 48px); margin-top: 10px; }
-  .beats::before { content: ''; position: absolute; left: 13px; top: 24px; bottom: 24px; border-left: 2px dashed var(--accent); opacity: 0.5; }
-  .beat { display: grid; grid-template-columns: 28px minmax(0, 1fr) minmax(0, 300px); gap: 0 clamp(18px, 3vw, 40px); align-items: center; }
-  .beat .dot { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 5px var(--paper); position: relative; align-self: start; margin-top: 6px; }
-  .beat .dot::after { content: ''; position: absolute; inset: 9px; border-radius: 50%; background: var(--card); }
-  .beat .when { font-family: var(--font-hand); font-size: 20px; color: var(--accent-ink); margin: 0 0 2px; }
-  .beat h3 { font-family: var(--font-hand); font-weight: 400; font-size: clamp(26px, 3vw, 32px); margin: 0 0 8px; line-height: 1.15; }
-  .beat p { margin: 0; color: var(--ink-soft); max-width: 52ch; text-wrap: pretty; }
-  .beat .aside { display: inline-block; margin-top: 12px; padding: 6px 12px; border-radius: 4px; background: var(--card); border: 1px solid var(--line); font-family: var(--font-hand); font-size: 17px; color: var(--ink-soft); }
-  .beat .aside b { color: var(--accent-ink); font-weight: 400; }
-  .photo { position: relative; background: var(--card); padding: 10px 10px 34px; border: 1px solid var(--line); box-shadow: 0 14px 30px -22px rgba(72, 68, 62, 0.6); }
-  .photo img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
-  .photo::before { content: ''; position: absolute; top: -10px; left: 50%; width: 84px; height: 22px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); border: 1px solid rgba(121, 103, 144, 0.25); }
-  .photo .note { position: absolute; left: 12px; right: 12px; bottom: 8px; font-family: var(--font-hand); font-size: 16px; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .beat:nth-child(odd) .photo { transform: rotate(1.1deg); }
-  .beat:nth-child(even) .photo { transform: rotate(-1deg); }
+  /* --- demo layout: text left, live widget right ---------------------- */
+  .demo { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(20px, 4vw, 48px); align-items: start; }
+  .demo .when { font-family: var(--font-hand); font-size: 20px; color: var(--accent-ink); margin: 0 0 2px; }
+  .demo p { color: var(--ink-soft); max-width: 46ch; text-wrap: pretty; }
+  .demo .say { margin-top: 16px; padding: 12px 14px; border-left: 3px solid var(--accent-soft); font-family: var(--font-hand); font-size: 18px; color: var(--ink-soft); }
+  .demo .say b { font-weight: 400; color: var(--accent-ink); }
+  .stage { position: relative; background: var(--card); border: 1px solid var(--line); box-shadow: 0 20px 44px -30px rgba(72, 68, 62, 0.6); padding: 16px; }
 
-  /* --- the promise ----------------------------------------------- */
+  /* the sketched map */
+  .map { position: relative; }
+  .map svg { width: 100%; height: auto; display: block; background: #fbf8f1; border: 1px solid var(--line); }
+  .map .river { fill: none; stroke: var(--river); stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; }
+  .map .street { fill: none; stroke: #e6e0d3; stroke-width: 2; }
+  .map .label { font-family: var(--font-hand); font-size: 13px; fill: var(--muted); }
+  .map .route { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-dasharray: 6 6; opacity: 0; transition: opacity 600ms ease; }
+  .map .route.on { opacity: 0.85; }
+  .map .pin { opacity: 0; transform: translateY(-26px); transition: opacity 320ms ease, transform 420ms cubic-bezier(.2,.9,.3,1.3); cursor: pointer; }
+  .map .pin.on { opacity: 1; transform: translateY(0); }
+  .map .pin circle.head { fill: var(--accent); stroke: var(--card); stroke-width: 2.5; }
+  .map .pin circle.ring { fill: none; stroke: var(--accent); stroke-width: 2; opacity: 0; }
+  .map .pin.pulse circle.ring { animation: ring 1.1s ease-out 2; }
+  @keyframes ring { 0% { r: 8; opacity: 0.9; } 100% { r: 30; opacity: 0; } }
+  .map .pin text { font-family: var(--font-hand); font-size: 14px; fill: var(--ink); }
+  .map .pin .count { font-family: var(--font-sans); font-size: 10px; font-weight: 800; fill: var(--card); }
+  .map .pin .badge { fill: var(--sage); opacity: 0; transition: opacity 300ms ease; }
+  .map .pin.has-photo .badge, .map .pin.has-photo .count { opacity: 1; }
+  .map .pin .count { opacity: 0; transition: opacity 300ms ease; }
+  .map.armed svg { outline: 2px dashed var(--accent); outline-offset: -6px; }
+  .map.over svg { background: var(--accent-soft); }
+
+  .prompt { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+  .prompt .field { flex: 1; min-width: 0; padding: 10px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); font-family: var(--font-hand); font-size: 19px; color: var(--ink); min-height: 44px; }
+  .prompt .field .caret { display: inline-block; width: 2px; height: 1em; background: var(--accent); vertical-align: -2px; margin-left: 1px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .ticker { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 6px; font-size: 14.5px; min-height: 2em; }
+  .ticker li { display: flex; gap: 8px; align-items: baseline; opacity: 0; transform: translateX(-6px); transition: opacity 300ms ease, transform 300ms ease; color: var(--ink-soft); }
+  .ticker li.on { opacity: 1; transform: none; }
+  .ticker li .ok { color: var(--sage); font-weight: 800; }
+  .ticker li .no { color: #b3554a; font-weight: 800; }
+  .ticker li.dropped span:not(.no) { text-decoration: line-through; color: var(--muted); }
+  .ticker .why { color: var(--muted); }
+
+  /* photo drop */
+  .tray { display: flex; gap: 14px; align-items: flex-start; margin-top: 14px; flex-wrap: wrap; }
+  .polaroid { position: relative; width: 132px; background: var(--card); border: 1px solid var(--line); padding: 6px 6px 22px; box-shadow: 0 10px 22px -16px rgba(72, 68, 62, 0.7); cursor: grab; user-select: none; transition: transform 200ms ease, opacity 300ms ease; }
+  .polaroid:active { cursor: grabbing; }
+  .polaroid img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; pointer-events: none; }
+  .polaroid .cap { position: absolute; left: 8px; right: 8px; bottom: 3px; font-family: var(--font-hand); font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .polaroid.gone { opacity: 0; transform: scale(0.6) rotate(6deg); pointer-events: none; }
+  .polaroid.nogps { background: var(--butter); }
+  .polaroid.nogps .noimg { width: 100%; aspect-ratio: 4 / 3; background: repeating-linear-gradient(45deg, var(--paper-deep) 0 6px, var(--butter) 6px 12px); display: grid; place-items: center; font-family: var(--font-hand); font-size: 14px; color: var(--muted); }
+  .tray .hint { font-size: 13px; color: var(--muted); max-width: 22ch; align-self: center; }
+  .hud { position: absolute; left: 16px; right: 16px; top: 16px; padding: 10px 14px; background: rgba(255, 252, 245, 0.96); border: 1px solid var(--line); border-left: 4px solid var(--sage); font-size: 14px; opacity: 0; transform: translateY(-8px); transition: opacity 300ms ease, transform 300ms ease; pointer-events: none; }
+  .hud.on { opacity: 1; transform: none; }
+  .hud.warn { border-left-color: #d3a34a; }
+  .hud b { font-weight: 800; }
+
+  /* journal */
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .chip { border: 1px solid var(--line); background: var(--paper); color: var(--accent-ink); border-radius: 999px; padding: 6px 12px; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .chip:hover { border-color: var(--accent); }
+  .answer { min-height: 6.5em; padding: 14px 16px; background: var(--paper); border: 1px solid var(--line); font-size: 16px; line-height: 1.6; }
+  .answer .src { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-ink); font-size: 12.5px; font-weight: 700; opacity: 0; transition: opacity 300ms ease; }
+  .pill.on { opacity: 1; }
+  .pill::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+  .notes { list-style: none; padding: 0; margin: 0 0 12px; display: grid; gap: 6px; font-family: var(--font-hand); font-size: 17px; color: var(--ink-soft); }
+  .notes li::before { content: '✎ '; color: var(--accent); }
+
+  /* film */
+  .stepper { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+  .stepper div { padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; font-size: 13.5px; color: var(--muted); background: var(--paper); transition: all 300ms ease; }
+  .stepper div.busy { border-color: var(--accent); color: var(--accent-ink); background: var(--accent-soft); }
+  .stepper div.done { border-color: var(--sage); color: var(--sage); background: var(--sage-soft); }
+  .stepper div.done::before { content: '✓ '; }
+  .film video { width: 100%; aspect-ratio: 16 / 9; background: #2a2622; border: 1px solid var(--line); }
+  .cite { margin-top: 10px; font-size: 14px; color: var(--muted); min-height: 1.5em; }
+
+  /* promise + close */
   .promise { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 6fr); gap: clamp(20px, 4vw, 48px); align-items: center; }
   .promise img { border: 1px solid var(--line); background: var(--card); padding: 8px; transform: rotate(0.8deg); box-shadow: 0 18px 36px -26px rgba(72, 68, 62, 0.6); }
   .quote { font-family: var(--font-hand); font-size: clamp(24px, 2.6vw, 30px); line-height: 1.3; margin: 0 0 16px; text-wrap: balance; }
   .facts { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
   .facts li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; color: var(--ink-soft); font-size: 15.5px; }
   .facts li::before { content: '✓'; color: var(--sage); font-weight: 800; }
-
-  /* --- closing --------------------------------------------------- */
-  .close { text-align: center; padding-block: clamp(48px, 7vw, 88px); }
+  .close { text-align: center; padding-block: clamp(48px, 7vw, 88px) clamp(60px, 8vw, 100px); }
   .close h2 { font-size: clamp(36px, 5vw, 56px); margin-bottom: 14px; }
   .close p { color: var(--ink-soft); max-width: 44ch; margin: 0 auto 26px; text-wrap: pretty; }
   .close .cta { justify-content: center; }
-
-  footer { padding-block: 30px 44px; border-top: 1px dashed var(--line); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; color: var(--muted); font-size: 13.5px; }
+  footer { padding-block: 30px 84px; border-top: 1px dashed var(--line); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; color: var(--muted); font-size: 13.5px; }
 
   @media (max-width: 880px) {
-    .hero, .promise { grid-template-columns: 1fr; }
+    .hero, .promise, .demo { grid-template-columns: 1fr; }
     .scraps { grid-template-columns: 1fr; }
-    .beat { grid-template-columns: 28px minmax(0, 1fr); }
-    .beat .photo { grid-column: 2; margin-top: 18px; max-width: 360px; }
+    .presenter .hint { display: none; }
   }
   @media (max-width: 520px) {
     .reel { transform: none; padding-bottom: 50px; }
     .reel figcaption { flex-direction: column; gap: 2px; }
+    .stepper { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { transition-duration: 1ms !important; animation-duration: 1ms !important; }
   }
 </style>
 </head>
 <body>
+<div id="progress" aria-hidden="true"></div>
+
 <div class="wrap">
   <header class="mast">
     <a class="wordmark" href="#top">pin<span class="pin">•</span>log</a>
     <nav aria-label="Sections">
       <a href="#problem">The problem</a>
-      <a href="#weekend">One weekend</a>
-      <a href="#promise">The promise</a>
+      <a href="#plan">Plan</a>
+      <a href="#photo">Photos</a>
+      <a href="#journal">Journal</a>
+      <a href="#film">Film</a>
     </nav>
   </header>
 
   <main id="top">
-    <section class="hero" style="border-top: 0">
+    <!-- 0:00 hook -->
+    <section class="hero step-block on" data-step="0">
       <div>
         <p class="eyebrow">A travel diary that writes itself</p>
         <h1>Your camera roll is <em>not a diary.</em></h1>
         <p class="lede">You took 400 photos and remember about six of them. Pinlog puts every trip on a map, catches your photos as they happen, and hands you back a hand-drawn journal and a little film in your own words.</p>
         <div class="cta">
-          <button class="btn primary" type="button" id="play-reel">Watch our weekend (0:30)</button>
-          <a class="btn" href="#problem">Sound familiar?</a>
+          <button class="btn primary" type="button" id="start-pitch">Start the 3-minute pitch</button>
+          <button class="btn" type="button" id="play-hero">Just watch the reel</button>
+          <small>Press <b>→</b> to step through · <b>T</b> starts the clock</small>
         </div>
       </div>
       <figure class="reel">
         <video id="reel" controls playsinline preload="metadata" poster="assets/reel-poster.jpg">
           <source src="assets/reel.mp4" type="video/mp4" />
-          Your browser cannot play this video. Open assets/reel.mp4 directly.
         </video>
         <figcaption><span>One real weekend in Pittsburgh, made by Pinlog</span><span>0:30 · voiced</span></figcaption>
       </figure>
     </section>
 
-    <section id="problem">
-      <p class="eyebrow">The problem</p>
+    <!-- 0:20 the problem -->
+    <section id="problem" class="step-block" data-step="1">
+      <p class="eyebrow">The problem · 0:20</p>
       <h2>Every trip ends the same way.</h2>
       <p class="sub">Not badly. Just… nowhere. The plan lived in a group chat, the photos went into the roll, and the video you were going to make is still "going to be made."</p>
       <div class="scraps">
-        <article class="scrap chat">
+        <article class="scrap chat hidden">
           <h3>The plan</h3>
           <p><span class="bubble">ok so phipps then warhol??</span><br /><span class="bubble me">wait is the cathedral open sat</span><br /><span class="bubble">idk i screenshotted a blog</span><br /><span class="bubble me">send it</span></p>
           <p style="margin-top: 12px">Fourteen screenshots, one Google Doc nobody opened again, and a group chat named PGH!!!</p>
         </article>
-        <article class="scrap roll">
+        <article class="scrap roll hidden">
           <h3>The photos</h3>
-          <p class="stack-count">412</p>
+          <p class="stack-count" id="roll-count">412</p>
           <p>photos. Zero captions. Three of the same fern. Which greenhouse was the fern in? Was that Saturday? Who took the one with the rollercoaster?</p>
         </article>
-        <article class="scrap later">
+        <article class="scrap later hidden">
           <h3>The recap</h3>
           <p><span class="strike">Make a trip video this weekend</span><br /><span class="strike">Make a trip video this month</span><br /><span class="strike">Make a trip video</span></p>
           <p style="margin-top: 12px">You had the footage. You had the feelings. You did not have four hours and a video editor.</p>
@@ -194,80 +274,145 @@
       <p class="margin-note">So we built the thing we wanted on the way home: a diary that keeps up with the trip, instead of waiting for you after it.</p>
     </section>
 
-    <section id="weekend">
-      <p class="eyebrow">One weekend, the Pinlog way</p>
-      <h2>Here is how ours actually went.</h2>
-      <p class="sub">Pittsburgh, two days, four friends, one app. Everything below happened; the reel at the top is what came out the other end.</p>
-
-      <div class="beats">
-        <article class="beat">
-          <span class="dot" aria-hidden="true"></span>
-          <div>
-            <p class="when">Friday, 11 pm, on the couch</p>
-            <h3>We typed "Pittsburgh, two days, art and gardens."</h3>
-            <p>Pins dropped onto the map one by one, each with a reason: the Cathedral for the view, Phipps for the glasshouse, the Warhol because it's the Warhol. Every pin was checked against a real map before it landed, so nothing was made up.</p>
-            <span class="aside">Tap a pin → <b>why this pin</b> · verified on OpenStreetMap</span>
+    <!-- 0:45 plan -->
+    <section id="plan" class="step-block" data-step="2">
+      <p class="eyebrow">Beat one · plan · 0:45</p>
+      <h2>Type a sentence. Get a map.</h2>
+      <div class="demo">
+        <div>
+          <p class="when">Friday, 11 pm, on the couch</p>
+          <p>Pins drop onto the map one by one while the plan is still being written, each with the reason it was picked. Every pin is checked against OpenStreetMap before it lands. The one that can't be verified never appears.</p>
+          <div class="say">Say: "<b>Anything it can't find on a real map never shows up.</b> No hallucinated cafés."</div>
+          <div class="cta" style="margin-top: 16px"><button class="btn primary" type="button" id="run-plan">Generate the plan</button><button class="btn" type="button" id="reset-plan">Reset</button></div>
+        </div>
+        <div class="stage">
+          <div class="prompt"><div class="field" id="prompt-field" aria-live="polite"><span class="caret"></span></div></div>
+          <div class="map" id="map">
+            <svg viewBox="0 0 600 380" role="img" aria-label="Sketched map of Pittsburgh with pins">
+              <path class="river" d="M20 140 C 90 150, 130 190, 175 200 C 260 215, 330 120, 420 60" />
+              <path class="river" d="M175 200 C 250 250, 330 280, 420 300 C 480 312, 540 350, 590 372" />
+              <path class="river" d="M20 140 C 60 170, 110 190, 175 200" />
+              <path class="street" d="M240 60 L 260 340 M 300 40 L 330 350 M 180 120 L 560 200 M 150 260 L 560 240 M 380 30 L 420 360" />
+              <text class="label" x="200" y="120">Allegheny</text>
+              <text class="label" x="300" y="285">Monongahela</text>
+              <text class="label" x="330" y="170">Oakland</text>
+              <text class="label" x="200" y="70">North Shore</text>
+              <path class="route" id="route" d="M195 105 C 250 130, 280 170, 335 185 C 360 195, 372 215, 385 228 C 430 255, 480 295, 520 330" />
+              <g transform="translate(195 105)"><g class="pin" id="pin-warhol"><circle class="ring" r="8" /><circle class="head" r="8" /><text x="14" y="5">The Warhol</text></g></g>
+              <g transform="translate(335 185)"><g class="pin" id="pin-cathedral"><circle class="ring" r="8" /><circle class="head" r="8" /><text x="14" y="-6">Cathedral of Learning</text><circle class="badge" cx="0" cy="-16" r="9" /><text class="count" x="-3" y="-12">1</text></g></g>
+              <g transform="translate(385 228)"><g class="pin" id="pin-phipps"><circle class="ring" r="8" /><circle class="head" r="8" /><text x="14" y="16">Phipps</text></g></g>
+              <g transform="translate(520 330)"><g class="pin" id="pin-kennywood"><circle class="ring" r="8" /><circle class="head" r="8" /><text x="-78" y="5">Kennywood</text></g></g>
+            </svg>
+            <div class="hud" id="hud"></div>
           </div>
-          <div class="photo"><img src="assets/pittsburgh-postcard.jpg" alt="Hand-drawn pencil postcard of Pittsburgh" loading="lazy" /><span class="note">The plan, as a route on paper</span></div>
-        </article>
-
-        <article class="beat">
-          <span class="dot" aria-hidden="true"></span>
-          <div>
-            <p class="when">Saturday, 10:40 am</p>
-            <h3>The photo knew where it belonged.</h3>
-            <p>One of us took the classic shot of the Cathedral and dropped it in. Pinlog read where and when it was taken and slid it onto the right pin before we crossed the street. No albums, no sorting, no "which one is this."</p>
-            <span class="aside">"<b>60 m</b> from the Cathedral · within your window" · a photo with no GPS just waits in the tray</span>
-          </div>
-          <div class="photo"><img src="assets/cathy.jpg" alt="Cathedral of Learning against a blue sky" loading="lazy" /><span class="note">Cathedral of Learning · landed on its pin</span></div>
-        </article>
-
-        <article class="beat">
-          <span class="dot" aria-hidden="true"></span>
-          <div>
-            <p class="when">Saturday, 2 pm, inside the glasshouse</p>
-            <h3>We wrote one line at Phipps. It came back as a sentence.</h3>
-            <p>"$3 extra for the fern room, worth it." That was the whole note. When the film was made on Sunday, the narration said exactly that, and pointed at the note it came from. It never says anything we didn't.</p>
-            <span class="aside">Narration cites <b>the note it came from</b>, right under the player</span>
-          </div>
-          <div class="photo"><img src="assets/phipps2.jpg" alt="Phipps Conservatory glasshouse" loading="lazy" /><span class="note">Phipps · "$3 extra for the fern room"</span></div>
-        </article>
-
-        <article class="beat">
-          <span class="dot" aria-hidden="true"></span>
-          <div>
-            <p class="when">Sunday, 9 pm, back home</p>
-            <h3>One tap. A film, a journal, and our route drawn in pencil.</h3>
-            <p>Title, a flyover from the Cathedral to Phipps, our photos with a slow drift, a voice reading our own notes, and an outro that draws the whole route: 12 km, 9 places, 16 photos. The scrapbook pages were already waiting under each pin.</p>
-            <span class="aside">Ask the journal "<b>summarize my day</b>" and it answers from your notes only</span>
-          </div>
-          <div class="photo"><img src="assets/andy-warhol.jpg" alt="Gallery wall at the Andy Warhol Museum" loading="lazy" /><span class="note">The Warhol · Day 1, on the scrapbook page</span></div>
-        </article>
+          <ul class="ticker" id="ticker">
+            <li><span class="ok">✓</span><span>The Andy Warhol Museum</span><span class="why">· because it's the Warhol · verified on OpenStreetMap</span></li>
+            <li><span class="ok">✓</span><span>Cathedral of Learning</span><span class="why">· 42 floors of Gothic, free to walk in · verified</span></li>
+            <li><span class="ok">✓</span><span>Phipps Conservatory</span><span class="why">· the glasshouse, best in afternoon light · verified</span></li>
+            <li class="dropped"><span class="no">✕</span><span>"The Secret Garden Café"</span><span class="why">· couldn't verify · dropped</span></li>
+            <li><span class="ok">✓</span><span>Kennywood</span><span class="why">· a wooden coaster from 1924 · verified</span></li>
+          </ul>
+        </div>
       </div>
     </section>
 
-    <section id="promise">
+    <!-- 1:15 photo lands -->
+    <section id="photo" class="step-block" data-step="3">
+      <p class="eyebrow">Beat two · photos · 1:15</p>
+      <h2>The photo knows where it goes.</h2>
+      <div class="demo">
+        <div>
+          <p class="when">Saturday, 10:40 am</p>
+          <p>Drag the Cathedral shot onto the map. The browser reads where and when it was taken, before anything uploads, and it lands on the right pin. A photo with no GPS isn't lost: it waits in the tray.</p>
+          <div class="say">Say: "<b>300 metres and two hours</b>, in the trip's time zone. No albums, no sorting."</div>
+          <div class="tray">
+            <div class="polaroid" id="photo-cathy" draggable="true" tabindex="0" role="button" aria-label="Drag or press Enter to drop the Cathedral photo on the map"><img src="assets/cathy.jpg" alt="" /><span class="cap">IMG_0417 · 10:40 · GPS ✓</span></div>
+            <div class="polaroid nogps" id="photo-nogps" draggable="true" tabindex="0" role="button" aria-label="Drag or press Enter to drop a photo with no GPS"><div class="noimg">no GPS</div><span class="cap">IMG_0418 · from iMessage</span></div>
+            <span class="hint">Drag onto the map, or press Enter on a photo.</span>
+          </div>
+        </div>
+        <div class="stage" id="photo-stage">
+          <p class="eyebrow" style="margin-bottom: 8px">Your map · Saturday</p>
+          <div class="map" id="map2">
+            <svg viewBox="0 0 600 380" role="img" aria-label="Map with the Cathedral pin waiting for a photo">
+              <path class="river" d="M20 140 C 90 150, 130 190, 175 200 C 260 215, 330 120, 420 60" />
+              <path class="river" d="M175 200 C 250 250, 330 280, 420 300 C 480 312, 540 350, 590 372" />
+              <path class="street" d="M240 60 L 260 340 M 300 40 L 330 350 M 180 120 L 560 200 M 150 260 L 560 240 M 380 30 L 420 360" />
+              <path class="route on" d="M195 105 C 250 130, 280 170, 335 185 C 360 195, 372 215, 385 228 C 430 255, 480 295, 520 330" />
+              <g transform="translate(195 105)"><g class="pin on"><circle class="head" r="8" /><text x="14" y="5">The Warhol</text></g></g>
+              <g transform="translate(335 185)"><g class="pin on" id="pin2-cathedral"><circle class="ring" r="8" /><circle class="head" r="8" /><text x="14" y="-6">Cathedral of Learning</text><circle class="badge" cx="0" cy="-16" r="9" /><text class="count" x="-3" y="-12">1</text></g></g>
+              <g transform="translate(385 228)"><g class="pin on"><circle class="head" r="8" /><text x="14" y="16">Phipps</text></g></g>
+              <g transform="translate(520 330)"><g class="pin on"><circle class="head" r="8" /><text x="-78" y="5">Kennywood</text></g></g>
+            </svg>
+            <div class="hud" id="hud2"></div>
+          </div>
+          <ul class="ticker" id="tray-log"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1:45 journal -->
+    <section id="journal" class="step-block" data-step="4">
+      <p class="eyebrow">Beat three · journal · 1:45</p>
+      <h2>It only knows what you wrote.</h2>
+      <div class="demo">
+        <div>
+          <p class="when">Saturday, 2 pm, inside the glasshouse</p>
+          <p>Along the way we wrote three lines. That's all the journal knows. Ask it to summarize the day and it answers from those notes, and shows you which ones. No web search, no invented weather.</p>
+          <div class="say">Say: "<b>It can't hallucinate</b> the weather because it doesn't know the weather. It's our diary answering."</div>
+        </div>
+        <div class="stage">
+          <ul class="notes">
+            <li>Cathedral: took the elevator to 36, the view is the whole city.</li>
+            <li>Phipps: $3 extra for the fern room, worth it.</li>
+            <li>Warhol: the silver clouds room, we stayed 20 minutes.</li>
+          </ul>
+          <div class="chips"><button class="chip" type="button" id="ask-summary">Summarize my day</button><button class="chip" type="button" id="ask-best">What was worth the money?</button></div>
+          <div class="answer" id="answer"><span class="muted" style="color: var(--muted)">Pick a question.</span><div class="src" id="answer-src"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2:10 film -->
+    <section id="film" class="step-block" data-step="5">
+      <p class="eyebrow">Beat four · film · 2:10</p>
+      <h2>One tap. A film in your own words.</h2>
+      <div class="demo">
+        <div>
+          <p class="when">Sunday, 9 pm, back home</p>
+          <p>Pinlog writes the script from the pins and notes, records a voice, and plays a film: a title, a flyover between pins, your photos with a slow drift, and an outro that draws the whole route.</p>
+          <div class="say">Say: "<b>Every line of narration cites the note it came from.</b> The film is a pure function of the trip."</div>
+          <div class="cta" style="margin-top: 16px"><button class="btn primary" type="button" id="make-film">Make the film</button></div>
+        </div>
+        <div class="stage film">
+          <div class="stepper"><div id="st-1">Writing the script</div><div id="st-2">Recording the voice</div><div id="st-3">Ready</div></div>
+          <video id="film-video" controls playsinline preload="metadata" poster="assets/reel-poster.jpg">
+            <source src="assets/reel.mp4" type="video/mp4" />
+          </video>
+          <div class="cite" id="cite"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2:45 close -->
+    <section id="promise" class="step-block" data-step="6">
       <div class="promise">
         <div>
-          <p class="eyebrow">The promise</p>
-          <h2>It only knows what you saw and wrote.</h2>
-          <p class="quote">No stock footage. No invented weather. No "vibrant city known for its bridges." Your photos, your notes, your route, in your words.</p>
+          <p class="eyebrow">The promise · 2:45</p>
+          <h2>Your photos, your notes, your route. In your words.</h2>
+          <p class="quote">No stock footage. No invented weather. No "vibrant city known for its bridges."</p>
           <ul class="facts">
             <li>Places are real: a pin only appears if it exists on the map.</li>
-            <li>Photos land by where and when they were taken, before they even upload.</li>
+            <li>Photos land by where and when they were taken, before they upload.</li>
             <li>Every line the film says points back to the note that said it.</li>
             <li>Lives on your phone as a web app. Add to Home Screen and go.</li>
           </ul>
         </div>
         <img src="assets/travel-desk.jpg" alt="Hand-drawn traveler's desk with an open notebook, camera and tea" loading="lazy" />
       </div>
-    </section>
-
-    <section class="close">
-      <h2 class="hand">Start your next trip as a map.</h2>
-      <p>Pinlog is a HackCMU 2026 project. Come find us and plan a trip on your own phone in under a minute, then watch it become a film before you leave the table.</p>
-      <div class="cta">
-        <button class="btn primary" type="button" id="play-reel-2">Watch the reel again</button>
+      <div class="close">
+        <h2 class="hand">Start your next trip as a map.</h2>
+        <p>Pinlog is a HackCMU 2026 project. Plan a trip on your own phone in under a minute, then watch it become a film before you leave the table.</p>
       </div>
     </section>
   </main>
@@ -278,20 +423,183 @@
   </footer>
 </div>
 
+<div class="presenter" aria-label="Presenter controls">
+  <span class="clock" id="clock">3:00</span>
+  <button type="button" id="clock-btn">Start</button>
+  <span class="step" id="step-label">Step 1 / 7</span>
+  <button type="button" id="prev-btn" aria-label="Previous step">←</button>
+  <button type="button" id="next-btn" aria-label="Next step">→</button>
+  <span class="hint"><kbd>→</kbd> next · <kbd>T</kbd> clock · <kbd>Esc</kbd> exit</span>
+</div>
+
 <script>
-  (function () {
-    var video = document.getElementById('reel');
-    if (!video) return;
-    ['play-reel', 'play-reel-2'].forEach(function (id) {
-      var btn = document.getElementById(id);
-      if (!btn) return;
-      btn.addEventListener('click', function () {
-        video.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        var p = video.play();
-        if (p && p.catch) p.catch(function () { video.focus(); });
-      });
-    });
-  })();
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var wait = function (ms) { return new Promise(function (r) { setTimeout(r, reduce ? 1 : ms); }); };
+
+  /* ---------- steps ---------- */
+  var blocks = Array.prototype.slice.call(document.querySelectorAll('.step-block'));
+  var current = 0, pitch = false;
+  var actions = {
+    1: revealScraps,
+    2: runPlan,
+    3: function () {},
+    4: function () { answer('summary'); },
+    5: makeFilm,
+    6: function () {}
+  };
+  function goTo(n, act) {
+    n = Math.max(0, Math.min(blocks.length - 1, n));
+    current = n;
+    blocks.forEach(function (b, i) { b.classList.toggle('on', !pitch || i <= n); });
+    $('progress').style.width = ((n + 1) / blocks.length * 100) + '%';
+    $('step-label').textContent = 'Step ' + (n + 1) + ' / ' + blocks.length;
+    blocks[n].scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    if (act && actions[n]) actions[n]();
+  }
+  function startPitch() {
+    pitch = true; document.body.classList.add('pitch');
+    document.querySelectorAll('.scrap').forEach(function (s) { s.classList.add('hidden'); });
+    goTo(0, false);
+    if (!ticking) toggleClock();
+  }
+  function exitPitch() { pitch = false; document.body.classList.remove('pitch'); blocks.forEach(function (b) { b.classList.add('on'); }); }
+  $('start-pitch').addEventListener('click', startPitch);
+  $('next-btn').addEventListener('click', function () { if (!pitch) startPitch(); else goTo(current + 1, true); });
+  $('prev-btn').addEventListener('click', function () { goTo(current - 1, false); });
+  document.addEventListener('keydown', function (e) {
+    if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); if (!pitch) startPitch(); else goTo(current + 1, true); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); goTo(current - 1, false); }
+    else if (e.key === 't' || e.key === 'T') { toggleClock(); }
+    else if (e.key === 'r' || e.key === 'R') { resetClock(); }
+    else if (e.key === 'Escape') { exitPitch(); }
+  });
+
+  /* ---------- clock ---------- */
+  var total = 180, left = total, ticking = false, timer = null;
+  function paint() {
+    var m = Math.floor(Math.abs(left) / 60), s = Math.abs(left) % 60;
+    $('clock').textContent = (left < 0 ? '-' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+    $('clock').classList.toggle('over', left < 0);
+  }
+  function toggleClock() {
+    ticking = !ticking; $('clock-btn').textContent = ticking ? 'Pause' : 'Start';
+    if (ticking) timer = setInterval(function () { left -= 1; paint(); }, 1000); else clearInterval(timer);
+  }
+  function resetClock() { clearInterval(timer); ticking = false; left = total; $('clock-btn').textContent = 'Start'; paint(); }
+  $('clock-btn').addEventListener('click', toggleClock);
+
+  /* ---------- 0: hero ---------- */
+  $('play-hero').addEventListener('click', function () { var v = $('reel'); v.scrollIntoView({ block: 'center' }); v.play().catch(function () {}); });
+
+  /* ---------- 1: scraps + camera-roll counter ---------- */
+  var scrapsShown = false;
+  async function revealScraps() {
+    var scraps = document.querySelectorAll('.scrap');
+    for (var i = 0; i < scraps.length; i++) { scraps[i].classList.remove('hidden'); await wait(380); }
+    if (!scrapsShown) { scrapsShown = true; countUp($('roll-count'), 412, 1100); }
+  }
+  function countUp(el, to, ms) {
+    var t0 = performance.now();
+    (function f(now) { var p = Math.min(1, (now - t0) / (reduce ? 1 : ms)); el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(f); })(t0);
+  }
+
+  /* ---------- 2: plan ---------- */
+  var planning = false;
+  var pinsInOrder = ['pin-warhol', 'pin-cathedral', 'pin-phipps', null, 'pin-kennywood'];
+  async function typeInto(el, text) {
+    el.innerHTML = '<span class="caret"></span>';
+    for (var i = 0; i < text.length; i++) { el.firstChild.insertAdjacentText('beforebegin', text[i]); await wait(28 + Math.random() * 30); }
+  }
+  async function runPlan() {
+    if (planning) return; planning = true; resetPlan(false);
+    await typeInto($('prompt-field'), 'Pittsburgh, two days, art and gardens');
+    await wait(400);
+    var rows = $('ticker').children;
+    for (var i = 0; i < rows.length; i++) {
+      rows[i].classList.add('on');
+      if (pinsInOrder[i]) { var p = $(pinsInOrder[i]); p.classList.add('on', 'pulse'); }
+      await wait(650);
+    }
+    $('route').classList.add('on');
+    planning = false;
+  }
+  function resetPlan(clearField) {
+    if (clearField !== false) $('prompt-field').innerHTML = '<span class="caret"></span>';
+    Array.prototype.forEach.call($('ticker').children, function (li) { li.classList.remove('on'); });
+    ['pin-warhol', 'pin-cathedral', 'pin-phipps', 'pin-kennywood'].forEach(function (id) { $(id).classList.remove('on', 'pulse'); });
+    $('route').classList.remove('on');
+  }
+  $('run-plan').addEventListener('click', runPlan);
+  $('reset-plan').addEventListener('click', function () { planning = false; resetPlan(true); });
+
+  /* ---------- 3: photo drop ---------- */
+  var map2 = $('map2'), hud2 = $('hud2'), log = $('tray-log');
+  function logLine(ok, text) {
+    var li = document.createElement('li');
+    li.innerHTML = '<span class="' + (ok ? 'ok' : 'no') + '">' + (ok ? '✓' : '·') + '</span><span>' + text + '</span>';
+    log.appendChild(li); requestAnimationFrame(function () { li.classList.add('on'); });
+  }
+  function showHud(el, html, warn) { el.innerHTML = html; el.classList.toggle('warn', !!warn); el.classList.add('on'); setTimeout(function () { el.classList.remove('on'); }, 4200); }
+  function dropPhoto(id) {
+    var card = $(id); if (!card || card.classList.contains('gone')) return;
+    if (id === 'photo-cathy') {
+      showHud(hud2, '<b>Landed on Cathedral of Learning</b> · 60 m away · Sat 10:40 · within window ✓');
+      var pin = $('pin2-cathedral'); pin.classList.remove('pulse'); void pin.getBBox(); pin.classList.add('pulse', 'has-photo');
+      card.classList.add('gone'); logLine(true, 'IMG_0417 → Cathedral of Learning · read from EXIF in the browser, then uploaded');
+    } else {
+      showHud(hud2, '<b>No GPS in this photo.</b> It stays in the tray. Tap "Move to pin" whenever you like.', true);
+      card.style.transform = 'rotate(-3deg)'; logLine(false, 'IMG_0418 · no location data (iMessage strips it) · waiting in the tray');
+    }
+  }
+  ['photo-cathy', 'photo-nogps'].forEach(function (id) {
+    var el = $(id);
+    el.addEventListener('dragstart', function (e) { e.dataTransfer.setData('text/plain', id); e.dataTransfer.effectAllowed = 'move'; map2.classList.add('armed'); });
+    el.addEventListener('dragend', function () { map2.classList.remove('armed', 'over'); });
+    el.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); dropPhoto(id); } });
+    el.addEventListener('click', function () { dropPhoto(id); });
+  });
+  map2.addEventListener('dragover', function (e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; map2.classList.add('over'); });
+  map2.addEventListener('dragleave', function () { map2.classList.remove('over'); });
+  map2.addEventListener('drop', function (e) { e.preventDefault(); map2.classList.remove('armed', 'over'); dropPhoto(e.dataTransfer.getData('text/plain')); });
+
+  /* ---------- 4: journal ---------- */
+  var answers = {
+    summary: { text: 'Started under the Cathedral, took the elevator to 36 and saw the whole city. Spent the afternoon at Phipps, paid the $3 for the fern room and called it worth it. Ended in the silver clouds room at the Warhol for twenty minutes.', src: ['From your notes: Cathedral', 'Phipps', 'Warhol'] },
+    best: { text: 'The $3 fern room at Phipps. Your note says "worth it," and it is the only thing you paid extra for.', src: ['From your note: Phipps'] }
+  };
+  var answering = false;
+  async function answer(key) {
+    if (answering) return; answering = true;
+    var box = $('answer'), src = $('answer-src'); box.innerHTML = ''; src.innerHTML = ''; box.appendChild(src);
+    var words = answers[key].text.split(' '), span = document.createElement('span'); box.insertBefore(span, src);
+    for (var i = 0; i < words.length; i++) { span.textContent += (i ? ' ' : '') + words[i]; await wait(55); }
+    answers[key].src.forEach(function (s, i) { var p = document.createElement('span'); p.className = 'pill'; p.textContent = s; src.appendChild(p); setTimeout(function () { p.classList.add('on'); }, 120 * i); });
+    answering = false;
+  }
+  $('ask-summary').addEventListener('click', function () { answer('summary'); });
+  $('ask-best').addEventListener('click', function () { answer('best'); });
+
+  /* ---------- 5: film ---------- */
+  var filming = false;
+  async function makeFilm() {
+    if (filming) return; filming = true;
+    var st = [$('st-1'), $('st-2'), $('st-3')]; st.forEach(function (s) { s.className = ''; });
+    st[0].classList.add('busy'); await wait(900); st[0].classList.replace('busy', 'done');
+    st[1].classList.add('busy'); await wait(900); st[1].classList.replace('busy', 'done');
+    st[2].classList.add('done');
+    var v = $('film-video'); v.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
+    v.play().catch(function () {});
+    var cite = $('cite'), lines = [[0, 'Title · Pittsburgh weekend'], [5, 'From your note: Cathedral'], [11, 'From your note: Phipps · "$3 extra for the fern room"'], [15, 'From your note: Carnival'], [23, 'From your note: Kennywood'], [27, 'Outro · 12 km · 9 places · 16 photos']];
+    v.ontimeupdate = function () { for (var i = lines.length - 1; i >= 0; i--) { if (v.currentTime >= lines[i][0]) { cite.textContent = lines[i][1]; break; } } };
+    filming = false;
+  }
+  $('make-film').addEventListener('click', makeFilm);
+
+  paint();
+})();
 </script>
 </body>
 </html>
