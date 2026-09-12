@@ -7,6 +7,8 @@ auto-generated vlog. **Everything is a pin.**
 plan  ──►  pins on a map  ──►  photos auto-land on pins (EXIF)  ──►  one-tap vlog  ──►  share
 ```
 
+**New here? Start with [docs/HANDOFF.md](docs/HANDOFF.md)** — what exists, how to verify it, and the next step for each owner.
+
 ## 60-second start (no keys needed)
 
 ```bash
