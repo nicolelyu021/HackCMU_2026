@@ -27,10 +27,9 @@ export interface TripMapProps {
   /** Verified stops streaming in from the planner (dashed markers until `done`). */
   provisional: ProvisionalStop[];
   mapStyle?: string;
+  /** Fraction of the map height covered by the paper desk (pins pad above it). */
+  deskFraction?: number;
 }
-
-/** Phone layout: panels are bottom sheets, so the fit pads the bottom instead of the sides. */
-const narrow = (map: MapRef) => map.getContainer().clientWidth < 768;
 
 const lineFor = (points: { lng: number; lat: number }[]) => ({
   type: 'Feature' as const,
@@ -48,6 +47,7 @@ export function TripMap({
   nowPinId,
   provisional,
   mapStyle,
+  deskFraction = 0.3,
 }: TripMapProps) {
   const mapRef = useRef<MapRef>(null);
   const pins = useMemo(
@@ -96,9 +96,12 @@ export function TripMap({
         [Math.max(...lngs), Math.max(...lats)],
       ],
       {
-        padding: narrow(map)
-          ? { top: 150, left: 24, right: 24, bottom: 230 }
-          : { top: 120, left: 380, right: 420, bottom: 160 },
+        padding: {
+          top: 72,
+          left: 28,
+          right: 28,
+          bottom: Math.round(map.getContainer().clientHeight * deskFraction) + 24,
+        },
         duration: 900,
         maxZoom: 15.5,
       },
@@ -107,7 +110,7 @@ export function TripMap({
   useEffect(() => {
     fit();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fitKey]);
+  }, [fitKey, deskFraction]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -117,11 +120,14 @@ export function TripMap({
       center: [p.lng, p.lat],
       zoom: Math.max(map.getZoom(), 14.5),
       duration: 600,
-      padding: narrow(map)
-        ? { right: 0, left: 0, top: 0, bottom: Math.round(map.getContainer().clientHeight * 0.62) }
-        : { right: 380, left: 0, top: 0, bottom: 0 },
+      padding: {
+        right: 0,
+        left: 0,
+        top: 0,
+        bottom: Math.round(map.getContainer().clientHeight * Math.max(deskFraction, 0.55)),
+      },
     });
-  }, [selectedPinId, bundle.pins]);
+  }, [selectedPinId, bundle.pins, deskFraction]);
 
   return (
     <MapGL
@@ -132,7 +138,7 @@ export function TripMap({
       onClick={() => onSelectPin(null)}
       onLoad={fit}
     >
-      <NavigationControl position="bottom-right" showCompass={false} />
+      <NavigationControl position="top-right" showCompass={false} />
       {days.map((d) => {
         const pts = pins.filter((p) => p.day_index === d);
         if (pts.length < 2) return null;
@@ -163,7 +169,7 @@ export function TripMap({
             id="route-provisional-line"
             type="line"
             paint={{
-              'line-color': '#f97316',
+              'line-color': '#8b7cb8',
               'line-width': 3,
               'line-dasharray': [1.5, 1.5],
               'line-opacity': 0.8,
@@ -203,7 +209,7 @@ export function TripMap({
               >
                 {p.source === 'user' || p.source === 'photo' ? KIND_EMOJI[p.kind] : idx}
                 {n > 0 && (
-                  <span className="absolute -right-2 -top-2 rounded-full bg-slate-900 px-1.5 text-[10px] font-semibold text-white ring-2 ring-white">
+                  <span className="absolute -right-2 -top-2 rounded-full bg-ink px-1.5 text-[10px] font-semibold text-paper ring-2 ring-white">
                     {n}
                   </span>
                 )}
@@ -211,14 +217,14 @@ export function TripMap({
               <div className="h-2 w-0.5 bg-white/90" />
               <div
                 className={cx(
-                  'pointer-events-none absolute top-full mt-0.5 whitespace-nowrap rounded-md bg-white/95 px-1.5 py-0.5 text-[11px] font-semibold text-slate-800 shadow',
+                  'pointer-events-none absolute top-full mt-0.5 whitespace-nowrap rounded-md border border-line bg-card px-1.5 py-0.5 text-[11px] font-semibold',
                   selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
                 )}
               >
                 {p.name}
               </div>
               {isNow && (
-                <div className="absolute -top-6 rounded-full bg-slate-900 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                <div className="absolute -top-6 rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-semibold text-white">
                   now
                 </div>
               )}
@@ -229,7 +235,7 @@ export function TripMap({
       {provisional.map((s, i) => (
         <Marker key={`prov-${i}`} longitude={s.stop.lng} latitude={s.stop.lat} anchor="bottom">
           <div
-            className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-dashed border-orange-500 bg-white/90 text-xs font-bold text-orange-600 shadow animate-bounce"
+            className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-dashed border-accent bg-card text-xs font-bold text-accent animate-bounce"
             title={s.stop.name}
           >
             {i + 1}

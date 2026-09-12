@@ -1,85 +1,113 @@
 'use client';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import type { Trip } from '@pinlog/schema';
+import type { Trip, TripBundle } from '@pinlog/schema';
 import { api } from '@/lib/api';
-import { isFixtureMode } from '@/lib/config';
-import { prettyDate } from '@/lib/format';
-import { Button } from '@/components/ui';
-import { TopBar } from '@/components/TopBar';
+import { tripStats } from '@/lib/tripStats';
+import { CityCard } from '@/components/cover/CityCard';
+import { Dock } from '@/components/Dock';
+import { useFixtureQuery, useHealth } from '@/lib/hooks';
 
-const STATUS: Record<Trip['status'], string> = {
-  planning: 'Planning',
-  active: 'On the road',
-  completed: 'Done',
-};
-
-export default function TripsPage() {
+export default function ShelfPage() {
   const [trips, setTrips] = useState<Trip[] | null>(null);
+  const [bundles, setBundles] = useState<Record<string, TripBundle>>({});
   const [error, setError] = useState<string | null>(null);
-  const q = typeof window !== 'undefined' && isFixtureMode() ? '?fixture=1' : '';
+  const health = useHealth();
+  const q = useFixtureQuery();
+
   useEffect(() => {
-    api.listTrips().then(setTrips, (e) => setError(e.message));
+    api
+      .listTrips()
+      .then(async (list) => {
+        setTrips(list);
+        const pairs = await Promise.all(
+          list.map(async (t) => {
+            try {
+              return [t.id, await api.getBundle(t.id)] as const;
+            } catch {
+              return null;
+            }
+          }),
+        );
+        const next: Record<string, TripBundle> = {};
+        for (const p of pairs) if (p) next[p[0]] = p[1];
+        setBundles(next);
+      })
+      .catch((e) => setError(e instanceof Error ? e.message : String(e)));
   }, []);
+
   return (
-    <main className="mx-auto max-w-4xl px-6 pb-16 pt-24">
-      <TopBar />
-      <div className="flex flex-wrap items-end justify-between gap-4">
+    <main className="mx-auto flex min-h-dvh max-w-lg flex-col bg-paper">
+      <header className="flex items-end justify-between px-5 pb-2 pt-10">
         <div>
-          <h1 className="text-4xl font-black tracking-tight">Your trips</h1>
-          <p className="mt-2 max-w-xl text-slate-600">
-            Plan a trip as pins on a map, drop photos and notes onto those pins while you travel,
-            then turn it into a vlog in one tap.
-          </p>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
+            Pinlog
+          </div>
+          <h1 className="font-display text-3xl font-extrabold tracking-tight">City memories</h1>
         </div>
-        <Link href={`/trips/new${q}`}>
-          <Button size="lg">＋ New trip</Button>
+        <span className="rounded-full border border-line bg-card px-2.5 py-1 text-[10px] font-medium text-muted">
+          {health?.mode === 'live' ? 'Live' : 'Demo'}
+        </span>
+      </header>
+      <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-4">
+        {error && (
+          <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+            {error}
+          </div>
+        )}
+        {!trips && !error && <div className="py-10 text-center text-sm text-muted">Opening…</div>}
+        {trips?.length === 0 && (
+          <p className="py-10 text-center text-sm text-muted">
+            No trips yet. Run <code>pnpm seed</code> or start a new one.
+          </p>
+        )}
+        <ul className="space-y-5">
+          {trips?.map((t) => {
+            const b = bundles[t.id];
+            const stats = b ? tripStats(b) : undefined;
+            return (
+              <li key={t.id}>
+                <Link href={`/trips/${t.id}${q}`} className="block">
+                  <CityCard trip={t} pins={b?.pins} stats={stats} />
+                </Link>
+                {b && (
+                  <div className="mt-2 overflow-hidden rounded-2xl border border-line bg-card">
+                    <Link
+                      href={`/trips/${t.id}${q}`}
+                      className="flex items-center justify-between border-b border-line px-4 py-3 text-sm"
+                    >
+                      <span>View map</span>
+                      <span className="text-muted">›</span>
+                    </Link>
+                    <Link
+                      href={`/trips/${t.id}${q ? `${q}&` : '?'}panel=scrapbook`}
+                      className="flex items-center justify-between border-b border-line px-4 py-3 text-sm"
+                    >
+                      <span>Generate scrapbook</span>
+                      <span className="text-muted">{stats?.notes ?? 0} notes ›</span>
+                    </Link>
+                    <Link
+                      href={`/trips/${t.id}${q ? `${q}&` : '?'}panel=vlog`}
+                      className="flex items-center justify-between px-4 py-3 text-sm"
+                    >
+                      <span>Make vlog</span>
+                      <span className="text-muted">›</span>
+                    </Link>
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+        <Link
+          href={`/trips/new${q}`}
+          className="mt-5 block rounded-[22px] border border-dashed border-line-strong bg-card/50 px-5 py-8 text-center"
+        >
+          <div className="font-display text-lg font-bold text-accent">New trip</div>
+          <div className="mt-1 text-sm text-muted">Kyoto · 2 days · temples, food</div>
         </Link>
       </div>
-      {error && (
-        <div className="mt-8 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-          {error}
-        </div>
-      )}
-      {!trips && !error && <div className="mt-8 text-slate-500">Loading…</div>}
-      {trips && trips.length === 0 && (
-        <div className="mt-8 rounded-2xl border border-dashed border-slate-300 p-10 text-center text-slate-500">
-          No trips yet. Run <code>pnpm seed</code> for the demo trip, or create one.
-        </div>
-      )}
-      <ul className="mt-8 grid gap-4 sm:grid-cols-2">
-        {trips?.map((t) => (
-          <li key={t.id}>
-            <Link
-              href={`/trips/${t.id}${q}`}
-              className="block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="text-xl font-bold">{t.title}</div>
-                  <div className="mt-1 text-sm text-slate-600">{t.destination}</div>
-                </div>
-                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
-                  {STATUS[t.status]}
-                </span>
-              </div>
-              <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-600">
-                <span className="rounded-full bg-orange-50 px-2 py-0.5 text-orange-800">
-                  {prettyDate(t.start_date)} → {prettyDate(t.end_date)}
-                </span>
-                <span className="rounded-full bg-slate-50 px-2 py-0.5">
-                  {t.party.size} {t.party.kind ?? (t.party.size === 1 ? 'solo' : 'people')}
-                </span>
-                {t.interests.slice(0, 3).map((i) => (
-                  <span key={i} className="rounded-full bg-slate-50 px-2 py-0.5">
-                    {i}
-                  </span>
-                ))}
-              </div>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <Dock active="shelf" tripId={trips?.[0]?.id} />
     </main>
   );
 }

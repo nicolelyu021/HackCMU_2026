@@ -13,33 +13,30 @@ export function LandingHUD({
 }) {
   if (results.length === 0) return null;
   return (
-    <div className="pointer-events-none fixed bottom-[6.5rem] left-1/2 z-40 flex w-[min(460px,calc(100vw-1.5rem))] -translate-x-1/2 flex-col gap-2 md:bottom-6">
+    <div className="pointer-events-none absolute inset-x-0 bottom-[11.5rem] z-40 flex flex-col items-center gap-2 px-3">
       {results.slice(-4).map((r) => (
         <Panel
           key={r.media_id}
-          className="pointer-events-auto flex w-full items-center gap-3 p-2.5"
+          className="pointer-events-auto flex w-full max-w-md items-center gap-3 p-2.5"
           onClick={() => r.pin && onSelectPin(r.pin.id)}
         >
           <img
             src={fileUrl(r.thumb_path)}
             alt=""
-            className="h-12 w-12 rounded-lg object-cover bg-slate-200"
+            className="h-12 w-12 rounded-lg bg-paper object-cover"
           />
           <div className="min-w-0 flex-1 text-sm">
             <div className="truncate font-semibold">
               {r.pin ? (
                 <>
-                  <span className="text-emerald-600">landed on</span> {r.pin.name}
+                  <span className="text-accent">landed on</span> {r.pin.name}
                 </>
               ) : (
-                <>
-                  <span className="text-amber-600">→ unsorted tray</span>
-                </>
+                <span className="text-muted">→ unsorted tray</span>
               )}
             </div>
-            <div className="truncate text-xs text-slate-600">{r.reason}</div>
+            <div className="truncate text-xs text-muted">{r.reason}</div>
           </div>
-          <span className="text-2xl">{r.pin ? '📍' : '🗂️'}</span>
         </Panel>
       ))}
     </div>

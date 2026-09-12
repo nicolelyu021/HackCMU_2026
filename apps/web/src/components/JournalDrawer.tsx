@@ -116,19 +116,19 @@ export function JournalDrawer({
   };
   const notesCount = bundle.entries.length;
   return (
-    <Sheet desktopClass="md:h-[calc(100vh-6.5rem)] md:w-[400px]">
-      <div className="flex items-center justify-between border-b border-slate-200 p-4">
+    <Sheet>
+      <div className="flex items-center justify-between border-b border-line p-4">
         <div>
-          <div className="text-xs text-slate-500">Talk to your journal</div>
-          <h2 className="text-lg font-bold leading-tight">{bundle.trip.title}</h2>
-          <div className="text-[11px] text-slate-500">
+          <div className="text-xs text-muted">Talk to your journal</div>
+          <h2 className="font-display text-lg font-bold leading-tight">{bundle.trip.title}</h2>
+          <div className="text-[11px] text-muted">
             {bundle.pins.length} pins · {notesCount} notes · {bundle.media.length} photos · answers
             only from what you wrote
           </div>
         </div>
         <button
           onClick={onClose}
-          className="rounded-full p-1.5 text-slate-500 hover:bg-slate-100"
+          className="rounded-full p-1.5 text-muted hover:bg-paper"
           aria-label="Close"
         >
           ✕
@@ -140,9 +140,7 @@ export function JournalDrawer({
             key={m.id}
             className={cx(
               'max-w-[92%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm',
-              m.role === 'user'
-                ? 'ml-auto bg-slate-900 text-white'
-                : 'border border-slate-200 bg-white',
+              m.role === 'user' ? 'ml-auto bg-ink text-paper' : 'border border-line bg-card',
             )}
           >
             {m.content}
@@ -151,7 +149,7 @@ export function JournalDrawer({
         {live !== null && (
           <div
             className={cx(
-              'max-w-[92%] rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm',
+              'max-w-[92%] rounded-2xl border border-line bg-card px-3 py-2 text-sm',
               live ? 'caret' : '',
             )}
           >
@@ -160,10 +158,10 @@ export function JournalDrawer({
         )}
         <div ref={bottom} />
       </div>
-      <div className="border-t border-slate-200 p-3">
+      <div className="border-t border-line p-3">
         <div className="mb-2 flex flex-wrap gap-1.5">
-          <Chip onClick={summarize} className="border-orange-300 bg-orange-50 text-orange-900">
-            ✨ Summarize my day
+          <Chip onClick={summarize} className="border-accent bg-accent-soft text-accent">
+            Summarize my day
           </Chip>
           <Chip onClick={() => send('What did we do yesterday?')}>What did we do yesterday?</Chip>
           <Chip onClick={() => send("What's left today?")}>What&apos;s left today?</Chip>
@@ -179,7 +177,7 @@ export function JournalDrawer({
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Ask your journal…"
-            className="flex-1 rounded-full border border-slate-300 px-3.5 py-2 text-sm outline-none focus:border-orange-400"
+            className="flex-1 rounded-full border border-line bg-card px-3.5 py-2 text-sm outline-none focus:border-accent"
           />
           <Button type="submit" disabled={busy || !text.trim()}>
             Send

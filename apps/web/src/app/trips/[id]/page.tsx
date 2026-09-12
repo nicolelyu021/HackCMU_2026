@@ -1,55 +1,52 @@
 'use client';
 import dynamic from 'next/dynamic';
-import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { dayIndexOf, nowNaive, tripLengthDays, withinWindow, type PlanEvent } from '@pinlog/schema';
 import { api } from '@/lib/api';
-import { isFixtureMode } from '@/lib/config';
 import { prettyDate } from '@/lib/format';
-import { useBundle, useIsDesktop, useToasts } from '@/lib/hooks';
+import { useBundle, useFixtureQuery, useHealth, useToasts } from '@/lib/hooks';
+import { tripStats } from '@/lib/tripStats';
 import { DayChips } from '@/components/DayChips';
+import { Dock, type DockKey } from '@/components/Dock';
 import { JournalDrawer } from '@/components/JournalDrawer';
 import { LandingHUD } from '@/components/LandingHUD';
+import { NewTripForm } from '@/components/NewTripForm';
 import { usePhotoUpload, type LandingResult } from '@/components/PhotoDrop';
 import { PinSheet } from '@/components/PinSheet';
 import { PlanTicker, type PlanState } from '@/components/PlanTicker';
-import { TabBar } from '@/components/TabBar';
-import { TopBar } from '@/components/TopBar';
+import { ScrapbookSpread } from '@/components/scrapbook/ScrapbookSpread';
 import { Tray } from '@/components/Tray';
-import { Button, Panel, Spinner, Toasts } from '@/components/ui';
+import { Button, Spinner, Toasts } from '@/components/ui';
+import { VlogStudio } from '@/components/vlog/VlogStudio';
 import type { ProvisionalStop } from '@/components/map/TripMap';
 
 const TripMap = dynamic(() => import('@/components/map/TripMap'), {
   ssr: false,
-  loading: () => <div className="absolute inset-0 bg-slate-100" />,
+  loading: () => <div className="absolute inset-0 bg-[#e7efe8]" />,
 });
 
-/**
- * MAP-1 map-first home, mobile-first: on a phone the map fills the screen, day chips sit in a strip under the top bar,
- * pin sheet / journal / tray are bottom sheets and the tab bar navigates; on md+ the same components become side panels.
- * Deep links: ?plan=1 (start planning), ?pin=<id> (open a pin), ?panel=journal (open the journal).
- */
+type Panel = 'map' | 'journal' | 'tray' | 'vlog' | 'scrapbook' | 'new';
+
 export default function TripPage() {
-  const { id } = useParams<{ id: string }>();
+  const params = useParams<{ id: string }>();
+  const id = typeof params.id === 'string' ? params.id : '';
   const router = useRouter();
   const search = useSearchParams();
-  const desktop = useIsDesktop();
   const { bundle, refresh, error } = useBundle(id);
+  const health = useHealth();
   const { toasts, push, pushError } = useToasts();
   const [selectedDay, setSelectedDay] = useState<number | 'all'>('all');
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
-  const [journalOpen, setJournalOpen] = useState(false);
-  const [trayOpen, setTrayOpen] = useState(false);
+  const [panel, setPanel] = useState<Panel>('map');
   const [pulsePinId, setPulsePinId] = useState<string | null>(null);
+  const [scrapPulse, setScrapPulse] = useState(false);
   const [landed, setLanded] = useState<LandingResult[]>([]);
   const [dragging, setDragging] = useState(false);
   const [plan, setPlan] = useState<PlanState | null>(null);
   const [provisional, setProvisional] = useState<ProvisionalStop[]>([]);
-  const [replanText, setReplanText] = useState('');
-  const [replanning, setReplanning] = useState(false);
   const planStarted = useRef(false);
-  const q = typeof window !== 'undefined' && isFixtureMode() ? '?fixture=1' : '';
+  const q = useFixtureQuery();
 
   const now = nowNaive();
   const todayIndex = useMemo(() => {
@@ -80,15 +77,7 @@ export default function TripPage() {
 
   const openPin = useCallback((pid: string | null) => {
     setSelectedPinId(pid);
-    if (pid) {
-      setJournalOpen(false);
-      setTrayOpen(false);
-    }
-  }, []);
-  const toggleJournal = useCallback(() => {
-    setJournalOpen((o) => !o);
-    setSelectedPinId(null);
-    setTrayOpen(false);
+    if (pid) setPanel('map');
   }, []);
 
   const startPlan = useCallback(
@@ -97,8 +86,7 @@ export default function TripPage() {
       setProvisional([]);
       setSelectedDay('all');
       setSelectedPinId(null);
-      setJournalOpen(false);
-      setTrayOpen(false);
+      setPanel('map');
       try {
         await api.plan(
           id,
@@ -150,19 +138,18 @@ export default function TripPage() {
     [id, refresh, push, pushError],
   );
 
-  // deep links
   useEffect(() => {
     const plan1 = search.get('plan') === '1';
     const pin = search.get('pin');
-    const panel = search.get('panel');
-    if (!plan1 && !pin && !panel) return;
+    const p = search.get('panel');
+    if (!plan1 && !pin && !p) return;
     if (plan1 && !planStarted.current) {
       planStarted.current = true;
       void startPlan(search.get('must_see') ?? undefined);
     }
     if (pin) openPin(pin);
-    if (panel === 'journal') {
-      setJournalOpen(true);
+    if (p === 'journal' || p === 'tray' || p === 'vlog' || p === 'scrapbook' || p === 'new') {
+      setPanel(p);
       setSelectedPinId(null);
     }
     router.replace(`/trips/${id}${q}`);
@@ -176,6 +163,8 @@ export default function TripPage() {
         setPulsePinId(hit.pin.id);
         setTimeout(() => setPulsePinId(null), 3500);
       }
+      setScrapPulse(true);
+      setTimeout(() => setScrapPulse(false), 8000);
       setTimeout(() => setLanded((xs) => xs.filter((x) => !results.includes(x))), 7000);
       void refresh();
     },
@@ -189,38 +178,31 @@ export default function TripPage() {
     onDone: refresh,
   });
 
-  const replan = async () => {
-    if (!replanText.trim()) return;
-    setReplanning(true);
-    try {
-      const res = await api.replan(id, replanText.trim());
-      push({ kind: 'success', title: 'Plan updated', detail: res.diff.summary });
-      setReplanText('');
-      void refresh();
-    } catch (e) {
-      pushError(e, 'Replan refused');
-    } finally {
-      setReplanning(false);
-    }
-  };
-
   const selectedPin = bundle?.pins.find((p) => p.id === selectedPinId) ?? null;
-  const trayCount = bundle?.media.filter((m) => !m.pin_id).length ?? 0;
-  const addPhotos = (
-    <Button variant="ghost" size="sm" onClick={uploader.openPicker} disabled={!!uploader.uploading}>
-      {uploader.uploading ? (
-        <>
-          <Spinner /> {uploader.uploading.done}/{uploader.uploading.total}
-        </>
-      ) : (
-        '📷 Add photos'
-      )}
-    </Button>
-  );
+  const stats = bundle ? tripStats(bundle) : null;
+  const deskTall = !!(selectedPin || panel !== 'map' || plan || error);
+  const deskFraction = deskTall ? 0.62 : 0.3;
+  const dockActive: DockKey =
+    panel === 'journal'
+      ? 'journal'
+      : panel === 'vlog'
+        ? 'vlog'
+        : panel === 'scrapbook'
+          ? 'scrapbook'
+          : 'map';
+
+  const onDock = (key: DockKey) => {
+    if (key === 'shelf') return;
+    setSelectedPinId(null);
+    if (key === 'map') setPanel('map');
+    else if (key === 'journal') setPanel('journal');
+    else if (key === 'vlog') setPanel('vlog');
+    else if (key === 'scrapbook') setPanel('scrapbook');
+  };
 
   return (
     <main
-      className="relative h-dvh w-screen overflow-hidden bg-slate-100"
+      className="relative h-dvh w-screen overflow-hidden bg-paper"
       onDragOver={(e) => {
         e.preventDefault();
         setDragging(true);
@@ -241,204 +223,146 @@ export default function TripPage() {
           pulsePinId={pulsePinId}
           nowPinId={nowPinId}
           provisional={provisional}
+          deskFraction={deskFraction}
         />
       )}
-      <TopBar
-        title={
-          bundle
-            ? desktop
-              ? `${bundle.trip.title} · ${bundle.trip.destination}`
-              : bundle.trip.title
-            : '…'
-        }
-        right={
-          <span className="hidden items-center gap-2 md:flex">
-            <Button variant="ghost" size="sm" onClick={toggleJournal}>
-              💬 Talk to your journal
-            </Button>
-            {addPhotos}
-            <Link href={`/trips/${id}/vlog${q}`}>
-              <Button variant="dark" size="sm">
-                🎬 Make vlog
-              </Button>
-            </Link>
-          </span>
-        }
-      />
       {uploader.input}
 
-      {/* phone: day strip under the top bar */}
-      {bundle && (
-        <div className="absolute inset-x-0 top-[3.55rem] z-30 px-3 md:hidden">
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 [&>*]:flex-none [&_button]:flex-none [scrollbar-width:none]">
-            <span className="rounded-full border border-slate-200/70 bg-white/90 px-2.5 py-1 text-[11px] font-medium text-slate-600 shadow backdrop-blur">
-              {bundle.pins.length} pins · {bundle.media.length} photos · {bundle.entries.length}{' '}
-              notes
-            </span>
-            <DayChips
-              trip={bundle.trip}
-              selected={selectedDay}
-              onSelect={setSelectedDay}
-              todayIndex={todayIndex}
-              nowrap
-            />
-          </div>
-        </div>
-      )}
-
-      {/* desktop: left column */}
-      <div className="pointer-events-none absolute left-4 top-16 z-30 hidden max-h-[calc(100vh-5rem)] w-[340px] flex-col gap-3 md:flex">
-        {bundle && (
-          <Panel className="pointer-events-auto p-3">
-            <div className="flex items-center justify-between text-xs text-slate-500">
-              <span>
-                {prettyDate(bundle.trip.start_date)} → {prettyDate(bundle.trip.end_date)}
-              </span>
-              <span>
-                {bundle.pins.length} pins · {bundle.media.length} photos · {bundle.entries.length}{' '}
-                notes
-              </span>
-            </div>
-            <div className="mt-2">
-              <DayChips
-                trip={bundle.trip}
-                selected={selectedDay}
-                onSelect={setSelectedDay}
-                todayIndex={todayIndex}
-              />
-            </div>
-            {bundle.pins.length === 0 && !plan?.running && (
-              <div className="mt-3 rounded-xl border border-dashed border-orange-300 bg-orange-50 p-3 text-sm">
-                <div className="font-semibold">No pins yet.</div>
-                <Button className="mt-2" size="sm" onClick={() => startPlan()}>
-                  ✨ Plan this trip with Claude
-                </Button>
-              </div>
-            )}
-            {bundle.pins.length > 0 && (
-              <form
-                className="mt-3 flex gap-1.5"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  void replan();
-                }}
-              >
-                <input
-                  value={replanText}
-                  onChange={(e) => setReplanText(e.target.value)}
-                  placeholder="Change the plan… “make day 2 lighter”"
-                  className="min-w-0 flex-1 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs outline-none focus:border-orange-400"
-                />
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  type="submit"
-                  disabled={replanning || !replanText.trim()}
-                >
-                  {replanning ? <Spinner /> : 'Replan'}
-                </Button>
-              </form>
-            )}
-          </Panel>
-        )}
-        {plan && (
-          <div className="pointer-events-auto">
-            <PlanTicker state={plan} />
-          </div>
-        )}
-        {error && (
-          <Panel className="pointer-events-auto border-red-200 bg-red-50 p-3 text-sm text-red-800">
-            {error}
-          </Panel>
-        )}
-        <div className="pointer-events-auto mt-auto">
-          {bundle && desktop && (
-            <Tray bundle={bundle} onChanged={refresh} onError={pushError} onSelectPin={openPin} />
-          )}
-        </div>
-      </div>
-
-      {/* phone: ticker, action buttons, tray chip — all above the tab bar */}
-      {plan && (
-        <div className="absolute inset-x-3 bottom-[5.6rem] z-30 md:hidden">
-          <PlanTicker state={plan} />
-        </div>
-      )}
-      {error && (
-        <div className="absolute inset-x-3 top-24 z-30 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800 md:hidden">
-          {error}
-        </div>
-      )}
-      {bundle && !plan && (
-        <>
-          <div className="absolute bottom-[5.6rem] right-3 z-30 flex flex-col items-end gap-2 md:hidden">
-            {bundle.pins.length === 0 && (
-              <Button size="sm" onClick={() => startPlan()}>
-                ✨ Plan with Claude
-              </Button>
-            )}
-            {addPhotos}
-          </div>
-          {trayCount > 0 && (
-            <button
-              className="absolute bottom-[5.6rem] left-3 z-30 rounded-full border border-slate-200/70 bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-800 shadow backdrop-blur md:hidden"
-              onClick={() => {
-                setTrayOpen(true);
-                setSelectedPinId(null);
-                setJournalOpen(false);
-              }}
-            >
-              🗂️ Unsorted · {trayCount}
-            </button>
-          )}
-        </>
-      )}
-
-      {/* sheets (phone) / right column (desktop) */}
-      <div className="md:absolute md:right-4 md:top-16 md:z-30">
-        {bundle && selectedPin && (
-          <PinSheet
-            bundle={bundle}
-            pin={selectedPin}
-            onClose={() => setSelectedPinId(null)}
-            onChanged={refresh}
-            onError={pushError}
-          />
-        )}
-        {bundle && journalOpen && !selectedPin && (
-          <JournalDrawer
-            bundle={bundle}
-            todayIndex={todayIndex}
-            onClose={() => setJournalOpen(false)}
-            onError={pushError}
-          />
-        )}
-        {bundle && trayOpen && !desktop && !selectedPin && !journalOpen && (
-          <Tray
-            variant="sheet"
-            bundle={bundle}
-            onChanged={refresh}
-            onError={pushError}
-            onSelectPin={openPin}
-            onClose={() => setTrayOpen(false)}
-          />
-        )}
-      </div>
-
       {dragging && (
-        <div className="pointer-events-none absolute inset-0 z-40 flex items-center justify-center bg-orange-500/10 backdrop-blur-[1px]">
-          <div className="rounded-3xl border-4 border-dashed border-orange-500 bg-white/90 px-10 py-8 text-center shadow-xl">
-            <div className="text-4xl">📷</div>
-            <div className="mt-2 text-lg font-bold">Drop photos anywhere</div>
-            <div className="text-sm text-slate-600">
-              EXIF is read here in the browser · 300 m · ±2 h · nothing is lost
-            </div>
+        <div className="pointer-events-none absolute inset-0 z-40 flex items-center justify-center bg-paper/40">
+          <div className="rounded-3xl border border-dashed border-line-strong bg-card px-10 py-8 text-center">
+            <div className="font-display text-lg font-bold">Drop photos anywhere</div>
+            <div className="mt-1 text-sm text-muted">EXIF is read here · 300 m · ±2 h</div>
           </div>
         </div>
       )}
       <LandingHUD results={landed} onSelectPin={openPin} />
       <Toasts toasts={toasts} />
-      <TabBar tripId={id} active={journalOpen ? 'journal' : 'map'} onJournal={toggleJournal} />
+
+      <div
+        className="absolute inset-x-0 bottom-0 z-40 flex flex-col border-t border-line-strong bg-paper"
+        style={{ height: deskTall ? '72dvh' : undefined, maxHeight: '72dvh' }}
+      >
+        {plan && (
+          <div className="border-b border-line px-3 py-2">
+            <PlanTicker state={plan} />
+          </div>
+        )}
+        {error && (
+          <div className="border-b border-red-200 bg-red-50 px-4 py-2 text-sm text-red-800">
+            {error}
+          </div>
+        )}
+
+        {bundle && panel === 'map' && !selectedPin && !plan && (
+          <div className="flex-none px-4 pb-2 pt-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="font-display text-lg font-extrabold leading-tight">
+                  {bundle.trip.title}
+                </div>
+                <div className="text-[11px] text-muted">
+                  {prettyDate(bundle.trip.start_date)} → {prettyDate(bundle.trip.end_date)}
+                  {stats
+                    ? ` · ${stats.pins} pins · ${stats.photos} photos · ${stats.notes} notes · ${stats.km} km`
+                    : ''}
+                </div>
+              </div>
+              <span className="rounded-full border border-line bg-card px-2 py-0.5 text-[10px] text-muted">
+                {health?.mode === 'live' ? 'Live' : 'Demo'}
+              </span>
+            </div>
+            <div className="mt-2 flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none]">
+              <DayChips
+                trip={bundle.trip}
+                selected={selectedDay}
+                onSelect={setSelectedDay}
+                todayIndex={todayIndex}
+                nowrap
+              />
+            </div>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {bundle.pins.length === 0 && (
+                <Button size="sm" onClick={() => startPlan()}>
+                  Plan this trip
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={uploader.openPicker}
+                disabled={!!uploader.uploading}
+              >
+                {uploader.uploading ? (
+                  <>
+                    <Spinner /> {uploader.uploading.done}/{uploader.uploading.total}
+                  </>
+                ) : (
+                  'Add photos'
+                )}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setPanel('scrapbook')}>
+                Generate scrapbook
+              </Button>
+              {stats && stats.unsorted > 0 && (
+                <Button size="sm" variant="ghost" onClick={() => setPanel('tray')}>
+                  Unsorted · {stats.unsorted}
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          {bundle && selectedPin && (
+            <PinSheet
+              bundle={bundle}
+              pin={selectedPin}
+              onClose={() => setSelectedPinId(null)}
+              onChanged={refresh}
+              onError={pushError}
+            />
+          )}
+          {bundle && panel === 'journal' && !selectedPin && (
+            <JournalDrawer
+              bundle={bundle}
+              todayIndex={todayIndex}
+              onClose={() => setPanel('map')}
+              onError={pushError}
+            />
+          )}
+          {bundle && panel === 'tray' && !selectedPin && (
+            <Tray
+              variant="sheet"
+              bundle={bundle}
+              onChanged={refresh}
+              onError={pushError}
+              onSelectPin={openPin}
+              onClose={() => setPanel('map')}
+            />
+          )}
+          {bundle && panel === 'scrapbook' && !selectedPin && (
+            <ScrapbookSpread bundle={bundle} onError={pushError} />
+          )}
+          {panel === 'vlog' && !selectedPin && <VlogStudio tripId={id} embedded bundle={bundle} />}
+          {panel === 'new' && !selectedPin && (
+            <NewTripForm
+              onCreated={(tripId, mustSee) => {
+                const params = new URLSearchParams({ plan: '1' });
+                if (mustSee) params.set('must_see', mustSee);
+                router.push(`/trips/${tripId}?${params}${q ? `&fixture=1` : ''}`);
+              }}
+            />
+          )}
+        </div>
+
+        <Dock
+          tripId={id}
+          active={dockActive}
+          onSelect={onDock}
+          pulse={scrapPulse ? 'scrapbook' : null}
+        />
+      </div>
     </main>
   );
 }

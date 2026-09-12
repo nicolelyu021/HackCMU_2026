@@ -14,10 +14,10 @@ export function Button({
   size?: 'sm' | 'md' | 'lg';
 }) {
   const v = {
-    primary: 'bg-orange-500 text-white hover:bg-orange-600 shadow-sm',
-    dark: 'bg-slate-900 text-white hover:bg-slate-800 shadow-sm',
-    ghost: 'bg-white/80 text-slate-800 hover:bg-white border border-slate-200',
-    danger: 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200',
+    primary: 'bg-accent text-white hover:bg-accent/90 border border-line-strong/20',
+    dark: 'bg-ink text-paper hover:bg-ink/90 border border-ink',
+    ghost: 'bg-card text-ink hover:bg-white border border-line',
+    danger: 'bg-card text-red-800 hover:bg-red-50 border border-red-200',
   }[variant];
   const s = { sm: 'px-2.5 py-1 text-xs', md: 'px-3.5 py-2 text-sm', lg: 'px-5 py-3 text-base' }[
     size
@@ -26,7 +26,7 @@ export function Button({
     <button
       {...props}
       className={cx(
-        'inline-flex items-center gap-1.5 rounded-full font-medium transition disabled:opacity-50 disabled:cursor-not-allowed',
+        'inline-flex items-center gap-1.5 rounded-full font-medium transition disabled:cursor-not-allowed disabled:opacity-50',
         v,
         s,
         className,
@@ -35,7 +35,7 @@ export function Button({
   );
 }
 
-/** Pill toggle. `dark` = the vlog studio theme (never override the background via className: Tailwind order wins). */
+/** Pill toggle. `dark` keeps the vlog Player chrome readable. */
 export function Chip({
   active,
   dark,
@@ -49,18 +49,18 @@ export function Chip({
         'rounded-full border px-3 py-1 text-xs font-medium transition',
         active
           ? dark
-            ? 'bg-orange-500 text-white border-orange-500'
-            : 'bg-slate-900 text-white border-slate-900'
+            ? 'border-accent bg-accent text-white'
+            : 'border-accent bg-accent text-white'
           : dark
-            ? 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700'
-            : 'bg-white/90 text-slate-700 border-slate-200 hover:bg-white',
+            ? 'border-white/20 bg-black/40 text-white/80 hover:bg-black/55'
+            : 'border-line bg-card text-ink hover:border-line-strong',
         className,
       )}
     />
   );
 }
 
-/** Floating card. `dark` = the vlog studio theme. */
+/** Paper card. `dark` = leftover Player chrome. */
 export function Panel({
   className,
   dark,
@@ -71,10 +71,8 @@ export function Panel({
     <div
       {...props}
       className={cx(
-        'rounded-2xl backdrop-blur shadow-lg border',
-        dark
-          ? 'bg-slate-900/85 border-slate-800 text-slate-100'
-          : 'bg-white/90 border-slate-200/70 text-slate-900',
+        'rounded-2xl border',
+        dark ? 'border-white/10 bg-black/70 text-white' : 'border-line bg-card text-ink',
         className,
       )}
     >
@@ -85,21 +83,21 @@ export function Panel({
 
 export function Toasts({ toasts }: { toasts: Toast[] }) {
   return (
-    <div className="pointer-events-none fixed inset-x-3 top-14 z-50 flex flex-col gap-2 md:inset-x-auto md:right-4 md:top-16 md:w-80">
+    <div className="pointer-events-none fixed inset-x-3 top-3 z-50 flex flex-col gap-2 md:inset-x-auto md:right-4 md:top-4 md:w-80">
       {toasts.map((t) => (
         <div
           key={t.id}
           className={cx(
-            'pointer-events-auto rounded-xl border px-3.5 py-2.5 text-sm shadow-lg backdrop-blur',
+            'pointer-events-auto rounded-xl border px-3.5 py-2.5 text-sm',
             t.kind === 'error'
-              ? 'border-red-200 bg-red-50/95 text-red-900'
+              ? 'border-red-200 bg-red-50 text-red-900'
               : t.kind === 'success'
-                ? 'border-emerald-200 bg-emerald-50/95 text-emerald-900'
-                : 'border-slate-200 bg-white/95 text-slate-800',
+                ? 'border-accent bg-accent-soft text-ink'
+                : 'border-line bg-card text-ink',
           )}
         >
           <div className="font-semibold">{t.title}</div>
-          {t.detail && <div className="mt-0.5 text-xs opacity-80 break-words">{t.detail}</div>}
+          {t.detail && <div className="mt-0.5 text-xs text-muted break-words">{t.detail}</div>}
         </div>
       ))}
     </div>
@@ -110,7 +108,7 @@ export function Spinner({ className }: { className?: string }) {
   return (
     <span
       className={cx(
-        'inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-slate-400 border-t-transparent',
+        'inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-line border-t-accent',
         className,
       )}
     />
@@ -118,28 +116,13 @@ export function Spinner({ className }: { className?: string }) {
 }
 
 /**
- * Mobile: a bottom sheet (fixed, rounded top, grab handle, safe-area padding).
- * Desktop (md+): a floating side panel sized by `desktopClass`. One component, two form factors — mobile-first.
+ * Paper panel that lives inside the desk (not a floating overlay).
+ * Grab handle on phones; no side-column split on desktop.
  */
-export function Sheet({
-  children,
-  className,
-  desktopClass = 'md:h-[calc(100vh-6.5rem)] md:w-[380px]',
-}: {
-  children: React.ReactNode;
-  className?: string;
-  desktopClass?: string;
-}) {
+export function Sheet({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div
-      className={cx(
-        'pb-safe fixed inset-x-0 bottom-0 z-40 flex max-h-[76dvh] flex-col overflow-hidden rounded-t-3xl border border-slate-200/70 bg-white/95 text-slate-900 shadow-2xl backdrop-blur',
-        'md:static md:inset-auto md:z-auto md:max-h-none md:rounded-2xl md:bg-white/90 md:pb-0 md:shadow-lg',
-        desktopClass,
-        className,
-      )}
-    >
-      <div className="mx-auto mt-2 h-1 w-10 flex-none rounded-full bg-slate-300 md:hidden" />
+    <div className={cx('flex min-h-0 flex-1 flex-col overflow-hidden bg-card text-ink', className)}>
+      <div className="mx-auto mt-2 h-1 w-10 flex-none rounded-full bg-line" />
       {children}
     </div>
   );

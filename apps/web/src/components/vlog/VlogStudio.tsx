@@ -1,18 +1,18 @@
 'use client';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   buildRenderProps,
   tripLengthDays,
   type MapMode,
+  type TripBundle,
   type Vlog,
   type VlogStatus,
   type Voice,
 } from '@pinlog/schema';
-import { api, fileUrl } from '@/lib/api';
+import { api } from '@/lib/api';
 import { FILES_BASE_URL, MAP_STYLE_URL, isFixtureMode } from '@/lib/config';
-import { MOOD_EMOJI } from '@/lib/format';
 import { useBundle, useHealth, useToasts } from '@/lib/hooks';
 import { TabBar } from '@/components/TabBar';
 import { TopBar } from '@/components/TopBar';
@@ -41,11 +41,23 @@ const VOICES: { id: Voice; label: string }[] = [
 ];
 
 /** VLOG-1/2/3/5: one-tap generate → stepper → Player, "from your note" pill, regenerate with instructions. */
-export function VlogStudio({ tripId }: { tripId: string }) {
-  const { bundle, error } = useBundle(tripId);
+export function VlogStudio({
+  tripId,
+  embedded,
+  bundle: bundleFromRoom,
+}: {
+  tripId: string;
+  embedded?: boolean;
+  /** When the map room already loaded the trip, skip a second wait. */
+  bundle?: TripBundle | null;
+}) {
+  const fetched = useBundle(tripId);
+  const bundle = bundleFromRoom ?? fetched.bundle;
+  const error = bundle ? null : fetched.error;
   const health = useHealth();
   const { toasts, push, pushError } = useToasts();
   const [vlogs, setVlogs] = useState<Vlog[]>([]);
+  const [vlogsReady, setVlogsReady] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
   const [targetLength, setTargetLength] = useState(60);
@@ -56,18 +68,31 @@ export function VlogStudio({ tripId }: { tripId: string }) {
   const [instructions, setInstructions] = useState('');
   const q = typeof window !== 'undefined' && isFixtureMode() ? '?fixture=1' : '';
 
-  const loadVlogs = useCallback(() => api.listVlogs(tripId), [tripId]);
   useEffect(() => {
-    loadVlogs()
+    if (!tripId) return;
+    let cancelled = false;
+    setVlogsReady(false);
+    api
+      .listVlogs(tripId)
       .then((list) => {
-        setVlogs(list);
-        const done = list.find((v) => v.status === 'done' && v.script);
+        if (cancelled) return;
+        const rows = Array.isArray(list) ? list : [];
+        setVlogs(rows);
+        setVlogsReady(true);
+        const done = rows.find((v) => v.status === 'done' && v.script);
         setActiveId((cur) => cur ?? done?.id ?? null);
-        const running = list.find((v) => !['done', 'failed'].includes(v.status));
+        const running = rows.find((v) => !['done', 'failed'].includes(v.status));
         if (running) setJobId(running.id);
       })
-      .catch(pushError);
-  }, [loadVlogs, pushError]);
+      .catch((e) => {
+        if (cancelled) return;
+        setVlogsReady(true);
+        pushError(e);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [tripId, pushError]);
 
   // poll the running job every 1.5 s (docs/CONTRACTS.md)
   useEffect(() => {
@@ -161,6 +186,341 @@ export function VlogStudio({ tripId }: { tripId: string }) {
     : 1;
   const stepIdx = running ? STEPS.findIndex((s) => s.status === running.status) : -1;
 
+  const body = (
+    <div
+      className={
+        embedded
+          ? 'flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-3 py-3'
+          : 'mx-auto grid max-w-7xl gap-5 px-4 pb-28 pt-20 md:px-6 md:pb-16 md:pt-24 grid-cols-[minmax(0,1fr)] lg:grid-cols-[320px_minmax(0,1fr)_360px]'
+      }
+    >
+      {/* left: settings + stepper + history */}
+      <div className={embedded ? 'order-2 space-y-3' : 'order-2 min-w-0 space-y-4 lg:order-1'}>
+        <Panel dark={!embedded} className="p-4">
+          <h2 className="text-lg font-bold">One-tap vlog</h2>
+          <p className={embedded ? 'mt-1 text-xs text-muted' : 'mt-1 text-xs text-slate-400'}>
+            The video is a pure function of your pins, photos and notes. Narration only says what
+            your notes say.
+          </p>
+          <div className="mt-4">
+            <div
+              className={
+                embedded
+                  ? 'flex items-center justify-between text-xs text-muted'
+                  : 'flex items-center justify-between text-xs text-slate-400'
+              }
+            >
+              <span>Target length</span>
+              <span
+                className={embedded ? 'font-semibold text-ink' : 'font-semibold text-slate-200'}
+              >
+                {targetLength} s
+              </span>
+            </div>
+            <input
+              type="range"
+              min={30}
+              max={120}
+              step={5}
+              value={targetLength}
+              onChange={(e) => setTargetLength(Number(e.target.value))}
+              className="mt-1 w-full accent-[var(--accent)]"
+            />
+          </div>
+          <div className="mt-3">
+            <div className={embedded ? 'text-xs text-muted' : 'text-xs text-slate-400'}>Voice</div>
+            <div className="mt-1 flex gap-1.5">
+              {VOICES.map((v) => (
+                <Chip
+                  dark={!embedded}
+                  key={v.id}
+                  active={voice === v.id}
+                  onClick={() => setVoice(v.id)}
+                >
+                  {v.label}
+                </Chip>
+              ))}
+            </div>
+          </div>
+          <div className="mt-3">
+            <div className={embedded ? 'text-xs text-muted' : 'text-xs text-slate-400'}>Days</div>
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              <Chip dark={!embedded} active={!days} onClick={() => setDays(undefined)}>
+                Whole trip
+              </Chip>
+              {Array.from({ length: nDays }, (_, i) => i + 1).map((d) => (
+                <Chip
+                  dark={!embedded}
+                  key={d}
+                  active={days?.includes(d) ?? false}
+                  onClick={() =>
+                    setDays((xs) =>
+                      xs?.includes(d)
+                        ? xs.length === 1
+                          ? undefined
+                          : xs.filter((x) => x !== d)
+                        : [...(xs ?? []), d].sort(),
+                    )
+                  }
+                >
+                  Day {d}
+                </Chip>
+              ))}
+            </div>
+          </div>
+          <Button
+            size="lg"
+            className="mt-5 w-full justify-center"
+            onClick={make}
+            disabled={!!jobId || !bundle || bundle.pins.length === 0}
+          >
+            {jobId ? (
+              <>
+                <Spinner className="border-white" /> Making your vlog…
+              </>
+            ) : (
+              '🎬 Make vlog'
+            )}
+          </Button>
+          {bundle && bundle.pins.length === 0 && (
+            <div className="mt-2 text-xs text-amber-300">
+              Plan the trip first — a vlog needs pins.
+            </div>
+          )}
+        </Panel>
+
+        {(running || (active && active.id === vlogs[0]?.id && active.status === 'failed')) && (
+          <Panel dark={!embedded} className="p-4">
+            <ol className="space-y-2">
+              {STEPS.map((s, i) => {
+                const state = running
+                  ? i < stepIdx
+                    ? 'done'
+                    : i === stepIdx
+                      ? 'now'
+                      : 'todo'
+                  : 'todo';
+                return (
+                  <li key={s.status} className="flex items-start gap-2.5 text-sm">
+                    <span
+                      className={cx(
+                        'mt-0.5 flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold',
+                        state === 'done'
+                          ? 'bg-emerald-500 text-white'
+                          : state === 'now'
+                            ? 'bg-accent text-white'
+                            : embedded
+                              ? 'bg-line text-muted'
+                              : 'bg-slate-700 text-slate-300',
+                      )}
+                    >
+                      {state === 'done' ? (
+                        '✓'
+                      ) : state === 'now' ? (
+                        <Spinner className="border-white h-3 w-3" />
+                      ) : (
+                        i + 1
+                      )}
+                    </span>
+                    <span>
+                      <div className={cx('font-medium', state === 'todo' && 'text-slate-400')}>
+                        {s.label}
+                      </div>
+                      {state === 'now' && <div className="text-xs text-slate-400">{s.hint}</div>}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
+          </Panel>
+        )}
+
+        {vlogs.length > 0 && (
+          <Panel dark={!embedded} className="p-3">
+            <div className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Vlogs of this trip
+            </div>
+            <ul className="mt-1 space-y-1">
+              {vlogs.map((v) => (
+                <li key={v.id}>
+                  <button
+                    onClick={() => v.status === 'done' && (setActiveId(v.id), setSegmentIndex(0))}
+                  >
+                    <span className="truncate">
+                      {new Date(v.created_at).toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}{' '}
+                      · {v.settings.target_length_s} s
+                      {v.settings.instructions ? ` · “${v.settings.instructions}”` : ''}
+                    </span>
+                    <span
+                      className={cx(
+                        'ml-2 rounded-full px-1.5 py-0.5 text-[10px]',
+                        v.status === 'done'
+                          ? 'bg-emerald-500/20 text-emerald-300'
+                          : v.status === 'failed'
+                            ? 'bg-red-500/20 text-red-300'
+                            : 'bg-slate-700 text-slate-200',
+                      )}
+                    >
+                      {v.status}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </Panel>
+        )}
+      </div>
+
+      <div
+        className={
+          embedded
+            ? 'order-1 flex shrink-0 flex-col items-center'
+            : 'order-1 flex min-w-0 flex-col items-center lg:order-2'
+        }
+      >
+        <div
+          className={
+            embedded
+              ? 'aspect-[9/16] w-[min(14rem,78%)] shrink-0 overflow-hidden rounded-2xl border border-line bg-ink'
+              : 'w-[360px] max-w-full rounded-[2.6rem] border-[10px] border-slate-800 bg-black p-1 shadow-2xl'
+          }
+        >
+          {renderProps ? (
+            <VlogPlayer
+              key={`${active?.id}-${mapMode}`}
+              props={renderProps}
+              controls
+              autoPlay={false}
+              onSegmentChange={setSegmentIndex}
+              style={{ borderRadius: embedded ? 16 : 32 }}
+            />
+          ) : (
+            <div className="flex aspect-[9/16] w-full flex-col items-center justify-center rounded-2xl bg-ink p-8 text-center text-paper/70">
+              <div className="font-display text-lg">Make vlog</div>
+              <div className="mt-2 text-sm">
+                {error ??
+                  (!vlogsReady || !bundle
+                    ? 'Opening the vlog…'
+                    : vlogs.length
+                      ? 'Pick a finished vlog or make a new one.'
+                      : 'No vlog yet — press Make vlog.')}
+              </div>
+            </div>
+          )}
+        </div>
+        <div
+          className={
+            embedded
+              ? 'mt-2 flex flex-wrap items-center justify-center gap-2 text-xs text-muted'
+              : 'mt-3 flex items-center gap-2 text-xs text-slate-400'
+          }
+        >
+          <span>Map:</span>
+          <Chip
+            dark={!embedded}
+            active={mapMode === 'maplibre'}
+            onClick={() => setMapMode('maplibre')}
+          >
+            Live flyover
+          </Chip>
+          <Chip dark={!embedded} active={mapMode === 'static'} onClick={() => setMapMode('static')}>
+            Static route
+          </Chip>
+        </div>
+      </div>
+
+      <div className={embedded ? 'order-3 space-y-3' : 'order-3 min-w-0 space-y-4'}>
+        {seg && (
+          <Panel dark={!embedded} className="p-4">
+            <div
+              className={
+                embedded
+                  ? 'text-[10px] font-semibold uppercase tracking-wide text-muted'
+                  : 'text-xs font-semibold uppercase tracking-wide text-slate-400'
+              }
+            >
+              Now playing · segment {segmentIndex + 1}/{active?.script?.segments.length}
+            </div>
+            {seg.type === 'pin' ? (
+              <>
+                <div className="mt-1 text-lg font-bold">{seg.caption || pinName(seg.pin_id)}</div>
+                <p className={embedded ? 'mt-2 text-sm' : 'mt-2 text-sm text-slate-200'}>
+                  {seg.narration || <span className="text-muted">(no narration)</span>}
+                </p>
+                {sourceNotes.length > 0 ? (
+                  <div className="mt-3 rounded-xl border border-accent bg-accent-soft p-3">
+                    <div className="text-[11px] font-semibold uppercase tracking-wide text-accent">
+                      From your note
+                    </div>
+                    {sourceNotes.map((e) => (
+                      <p key={e.id} className="mt-1 text-sm">
+                        “{e.text}”
+                      </p>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-3 rounded-xl border border-line bg-paper p-3 text-xs text-muted">
+                    Narration built from photo captions only — no note on this pin yet.
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="mt-1 text-lg font-bold">
+                {seg.type === 'title' ? seg.text : seg.text}
+              </div>
+            )}
+          </Panel>
+        )}
+
+        {active && (
+          <Panel dark={!embedded} className="p-4">
+            <div
+              className={
+                embedded
+                  ? 'text-[10px] font-semibold uppercase tracking-wide text-muted'
+                  : 'text-xs font-semibold uppercase tracking-wide text-slate-400'
+              }
+            >
+              Regenerate with instructions
+            </div>
+            <form
+              className="mt-2 flex gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                void regenerate();
+              }}
+            >
+              <input
+                value={instructions}
+                onChange={(e) => setInstructions(e.target.value)}
+                placeholder="more chill · skip day 1 · shorter"
+                className={
+                  embedded
+                    ? 'min-w-0 flex-1 rounded-full border border-line bg-card px-3.5 py-2 text-sm outline-none focus:border-accent'
+                    : 'min-w-0 flex-1 rounded-full border border-slate-700 bg-slate-800 px-3.5 py-2 text-sm text-slate-100 outline-none'
+                }
+              />
+              <Button type="submit" disabled={!!jobId || !instructions.trim()}>
+                Go
+              </Button>
+            </form>
+          </Panel>
+        )}
+      </div>
+    </div>
+  );
+
+  if (embedded) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-paper">
+        {body}
+        <Toasts toasts={toasts} />
+      </div>
+    );
+  }
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <TopBar
@@ -173,320 +533,7 @@ export function VlogStudio({ tripId }: { tripId: string }) {
           </Link>
         }
       />
-      <div className="mx-auto grid max-w-7xl gap-5 px-4 pb-28 pt-20 md:px-6 md:pb-16 md:pt-24 grid-cols-[minmax(0,1fr)] lg:grid-cols-[320px_minmax(0,1fr)_360px]">
-        {/* left: settings + stepper + history */}
-        <div className="order-2 min-w-0 space-y-4 lg:order-1">
-          <Panel dark className="p-4">
-            <h2 className="text-lg font-bold">One-tap vlog</h2>
-            <p className="mt-1 text-xs text-slate-400">
-              The video is a pure function of your pins, photos and notes. Narration only says what
-              your notes say.
-            </p>
-            <div className="mt-4">
-              <div className="flex items-center justify-between text-xs text-slate-400">
-                <span>Target length</span>
-                <span className="font-semibold text-slate-200">{targetLength} s</span>
-              </div>
-              <input
-                type="range"
-                min={30}
-                max={120}
-                step={5}
-                value={targetLength}
-                onChange={(e) => setTargetLength(Number(e.target.value))}
-                className="mt-1 w-full accent-orange-500"
-              />
-            </div>
-            <div className="mt-3">
-              <div className="text-xs text-slate-400">Voice</div>
-              <div className="mt-1 flex gap-1.5">
-                {VOICES.map((v) => (
-                  <Chip dark key={v.id} active={voice === v.id} onClick={() => setVoice(v.id)}>
-                    {v.label}
-                  </Chip>
-                ))}
-              </div>
-            </div>
-            <div className="mt-3">
-              <div className="text-xs text-slate-400">Days</div>
-              <div className="mt-1 flex flex-wrap gap-1.5">
-                <Chip dark active={!days} onClick={() => setDays(undefined)}>
-                  Whole trip
-                </Chip>
-                {Array.from({ length: nDays }, (_, i) => i + 1).map((d) => (
-                  <Chip
-                    dark
-                    key={d}
-                    active={days?.includes(d) ?? false}
-                    onClick={() =>
-                      setDays((xs) =>
-                        xs?.includes(d)
-                          ? xs.length === 1
-                            ? undefined
-                            : xs.filter((x) => x !== d)
-                          : [...(xs ?? []), d].sort(),
-                      )
-                    }
-                  >
-                    Day {d}
-                  </Chip>
-                ))}
-              </div>
-            </div>
-            <Button
-              size="lg"
-              className="mt-5 w-full justify-center"
-              onClick={make}
-              disabled={!!jobId || !bundle || bundle.pins.length === 0}
-            >
-              {jobId ? (
-                <>
-                  <Spinner className="border-white" /> Making your vlog…
-                </>
-              ) : (
-                '🎬 Make vlog'
-              )}
-            </Button>
-            {bundle && bundle.pins.length === 0 && (
-              <div className="mt-2 text-xs text-amber-300">
-                Plan the trip first — a vlog needs pins.
-              </div>
-            )}
-          </Panel>
-
-          {(running || (active && active.id === vlogs[0]?.id && active.status === 'failed')) && (
-            <Panel dark className="p-4">
-              <ol className="space-y-2">
-                {STEPS.map((s, i) => {
-                  const state = running
-                    ? i < stepIdx
-                      ? 'done'
-                      : i === stepIdx
-                        ? 'now'
-                        : 'todo'
-                    : 'todo';
-                  return (
-                    <li key={s.status} className="flex items-start gap-2.5 text-sm">
-                      <span
-                        className={cx(
-                          'mt-0.5 flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold',
-                          state === 'done'
-                            ? 'bg-emerald-500 text-white'
-                            : state === 'now'
-                              ? 'bg-orange-500 text-white'
-                              : 'bg-slate-700 text-slate-300',
-                        )}
-                      >
-                        {state === 'done' ? (
-                          '✓'
-                        ) : state === 'now' ? (
-                          <Spinner className="border-white h-3 w-3" />
-                        ) : (
-                          i + 1
-                        )}
-                      </span>
-                      <span>
-                        <div className={cx('font-medium', state === 'todo' && 'text-slate-400')}>
-                          {s.label}
-                        </div>
-                        {state === 'now' && <div className="text-xs text-slate-400">{s.hint}</div>}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ol>
-            </Panel>
-          )}
-
-          {vlogs.length > 0 && (
-            <Panel dark className="p-3">
-              <div className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                Vlogs of this trip
-              </div>
-              <ul className="mt-1 space-y-1">
-                {vlogs.map((v) => (
-                  <li key={v.id}>
-                    <button
-                      onClick={() => v.status === 'done' && (setActiveId(v.id), setSegmentIndex(0))}
-                    >
-                      <span className="truncate">
-                        {new Date(v.created_at).toLocaleTimeString('en-US', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}{' '}
-                        · {v.settings.target_length_s} s
-                        {v.settings.instructions ? ` · “${v.settings.instructions}”` : ''}
-                      </span>
-                      <span
-                        className={cx(
-                          'ml-2 rounded-full px-1.5 py-0.5 text-[10px]',
-                          v.status === 'done'
-                            ? 'bg-emerald-500/20 text-emerald-300'
-                            : v.status === 'failed'
-                              ? 'bg-red-500/20 text-red-300'
-                              : 'bg-slate-700 text-slate-200',
-                        )}
-                      >
-                        {v.status}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </Panel>
-          )}
-        </div>
-
-        {/* centre: phone */}
-        <div className="order-1 flex min-w-0 flex-col items-center lg:order-2">
-          <div className="w-[360px] max-w-full rounded-[2.6rem] border-[10px] border-slate-800 bg-black p-1 shadow-2xl">
-            {renderProps ? (
-              <VlogPlayer
-                key={`${active?.id}-${mapMode}`}
-                props={renderProps}
-                controls
-                autoPlay={false}
-                onSegmentChange={setSegmentIndex}
-                style={{ borderRadius: 32 }}
-              />
-            ) : (
-              <div className="flex aspect-[9/16] w-full flex-col items-center justify-center rounded-[2rem] bg-slate-900 p-8 text-center text-slate-400">
-                <div className="text-5xl">🎬</div>
-                <div className="mt-3 text-sm">
-                  {error ??
-                    (vlogs.length
-                      ? 'Pick a finished vlog or make a new one.'
-                      : 'No vlog yet — press Make vlog.')}
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
-            <span>Map:</span>
-            <Chip dark active={mapMode === 'maplibre'} onClick={() => setMapMode('maplibre')}>
-              Live flyover
-            </Chip>
-            <Chip dark active={mapMode === 'static'} onClick={() => setMapMode('static')}>
-              Static route
-            </Chip>
-            {active?.video_path && (
-              <a className="ml-2 underline" href={fileUrl(active.video_path)} download>
-                Download MP4
-              </a>
-            )}
-          </div>
-          {active && !active.video_path && (
-            <div className="mt-1 text-[11px] text-slate-500">
-              MP4 export (stretch): <code>pnpm render -- --vlog {active.id}</code>
-            </div>
-          )}
-        </div>
-
-        {/* right: current segment + script */}
-        <div className="order-3 min-w-0 space-y-4">
-          {seg && (
-            <Panel dark className="p-4">
-              <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                Now playing · segment {segmentIndex + 1}/{active?.script?.segments.length}
-              </div>
-              {seg.type === 'pin' ? (
-                <>
-                  <div className="mt-1 text-lg font-bold">{seg.caption || pinName(seg.pin_id)}</div>
-                  <p className="mt-2 text-sm text-slate-200">
-                    {seg.narration || <span className="text-slate-500">(no narration)</span>}
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-1.5 text-[11px]">
-                    <span className="rounded-full bg-slate-800 px-2 py-0.5">
-                      {seg.photos.length} photo{seg.photos.length === 1 ? '' : 's'}
-                    </span>
-                    <span className="rounded-full bg-slate-800 px-2 py-0.5">
-                      {seg.duration_s.toFixed(1)} s
-                    </span>
-                    {seg.mood && (
-                      <span className="rounded-full bg-slate-800 px-2 py-0.5">
-                        {MOOD_EMOJI[seg.mood as keyof typeof MOOD_EMOJI] ?? seg.mood}
-                      </span>
-                    )}
-                  </div>
-                  {sourceNotes.length > 0 ? (
-                    <div className="mt-3 rounded-xl border border-orange-500/40 bg-orange-500/10 p-3">
-                      <div className="text-[11px] font-semibold uppercase tracking-wide text-orange-300">
-                        From your note
-                      </div>
-                      {sourceNotes.map((e) => (
-                        <p key={e.id} className="mt-1 text-sm text-orange-100">
-                          “{e.text}”
-                        </p>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="mt-3 rounded-xl border border-slate-700 bg-slate-800/60 p-3 text-xs text-slate-400">
-                      Narration built from photo captions only — no note on this pin yet.
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="mt-1 text-lg font-bold">
-                  {seg.type === 'title' ? seg.text : seg.text}
-                </div>
-              )}
-            </Panel>
-          )}
-
-          {active?.script && (
-            <Panel dark className="p-3">
-              <div className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                Script
-              </div>
-              <ol className="mt-1 space-y-1">
-                {active.script.segments.map((s, i) => (
-                  <li
-                    key={i}
-                    className={cx(
-                      'rounded-lg px-2 py-1.5 text-xs',
-                      i === segmentIndex ? 'bg-orange-500/20' : '',
-                    )}
-                  >
-                    <span className="font-semibold">
-                      {s.type === 'pin'
-                        ? pinName(s.pin_id)
-                        : s.type === 'title'
-                          ? `Title · ${s.text}`
-                          : `Outro · ${s.text}`}
-                    </span>
-                    {s.type === 'pin' && <div className="text-slate-300">{s.narration}</div>}
-                  </li>
-                ))}
-              </ol>
-            </Panel>
-          )}
-
-          {active && (
-            <Panel dark className="p-4">
-              <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                Regenerate with instructions
-              </div>
-              <form
-                className="mt-2 flex gap-2"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  void regenerate();
-                }}
-              >
-                <input
-                  value={instructions}
-                  onChange={(e) => setInstructions(e.target.value)}
-                  placeholder="more chill · skip day 1 · shorter"
-                  className="min-w-0 flex-1 rounded-full border border-slate-700 bg-slate-800 px-3.5 py-2 text-sm text-slate-100 outline-none focus:border-orange-400"
-                />
-                <Button type="submit" disabled={!!jobId || !instructions.trim()}>
-                  Go
-                </Button>
-              </form>
-            </Panel>
-          )}
-        </div>
-      </div>
+      {body}
       <TabBar tripId={tripId} active="vlog" />
       <Toasts toasts={toasts} />
     </main>

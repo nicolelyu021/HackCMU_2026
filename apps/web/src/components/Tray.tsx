@@ -164,7 +164,7 @@ export function Tray({
 
   if (variant === 'sheet') {
     return (
-      <Sheet desktopClass="md:w-[380px]">
+      <Sheet>
         <div className="flex items-center justify-between px-4 pb-2 pt-2">
           <div>
             <div className="text-xs text-slate-500">Nothing is lost</div>

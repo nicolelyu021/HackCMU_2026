@@ -44,10 +44,10 @@ export function PinSheet({
   const notes = bundle.entries.filter((e) => e.pin_id === pin.id);
   useEffect(() => setTab(initialTab), [pin.id, initialTab]);
   return (
-    <Sheet desktopClass="md:h-[calc(100vh-6.5rem)] md:w-[380px]">
-      <div className="flex items-start justify-between gap-2 border-b border-slate-200 p-4">
+    <Sheet>
+      <div className="flex items-start justify-between gap-2 border-b border-line p-4">
         <div className="min-w-0">
-          <div className="flex items-center gap-2 text-xs text-slate-500">
+          <div className="flex items-center gap-2 text-xs text-muted">
             <span>
               {KIND_EMOJI[pin.kind]} {KIND_LABEL[pin.kind]}
             </span>
@@ -56,20 +56,22 @@ export function PinSheet({
               {prettyDate(dateForDay(bundle.trip.start_date, pin.day_index))}
             </span>
           </div>
-          <h2 className="mt-0.5 truncate text-lg font-bold leading-tight">{pin.name}</h2>
+          <h2 className="mt-0.5 truncate font-display text-lg font-bold leading-tight">
+            {pin.name}
+          </h2>
           <div className="mt-1 flex flex-wrap gap-1.5 text-[11px]">
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 font-medium">
+            <span className="rounded-full bg-paper px-2 py-0.5 font-medium">
               {windowLabel(pin)}
             </span>
             {isVerified(pin) ? (
               <span
-                className="rounded-full bg-emerald-50 px-2 py-0.5 font-medium text-emerald-700"
+                className="rounded-full bg-accent-soft px-2 py-0.5 font-medium text-accent"
                 title={pin.place_id ?? ''}
               >
                 ✓ verified on OpenStreetMap
               </span>
             ) : (
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-600">
+              <span className="rounded-full bg-paper px-2 py-0.5 font-medium text-muted">
                 {pin.source === 'user'
                   ? 'added by you'
                   : pin.source === 'photo'
@@ -81,13 +83,13 @@ export function PinSheet({
         </div>
         <button
           onClick={onClose}
-          className="rounded-full p-1.5 text-slate-500 hover:bg-slate-100"
+          className="rounded-full p-1.5 text-muted hover:bg-paper"
           aria-label="Close"
         >
           ✕
         </button>
       </div>
-      <div className="flex gap-1 border-b border-slate-200 px-3 py-2">
+      <div className="flex gap-1 border-b border-line px-3 py-2">
         {(
           [
             ['info', 'Info'],
@@ -163,11 +165,11 @@ function InfoTab({
   return (
     <div className="space-y-4 p-4 text-sm">
       {pin.ai_reason && (
-        <div className="rounded-xl bg-orange-50 p-3">
-          <div className="text-[11px] font-semibold uppercase tracking-wide text-orange-700">
+        <div className="rounded-xl bg-accent-soft p-3">
+          <div className="text-[11px] font-semibold uppercase tracking-wide text-accent">
             Why this pin
           </div>
-          <p className="mt-1 text-slate-800">{pin.ai_reason}</p>
+          <p className="mt-1">{pin.ai_reason}</p>
         </div>
       )}
       {pin.address && <div className="text-slate-600">📮 {pin.address}</div>}
@@ -184,14 +186,14 @@ function InfoTab({
               type="time"
               value={start}
               onChange={(e) => setStart(e.target.value)}
-              className="rounded-lg border border-slate-300 px-2 py-1"
+              className="rounded-lg border border-line px-2 py-1"
             />
             <span>→</span>
             <input
               type="time"
               value={end}
               onChange={(e) => setEnd(e.target.value)}
-              className="rounded-lg border border-slate-300 px-2 py-1"
+              className="rounded-lg border border-line px-2 py-1"
             />
             <Button
               size="sm"
@@ -344,7 +346,7 @@ function NotesTab({
           onChange={(e) => setText(e.target.value)}
           rows={2}
           placeholder={`Quick note at ${pin.name}…`}
-          className="w-full resize-none rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-orange-400"
+          className="w-full resize-none rounded-xl border border-line bg-card px-3 py-2 text-sm outline-none focus:border-accent"
         />
         <div className="mt-2 flex items-center justify-between">
           <div className="flex gap-1">
@@ -354,7 +356,7 @@ function NotesTab({
                 onClick={() => setMood(mood === m ? null : m)}
                 className={cx(
                   'rounded-full px-1.5 py-0.5 text-lg',
-                  mood === m ? 'bg-orange-100 ring-2 ring-orange-400' : 'hover:bg-slate-100',
+                  mood === m ? 'bg-accent-soft ring-2 ring-accent' : 'hover:bg-paper',
                 )}
                 title={m}
               >
@@ -453,9 +455,7 @@ function AskTab({
             key={m.id}
             className={cx(
               'max-w-[92%] rounded-2xl px-3 py-2 text-sm',
-              m.role === 'user'
-                ? 'ml-auto bg-slate-900 text-white'
-                : 'bg-white border border-slate-200',
+              m.role === 'user' ? 'ml-auto bg-ink text-paper' : 'border border-line bg-card',
             )}
           >
             {m.content}
@@ -493,7 +493,7 @@ function AskTab({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder={`Ask about ${pin.name}…`}
-          className="flex-1 rounded-full border border-slate-300 px-3.5 py-2 text-sm outline-none focus:border-orange-400"
+          className="flex-1 rounded-full border border-line bg-card px-3.5 py-2 text-sm outline-none focus:border-accent"
         />
         <Button type="submit" disabled={busy || !q.trim()}>
           {busy ? <Spinner className="border-white" /> : 'Ask'}

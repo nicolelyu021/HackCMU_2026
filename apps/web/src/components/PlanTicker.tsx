@@ -23,7 +23,7 @@ export function PlanTicker({ state }: { state: PlanState }) {
   const items = state.events.filter((e) => e.type === 'stop' || e.type === 'warning').slice(-6);
   const verified = state.events.filter((e) => e.type === 'stop').length;
   return (
-    <Panel className="w-full p-3 text-sm md:w-[340px]">
+    <Panel className="w-full p-3 text-sm">
       <div className="flex items-center gap-2 font-semibold">
         {state.running ? <Spinner /> : <span>{state.error ? '⚠️' : '✅'}</span>}
         <span>
@@ -34,20 +34,20 @@ export function PlanTicker({ state }: { state: PlanState }) {
               : `Plan ready · ${verified} verified pins${state.dropped.length ? ` · ${state.dropped.length} dropped` : ''}`}
         </span>
       </div>
-      {state.detail && <div className="mt-0.5 text-xs text-slate-500">{state.detail}</div>}
+      {state.detail && <div className="mt-0.5 text-xs text-muted">{state.detail}</div>}
       <ul className="mt-2 space-y-1.5">
         {items.map((e, i) =>
           e.type === 'stop' ? (
             <li key={i} className="flex gap-2 text-xs">
-              <span className="text-emerald-600">✓</span>
+              <span className="text-accent">✓</span>
               <span>
                 <span className="font-semibold">{e.stop.name}</span>{' '}
-                <span className="text-slate-500">· day {e.day_index} · verified</span>
-                <div className="text-slate-600">{e.stop.ai_reason}</div>
+                <span className="text-muted">· day {e.day_index} · verified</span>
+                <div className="text-muted">{e.stop.ai_reason}</div>
               </span>
             </li>
           ) : e.type === 'warning' ? (
-            <li key={i} className="flex gap-2 text-xs text-slate-500">
+            <li key={i} className="flex gap-2 text-xs text-muted">
               <span className="text-red-500">✕</span>
               <span>
                 <span className="font-semibold line-through">{e.name}</span> · {e.reason}

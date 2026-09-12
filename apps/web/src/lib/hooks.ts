@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Health, TripBundle } from '@pinlog/schema';
 import { api, ApiClientError } from './api';
+import { isFixtureMode } from './config';
 
 export function useHealth(): Health | null {
   const [health, setHealth] = useState<Health | null>(null);
@@ -84,3 +85,12 @@ export function useMediaQuery(query: string): boolean {
   return matches;
 }
 export const useIsDesktop = () => useMediaQuery('(min-width: 768px)');
+
+/** Empty on the server and the first paint so fixture links do not hydrate-mismatch. */
+export function useFixtureQuery(): string {
+  const [q, setQ] = useState('');
+  useEffect(() => {
+    if (isFixtureMode()) setQ('?fixture=1');
+  }, []);
+  return q;
+}

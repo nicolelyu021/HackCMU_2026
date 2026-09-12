@@ -37,13 +37,13 @@ export const KIND_EMOJI: Record<PinKind, string> = {
 };
 
 export const DAY_COLORS = [
-  '#f97316',
-  '#2563eb',
-  '#16a34a',
-  '#9333ea',
-  '#dc2626',
-  '#0891b2',
-  '#ca8a04',
+  '#8b7cb8',
+  '#4a4458',
+  '#6b6560',
+  '#a89fbf',
+  '#3f3a36',
+  '#9a90b8',
+  '#5c564f',
 ];
 export const dayColor = (day: number) => DAY_COLORS[(day - 1) % DAY_COLORS.length]!;
 
