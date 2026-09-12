@@ -8,7 +8,7 @@ TTS: ElevenLabs (needs ELEVENLABS_API_KEY in the environment or in the repo-root
 Each cue in script.json is synthesised separately and placed at its `at` timestamp;
 the original soundtrack is kept underneath at reduced volume.
 """
-import argparse, json, os, subprocess, sys, urllib.request, urllib.error
+import argparse, json, os, ssl, subprocess, sys, urllib.request, urllib.error
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -39,6 +39,15 @@ def duration(path):
     return float(out)
 
 
+def ssl_context():
+    # python.org builds on macOS ship without root certs; certifi fills the gap when present
+    try:
+        import certifi
+        return ssl.create_default_context(cafile=certifi.where())
+    except ImportError:
+        return ssl.create_default_context()
+
+
 def tts_elevenlabs(text, voice, key, out_path):
     url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice}?output_format=mp3_44100_128"
     body = json.dumps({"text": text, "model_id": MODEL_ID,
@@ -46,7 +55,7 @@ def tts_elevenlabs(text, voice, key, out_path):
     req = urllib.request.Request(url, data=body, method="POST",
                                  headers={"xi-api-key": key, "Content-Type": "application/json", "Accept": "audio/mpeg"})
     try:
-        with urllib.request.urlopen(req, timeout=120) as r:
+        with urllib.request.urlopen(req, timeout=120, context=ssl_context()) as r:
             out_path.write_bytes(r.read())
     except urllib.error.HTTPError as e:
         sys.exit(f"ElevenLabs {e.code}: {e.read().decode(errors='replace')}")
@@ -82,10 +91,14 @@ def main():
     segs = []
     for i, cue in enumerate(cues):
         mp3 = work / f"cue{i:02d}.mp3"
-        if a.preview:
-            tts_say(cue["text"], mp3)
-        else:
-            tts_elevenlabs(cue["text"], a.voice, key, mp3)
+        stamp = mp3.with_suffix(".txt")   # cache: re-synthesise only when the text or voice changed
+        sig = f"{a.voice}\n{cue['text']}"
+        if not (mp3.exists() and stamp.exists() and stamp.read_text() == sig):
+            if a.preview:
+                tts_say(cue["text"], mp3)
+            else:
+                tts_elevenlabs(cue["text"], a.voice, key, mp3)
+            stamp.write_text(sig)
         d = duration(mp3)
         nxt = cues[i + 1]["at"] if i + 1 < len(cues) else total
         flag = "" if cue["at"] + d <= nxt + 0.3 else "  <-- overruns next cue: shorten the line or move `at`"
