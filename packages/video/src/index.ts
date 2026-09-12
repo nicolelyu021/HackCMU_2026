@@ -1,18 +1,8 @@
 // Owner D — public surface of @pinlog/video (browser-safe: no Node imports here; the render CLI is a separate entry).
-import type { CSSProperties } from 'react';
-import type { VlogRenderProps } from '@pinlog/schema';
-
-export interface VlogPlayerProps {
-  props: VlogRenderProps;
-  autoPlay?: boolean;
-  controls?: boolean;
-  loop?: boolean;
-  style?: CSSProperties;
-  /** Fires when playback crosses into a new segment (index into script.segments). */
-  onSegmentChange?: (segmentIndex: number) => void;
-}
-
-/** Client component wrapping @remotion/player. Import with next/dynamic({ ssr: false }). */
-export function VlogPlayer(_props: VlogPlayerProps): null {
-  throw new Error('TODO(D): VlogPlayer not implemented');
-}
+export { VlogPlayer } from './VlogPlayer';
+export type { VlogPlayerProps } from './VlogPlayer';
+export { VlogComposition } from './composition/Vlog';
+export { cameraAtFrame, overviewCamera, lerpCamera } from './composition/map/camera';
+export { segmentAtFrame, photoSlots, flyoverFrames } from './composition/timing';
+export { StaticRouteCard } from './composition/map/StaticRouteCard';
+export { projectPins } from './composition/map/project';
