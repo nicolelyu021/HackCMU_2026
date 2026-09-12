@@ -67,7 +67,9 @@ export interface VlogsRepo {
   create(input: { trip_id: string; settings: VlogSettings; id?: string }): Promise<Vlog>;
   update(
     id: string,
-    patch: Partial<Pick<Vlog, 'status' | 'script' | 'video_path' | 'duration_s' | 'error' | 'settings'>>,
+    patch: Partial<
+      Pick<Vlog, 'status' | 'script' | 'video_path' | 'duration_s' | 'error' | 'settings'>
+    >,
   ): Promise<Vlog>;
 }
 

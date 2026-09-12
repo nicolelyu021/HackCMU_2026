@@ -62,7 +62,8 @@ export function createApp(container: Container, opts: AppOptions = {}): Hono<App
     c.json(errorBody('not_found', `No route for ${c.req.method} ${c.req.path}`), 404),
   );
   app.onError((err, c) => {
-    if (err instanceof ApiError) return c.json(errorBody(err.code, err.message, err.details), err.status);
+    if (err instanceof ApiError)
+      return c.json(errorBody(err.code, err.message, err.details), err.status);
     if (err instanceof NotFoundError) return c.json(errorBody('not_found', err.message), 404);
     if (err instanceof LockedPinError) return c.json(errorBody('locked_pin', err.message), 400);
     if (err instanceof HTTPException) {
@@ -70,7 +71,10 @@ export function createApp(container: Container, opts: AppOptions = {}): Hono<App
       return c.json(errorBody(status === 404 ? 'not_found' : 'internal', err.message), status);
     }
     console.error('[api] unhandled', err);
-    return c.json(errorBody('internal', err instanceof Error ? err.message : 'Internal error'), 500);
+    return c.json(
+      errorBody('internal', err instanceof Error ? err.message : 'Internal error'),
+      500,
+    );
   });
 
   return app;

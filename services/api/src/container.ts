@@ -43,9 +43,21 @@ function choose<K extends string>(
  */
 export function createContainer(env: Env, overrides: Partial<Ports> = {}): Container {
   const dir = dataDir(env);
-  const llmKind = choose('PINLOG_LLM', env.PINLOG_LLM, 'anthropic', env.PINLOG_MODE, !!env.ANTHROPIC_API_KEY);
+  const llmKind = choose(
+    'PINLOG_LLM',
+    env.PINLOG_LLM,
+    'anthropic',
+    env.PINLOG_MODE,
+    !!env.ANTHROPIC_API_KEY,
+  );
   const placesKind = choose('PINLOG_PLACES', env.PINLOG_PLACES, 'nominatim', env.PINLOG_MODE, true);
-  const ttsKind = choose('PINLOG_TTS', env.PINLOG_TTS, 'openai', env.PINLOG_MODE, !!env.OPENAI_API_KEY);
+  const ttsKind = choose(
+    'PINLOG_TTS',
+    env.PINLOG_TTS,
+    'openai',
+    env.PINLOG_MODE,
+    !!env.OPENAI_API_KEY,
+  );
 
   const ports: Ports = {
     repo: overrides.repo ?? createRepo({ path: env.PINLOG_DB_PATH ?? join(dir, 'pinlog.db') }),
@@ -59,7 +71,9 @@ export function createContainer(env: Env, overrides: Partial<Ports> = {}): Conta
         replay_dir: join(dir, 'replays'),
       }),
     places: overrides.places ?? createPlaces(placesKind, { email: env.NOMINATIM_EMAIL }),
-    tts: overrides.tts ?? createTTS(ttsKind, { api_key: env.OPENAI_API_KEY, model: env.OPENAI_TTS_MODEL }),
+    tts:
+      overrides.tts ??
+      createTTS(ttsKind, { api_key: env.OPENAI_API_KEY, model: env.OPENAI_TTS_MODEL }),
   };
   const providers = { llm: ports.llm.name, places: ports.places.name, tts: ports.tts.name };
   const mode = Object.values(providers).some((n) => n !== 'mock') ? 'live' : 'mock';

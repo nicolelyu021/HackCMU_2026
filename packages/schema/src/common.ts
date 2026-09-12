@@ -13,7 +13,10 @@ export type IsoDate = z.infer<typeof IsoDate>;
  */
 export const NaiveDateTime = z
   .string()
-  .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/, 'expected YYYY-MM-DDTHH:mm:ss (trip-local, no offset)');
+  .regex(
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/,
+    'expected YYYY-MM-DDTHH:mm:ss (trip-local, no offset)',
+  );
 export type NaiveDateTime = z.infer<typeof NaiveDateTime>;
 
 /** Server-side UTC instant (created_at, updated_at). */

@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { Entry, Media, Message, Pin, Trip, Vlog, VlogScript, ItineraryDraft, ReplanDraft } from '../src/index';
+import {
+  Entry,
+  Media,
+  Message,
+  Pin,
+  Trip,
+  Vlog,
+  VlogScript,
+  ItineraryDraft,
+  ReplanDraft,
+} from '../src/index';
 import { demoFixtures, mockPlanDraft, mockReplanDraft, mockPlaces } from '../src/fixtures/index';
 
 describe('demo fixtures satisfy the contracts', () => {
@@ -19,7 +29,10 @@ describe('demo fixtures satisfy the contracts', () => {
     expect(f.pins).toHaveLength(9);
     expect(new Set(f.pins.map((p) => p.id)).size).toBe(9);
     for (const day of [1, 2]) {
-      const idx = f.pins.filter((p) => p.day_index === day).map((p) => p.order_index).sort();
+      const idx = f.pins
+        .filter((p) => p.day_index === day)
+        .map((p) => p.order_index)
+        .sort();
       expect(idx).toEqual(idx.map((_, i) => i));
     }
     f.pins.filter((p) => p.source === 'ai').forEach((p) => expect(p.place_id).toBeTruthy());
@@ -71,7 +84,11 @@ describe('demo fixtures satisfy the contracts', () => {
     ReplanDraft.parse(mockReplanDraft);
     const names = mockPlaces.map((p) => p.name.toLowerCase());
     const stops = draft.days.flatMap((d) => d.stops);
-    const resolvable = stops.filter((s) => names.some((n) => n.includes(s.search_query.toLowerCase()) || s.search_query.toLowerCase().includes(n)));
+    const resolvable = stops.filter((s) =>
+      names.some(
+        (n) => n.includes(s.search_query.toLowerCase()) || s.search_query.toLowerCase().includes(n),
+      ),
+    );
     expect(stops.length - resolvable.length).toBe(1); // exactly one invented place
   });
 });

@@ -28,10 +28,16 @@ for (const [name, dir] of Object.entries(DIRS)) {
     console.error(`${dir}/package.json is named ${pkg.name}, expected ${name}`);
     failed = true;
   }
-  const deps = Object.keys({ ...pkg.dependencies, ...pkg.devDependencies, ...pkg.peerDependencies });
+  const deps = Object.keys({
+    ...pkg.dependencies,
+    ...pkg.devDependencies,
+    ...pkg.peerDependencies,
+  });
   for (const dep of deps.filter((d) => d.startsWith('@pinlog/'))) {
     if (!ALLOWED[name].includes(dep)) {
-      console.error(`${name} may not depend on ${dep} (allowed: ${ALLOWED[name].join(', ') || 'none'})`);
+      console.error(
+        `${name} may not depend on ${dep} (allowed: ${ALLOWED[name].join(', ') || 'none'})`,
+      );
       failed = true;
     }
   }

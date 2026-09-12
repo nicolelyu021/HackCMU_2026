@@ -1,6 +1,7 @@
 /** Frozen storage key layout (keys are stored in the db; URLs are built at read time with fileUrl). */
 export const storageKeys = {
-  media: (trip_id: string, media_id: string, ext: string) => `trips/${trip_id}/media/${media_id}.${ext}`,
+  media: (trip_id: string, media_id: string, ext: string) =>
+    `trips/${trip_id}/media/${media_id}.${ext}`,
   thumb: (trip_id: string, media_id: string) => `trips/${trip_id}/thumbs/${media_id}.jpg`,
   segmentAudio: (vlog_id: string, index: number) =>
     `vlogs/${vlog_id}/seg_${String(index).padStart(2, '0')}.wav`,

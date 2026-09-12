@@ -52,7 +52,8 @@ export const DEMO_PIN_SPECS: PinSpec[] = [
     end: '13:00',
     kind: 'poi',
     source: 'ai',
-    ai_reason: 'Victorian glasshouse at the edge of Schenley Park; the seasonal show is a 90-minute loop.',
+    ai_reason:
+      'Victorian glasshouse at the edge of Schenley Park; the seasonal show is a 90-minute loop.',
   },
   {
     id: 'pin_pgh_d1_primanti',
@@ -80,7 +81,8 @@ export const DEMO_PIN_SPECS: PinSpec[] = [
     end: '16:30',
     kind: 'poi',
     source: 'ai',
-    ai_reason: 'Largest single-artist museum in North America; the Silver Clouds room is the crowd favourite.',
+    ai_reason:
+      'Largest single-artist museum in North America; the Silver Clouds room is the crowd favourite.',
   },
   {
     id: 'pin_pgh_d1_point',
@@ -94,7 +96,8 @@ export const DEMO_PIN_SPECS: PinSpec[] = [
     end: '18:00',
     kind: 'poi',
     source: 'ai',
-    ai_reason: 'Where the Allegheny and Monongahela meet; the fountain and the three bridges in one frame.',
+    ai_reason:
+      'Where the Allegheny and Monongahela meet; the fountain and the three bridges in one frame.',
   },
   {
     id: 'pin_pgh_d1_incline',
@@ -108,7 +111,8 @@ export const DEMO_PIN_SPECS: PinSpec[] = [
     end: '19:30',
     kind: 'poi',
     source: 'ai',
-    ai_reason: '1877 cable car up Mount Washington; the skyline at sunset is the classic Pittsburgh photo.',
+    ai_reason:
+      '1877 cable car up Mount Washington; the skyline at sunset is the classic Pittsburgh photo.',
   },
   {
     id: 'pin_pgh_d2_strip',
@@ -122,7 +126,8 @@ export const DEMO_PIN_SPECS: PinSpec[] = [
     end: '10:30',
     kind: 'food',
     source: 'ai',
-    ai_reason: 'Saturday-morning market street: bakeries, pierogies and coffee before the day starts.',
+    ai_reason:
+      'Saturday-morning market street: bakeries, pierogies and coffee before the day starts.',
   },
   {
     id: 'pin_pgh_d2_cmu',

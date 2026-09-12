@@ -28,8 +28,10 @@ const now = () => new Date().toISOString();
 const uuid = () => globalThis.crypto.randomUUID();
 const byDayOrder = (a: Pin, b: Pin) => a.day_index - b.day_index || a.order_index - b.order_index;
 const byTakenAt = (a: Media, b: Media) =>
-  (a.taken_at ?? '9999').localeCompare(b.taken_at ?? '9999') || a.created_at.localeCompare(b.created_at);
-const byCreated = <T extends { created_at: string }>(a: T, b: T) => a.created_at.localeCompare(b.created_at);
+  (a.taken_at ?? '9999').localeCompare(b.taken_at ?? '9999') ||
+  a.created_at.localeCompare(b.created_at);
+const byCreated = <T extends { created_at: string }>(a: T, b: T) =>
+  a.created_at.localeCompare(b.created_at);
 
 export function createMemoryRepo(seed: MemoryRepoSeed = {}): Repo {
   const trips: Trip[] = [...(seed.trips ?? []), ...(seed.trip ? [seed.trip] : [])];
@@ -138,12 +140,15 @@ export function createMemoryRepo(seed: MemoryRepoSeed = {}): Repo {
       async delete(id) {
         if (!pins.some((p) => p.id === id)) throw new NotFoundError('pin', id);
         remove(pins, (p) => p.id === id);
-        for (const m of media) if (m.pin_id === id) (m.pin_id = null), (m.assign_method = 'none');
+        for (const m of media) if (m.pin_id === id) ((m.pin_id = null), (m.assign_method = 'none'));
         remove(entries, (e) => e.pin_id === id);
         remove(messages, (m) => m.pin_id === id);
       },
       async applyDiff(trip_id, diff: ReplanDiff) {
-        const touched = [...diff.removed.map((r) => r.pin_id), ...diff.changed.map((c) => c.pin_id)];
+        const touched = [
+          ...diff.removed.map((r) => r.pin_id),
+          ...diff.changed.map((c) => c.pin_id),
+        ];
         for (const id of touched) {
           const p = pins.find((x) => x.id === id && x.trip_id === trip_id);
           if (!p) throw new NotFoundError('pin', id);
@@ -222,7 +227,10 @@ export function createMemoryRepo(seed: MemoryRepoSeed = {}): Repo {
         return vlogs.find((v) => v.id === id) ?? null;
       },
       async listByTrip(trip_id) {
-        return vlogs.filter((v) => v.trip_id === trip_id).sort(byCreated).reverse();
+        return vlogs
+          .filter((v) => v.trip_id === trip_id)
+          .sort(byCreated)
+          .reverse();
       },
       async create(input: { trip_id: string; settings: VlogSettings; id?: string }) {
         const ts = now();

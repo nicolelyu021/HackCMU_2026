@@ -17,9 +17,17 @@ export const notFound = (what: string, id?: string) =>
   new ApiError('not_found', id ? `${what} ${id} not found` : `${what} not found`, 404);
 export const conflict = (message: string) => new ApiError('conflict', message, 409);
 export const lockedPin = (pin_id: string) =>
-  new ApiError('locked_pin', `Pin ${pin_id} was created by the user and cannot be changed by replan`, 400);
+  new ApiError(
+    'locked_pin',
+    `Pin ${pin_id} was created by the user and cannot be changed by replan`,
+    400,
+  );
 export const providerError = (provider: string, err: unknown) =>
-  new ApiError('provider_error', `${provider}: ${err instanceof Error ? err.message : String(err)}`, 502);
+  new ApiError(
+    'provider_error',
+    `${provider}: ${err instanceof Error ? err.message : String(err)}`,
+    502,
+  );
 export const validation = (message: string, details?: unknown) =>
   new ApiError('validation', message, 400, details);
 

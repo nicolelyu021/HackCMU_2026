@@ -66,7 +66,11 @@ export type UpdatePinInput = z.infer<typeof UpdatePinInput>;
 
 export const ReorderPinsInput = z.object({
   order: z.array(
-    z.object({ pin_id: Id, day_index: z.number().int().min(1), order_index: z.number().int().min(0) }),
+    z.object({
+      pin_id: Id,
+      day_index: z.number().int().min(1),
+      order_index: z.number().int().min(0),
+    }),
   ),
 });
 export type ReorderPinsInput = z.infer<typeof ReorderPinsInput>;
