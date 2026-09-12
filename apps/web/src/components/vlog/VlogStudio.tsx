@@ -14,6 +14,7 @@ import { api, fileUrl } from '@/lib/api';
 import { FILES_BASE_URL, MAP_STYLE_URL, isFixtureMode } from '@/lib/config';
 import { MOOD_EMOJI } from '@/lib/format';
 import { useBundle, useHealth, useToasts } from '@/lib/hooks';
+import { TabBar } from '@/components/TabBar';
 import { TopBar } from '@/components/TopBar';
 import { Button, Chip, Panel, Spinner, Toasts, cx } from '@/components/ui';
 
@@ -172,9 +173,9 @@ export function VlogStudio({ tripId }: { tripId: string }) {
           </Link>
         }
       />
-      <div className="mx-auto grid max-w-7xl gap-6 px-6 pb-16 pt-24 lg:grid-cols-[320px_minmax(0,1fr)_360px]">
+      <div className="mx-auto grid max-w-7xl gap-5 px-4 pb-28 pt-20 md:px-6 md:pb-16 md:pt-24 grid-cols-[minmax(0,1fr)] lg:grid-cols-[320px_minmax(0,1fr)_360px]">
         {/* left: settings + stepper + history */}
-        <div className="space-y-4">
+        <div className="order-2 min-w-0 space-y-4 lg:order-1">
           <Panel dark className="p-4">
             <h2 className="text-lg font-bold">One-tap vlog</h2>
             <p className="mt-1 text-xs text-slate-400">
@@ -337,7 +338,7 @@ export function VlogStudio({ tripId }: { tripId: string }) {
         </div>
 
         {/* centre: phone */}
-        <div className="flex flex-col items-center">
+        <div className="order-1 flex min-w-0 flex-col items-center lg:order-2">
           <div className="w-[360px] max-w-full rounded-[2.6rem] border-[10px] border-slate-800 bg-black p-1 shadow-2xl">
             {renderProps ? (
               <VlogPlayer
@@ -382,7 +383,7 @@ export function VlogStudio({ tripId }: { tripId: string }) {
         </div>
 
         {/* right: current segment + script */}
-        <div className="space-y-4">
+        <div className="order-3 min-w-0 space-y-4">
           {seg && (
             <Panel dark className="p-4">
               <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
@@ -486,6 +487,7 @@ export function VlogStudio({ tripId }: { tripId: string }) {
           )}
         </div>
       </div>
+      <TabBar tripId={tripId} active="vlog" />
       <Toasts toasts={toasts} />
     </main>
   );

@@ -85,7 +85,7 @@ export function Panel({
 
 export function Toasts({ toasts }: { toasts: Toast[] }) {
   return (
-    <div className="pointer-events-none fixed right-4 top-16 z-50 flex w-80 flex-col gap-2">
+    <div className="pointer-events-none fixed inset-x-3 top-14 z-50 flex flex-col gap-2 md:inset-x-auto md:right-4 md:top-16 md:w-80">
       {toasts.map((t) => (
         <div
           key={t.id}
@@ -114,5 +114,33 @@ export function Spinner({ className }: { className?: string }) {
         className,
       )}
     />
+  );
+}
+
+/**
+ * Mobile: a bottom sheet (fixed, rounded top, grab handle, safe-area padding).
+ * Desktop (md+): a floating side panel sized by `desktopClass`. One component, two form factors — mobile-first.
+ */
+export function Sheet({
+  children,
+  className,
+  desktopClass = 'md:h-[calc(100vh-6.5rem)] md:w-[380px]',
+}: {
+  children: React.ReactNode;
+  className?: string;
+  desktopClass?: string;
+}) {
+  return (
+    <div
+      className={cx(
+        'pb-safe fixed inset-x-0 bottom-0 z-40 flex max-h-[76dvh] flex-col overflow-hidden rounded-t-3xl border border-slate-200/70 bg-white/95 text-slate-900 shadow-2xl backdrop-blur',
+        'md:static md:inset-auto md:z-auto md:max-h-none md:rounded-2xl md:bg-white/90 md:pb-0 md:shadow-lg',
+        desktopClass,
+        className,
+      )}
+    >
+      <div className="mx-auto mt-2 h-1 w-10 flex-none rounded-full bg-slate-300 md:hidden" />
+      {children}
+    </div>
   );
 }

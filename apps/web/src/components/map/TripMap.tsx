@@ -29,6 +29,9 @@ export interface TripMapProps {
   mapStyle?: string;
 }
 
+/** Phone layout: panels are bottom sheets, so the fit pads the bottom instead of the sides. */
+const narrow = (map: MapRef) => map.getContainer().clientWidth < 768;
+
 const lineFor = (points: { lng: number; lat: number }[]) => ({
   type: 'Feature' as const,
   properties: {},
@@ -76,9 +79,9 @@ export function TripMap({
       ? { lng: bundle.trip.center_lng, lat: bundle.trip.center_lat }
       : (all[0] ?? { lng: -79.9959, lat: 40.4406 });
 
-  // fit to the visible pins whenever they change (new plan, day filter)
+  // fit to the visible pins whenever they change (new plan, day filter) and once the map has loaded
   const fitKey = all.map((p) => `${p.lng.toFixed(4)},${p.lat.toFixed(4)}`).join('|');
-  useEffect(() => {
+  const fit = () => {
     const map = mapRef.current;
     if (!map || all.length === 0) return;
     if (all.length === 1) {
@@ -92,8 +95,17 @@ export function TripMap({
         [Math.min(...lngs), Math.min(...lats)],
         [Math.max(...lngs), Math.max(...lats)],
       ],
-      { padding: { top: 120, left: 380, right: 420, bottom: 160 }, duration: 900, maxZoom: 15.5 },
+      {
+        padding: narrow(map)
+          ? { top: 150, left: 24, right: 24, bottom: 230 }
+          : { top: 120, left: 380, right: 420, bottom: 160 },
+        duration: 900,
+        maxZoom: 15.5,
+      },
     );
+  };
+  useEffect(() => {
+    fit();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fitKey]);
 
@@ -105,7 +117,9 @@ export function TripMap({
       center: [p.lng, p.lat],
       zoom: Math.max(map.getZoom(), 14.5),
       duration: 600,
-      padding: { right: 380, left: 0, top: 0, bottom: 0 },
+      padding: narrow(map)
+        ? { right: 0, left: 0, top: 0, bottom: Math.round(map.getContainer().clientHeight * 0.62) }
+        : { right: 380, left: 0, top: 0, bottom: 0 },
     });
   }, [selectedPinId, bundle.pins]);
 
@@ -116,6 +130,7 @@ export function TripMap({
       initialViewState={{ longitude: center.lng, latitude: center.lat, zoom: 12.5 }}
       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
       onClick={() => onSelectPin(null)}
+      onLoad={fit}
     >
       <NavigationControl position="bottom-right" showCompass={false} />
       {days.map((d) => {

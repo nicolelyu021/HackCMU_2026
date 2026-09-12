@@ -13,11 +13,11 @@ export function LandingHUD({
 }) {
   if (results.length === 0) return null;
   return (
-    <div className="pointer-events-none fixed bottom-6 left-1/2 z-40 flex -translate-x-1/2 flex-col gap-2">
+    <div className="pointer-events-none fixed bottom-[6.5rem] left-1/2 z-40 flex w-[min(460px,calc(100vw-1.5rem))] -translate-x-1/2 flex-col gap-2 md:bottom-6">
       {results.slice(-4).map((r) => (
         <Panel
           key={r.media_id}
-          className="pointer-events-auto flex w-[460px] items-center gap-3 p-2.5"
+          className="pointer-events-auto flex w-full items-center gap-3 p-2.5"
           onClick={() => r.pin && onSelectPin(r.pin.id)}
         >
           <img

@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Message, TripBundle } from '@pinlog/schema';
 import { api } from '@/lib/api';
-import { Button, Chip, Panel, Spinner, cx } from './ui';
+import { Button, Chip, Sheet, Spinner, cx } from './ui';
 
 /** Meeting notes: "talk to your journal" — trip-level chat grounded in notes, plus the "Summarize my day" chip. */
 export function JournalDrawer({
@@ -116,7 +116,7 @@ export function JournalDrawer({
   };
   const notesCount = bundle.entries.length;
   return (
-    <Panel className="flex h-[calc(100vh-6.5rem)] w-[400px] flex-col overflow-hidden">
+    <Sheet desktopClass="md:h-[calc(100vh-6.5rem)] md:w-[400px]">
       <div className="flex items-center justify-between border-b border-slate-200 p-4">
         <div>
           <div className="text-xs text-slate-500">Talk to your journal</div>
@@ -186,6 +186,6 @@ export function JournalDrawer({
           </Button>
         </form>
       </div>
-    </Panel>
+    </Sheet>
   );
 }

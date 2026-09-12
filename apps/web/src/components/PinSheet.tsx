@@ -19,7 +19,7 @@ import {
   prettyDate,
   windowLabel,
 } from '@/lib/format';
-import { Button, Chip, Panel, Spinner, cx } from './ui';
+import { Button, Chip, Sheet, Spinner, cx } from './ui';
 
 type Tab = 'info' | 'photos' | 'notes' | 'ask';
 
@@ -44,7 +44,7 @@ export function PinSheet({
   const notes = bundle.entries.filter((e) => e.pin_id === pin.id);
   useEffect(() => setTab(initialTab), [pin.id, initialTab]);
   return (
-    <Panel className="flex h-[calc(100vh-6.5rem)] w-[380px] flex-col overflow-hidden">
+    <Sheet desktopClass="md:h-[calc(100vh-6.5rem)] md:w-[380px]">
       <div className="flex items-start justify-between gap-2 border-b border-slate-200 p-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -111,7 +111,7 @@ export function PinSheet({
         )}
         {tab === 'ask' && <AskTab pin={pin} notesCount={notes.length} onError={onError} />}
       </div>
-    </Panel>
+    </Sheet>
   );
 }
 

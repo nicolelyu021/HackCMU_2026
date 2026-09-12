@@ -23,7 +23,7 @@ export function PlanTicker({ state }: { state: PlanState }) {
   const items = state.events.filter((e) => e.type === 'stop' || e.type === 'warning').slice(-6);
   const verified = state.events.filter((e) => e.type === 'stop').length;
   return (
-    <Panel className="w-[340px] p-3 text-sm">
+    <Panel className="w-full p-3 text-sm md:w-[340px]">
       <div className="flex items-center gap-2 font-semibold">
         {state.running ? <Spinner /> : <span>{state.error ? '⚠️' : '✅'}</span>}
         <span>
