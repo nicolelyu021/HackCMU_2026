@@ -4,6 +4,7 @@ import { ArtIcon, PencilArrow } from '@/components/ArtIcon';
 import { useRouter } from 'next/navigation';
 import { Dock } from '@/components/Dock';
 import { NewTripForm } from '@/components/NewTripForm';
+import { UserChip } from '@/components/UserChip';
 import { useFixtureQuery } from '@/lib/hooks';
 
 export default function NewTripPage() {
@@ -16,10 +17,13 @@ export default function NewTripPage() {
           <ArtIcon name="clover" size={38} />
           pinlog.
         </Link>
-        <Link href={`/${q}`} className="hand-link">
-          <PencilArrow back />
-          Back to shelf
-        </Link>
+        <div className="shelf-header-right">
+          <Link href={`/${q}`} className="hand-link">
+            <PencilArrow back />
+            Back to shelf
+          </Link>
+          <UserChip />
+        </div>
       </header>
       <div className="flex-1">
         <NewTripForm

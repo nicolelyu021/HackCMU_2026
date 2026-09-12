@@ -7,6 +7,7 @@ import { tripStats } from '@/lib/tripStats';
 import { CityCard } from '@/components/cover/CityCard';
 import { Dock } from '@/components/Dock';
 import { ArtIcon, PencilArrow } from '@/components/ArtIcon';
+import { UserChip } from '@/components/UserChip';
 import { useFixtureQuery, useHealth } from '@/lib/hooks';
 
 export default function ShelfPage() {
@@ -50,9 +51,12 @@ export default function ShelfPage() {
           </span>
         </Link>
         <span className="header-note">a little place for your adventures</span>
-        <span className="demo-stamp">
-          {health?.mode === 'live' ? 'on the road' : 'demo notebook'}
-        </span>
+        <div className="shelf-header-right">
+          <UserChip />
+          <span className="demo-stamp">
+            {health?.mode === 'live' ? 'on the road' : 'demo notebook'}
+          </span>
+        </div>
       </header>
       <div className="shelf-content">
         <section className="shelf-welcome">

@@ -19,6 +19,7 @@ import { PinSheet } from '@/components/PinSheet';
 import { PlanTicker, type PlanState } from '@/components/PlanTicker';
 import { ScrapbookSpread } from '@/components/scrapbook/ScrapbookSpread';
 import { Tray } from '@/components/Tray';
+import { UserChip } from '@/components/UserChip';
 import { Button, Spinner, Toasts } from '@/components/ui';
 import { VlogStudio } from '@/components/vlog/VlogStudio';
 import type { ProvisionalStop } from '@/components/map/TripMap';
@@ -253,9 +254,12 @@ export default function TripPage() {
           <span>{bundle?.trip.title ?? 'Opening your notebook…'}</span>
           <small>a notebook in the making</small>
         </div>
-        <span className="demo-stamp">
-          {health?.mode === 'live' ? 'on the road' : 'demo notebook'}
-        </span>
+        <div className="shelf-header-right">
+          <UserChip />
+          <span className="demo-stamp">
+            {health?.mode === 'live' ? 'on the road' : 'demo notebook'}
+          </span>
+        </div>
       </header>
       <div className="map-workspace">
         <div className="map-paper">

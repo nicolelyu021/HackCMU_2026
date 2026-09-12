@@ -3,6 +3,7 @@ import Link from 'next/link';
 import React from 'react';
 import { useHealth } from '@/lib/hooks';
 import { isFixtureMode } from '@/lib/config';
+import { UserChip } from '@/components/UserChip';
 
 /** Compact demo badge. Kept for leftover pages; the map room has its own desk badge. */
 export function TopBar({ title, right }: { title?: React.ReactNode; right?: React.ReactNode }) {
@@ -32,6 +33,7 @@ export function TopBar({ title, right }: { title?: React.ReactNode; right?: Reac
       </div>
       <div className="pointer-events-auto flex flex-none items-center gap-2">
         {right}
+        <UserChip />
         <span className="rounded-full border border-line bg-card px-2.5 py-1 text-[10px] font-medium text-muted">
           {badge}
         </span>

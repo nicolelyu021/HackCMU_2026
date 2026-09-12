@@ -22,6 +22,7 @@ catalog:
   '@remotion/bundler': 4.0.523
   '@remotion/renderer': 4.0.523
   next: 16.3.5
+  '@auth0/nextjs-auth0': 4.29.0
   tailwindcss: 4.3.3
   '@tailwindcss/postcss': 4.3.3
   hono: 4.13.7

@@ -195,6 +195,66 @@ select:focus-visible {
   transform: rotate(2deg);
   white-space: nowrap;
 }
+.shelf-header-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* The signed-in traveller, pinned to the right of every header. */
+.traveller-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 10px 4px 5px;
+  border: 1px solid var(--line);
+  border-radius: 7px 12px 8px 10px / 10px 6px 12px 7px;
+  background: var(--card);
+  white-space: nowrap;
+}
+.traveller-identity {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+.traveller-avatar {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  object-fit: cover;
+  background: var(--accent-soft, #e9e1ef);
+}
+.traveller-initial {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--accent);
+}
+.traveller-name {
+  font-family: var(--font-display);
+  font-size: 17px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.traveller-signout {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  border-left: 1px solid var(--line);
+  padding-left: 9px;
+}
+.traveller-signout:hover {
+  color: var(--accent);
+}
+.traveller-chip.is-loading .traveller-avatar {
+  opacity: 0.45;
+}
+
 .shelf-content {
   max-width: 1080px;
   padding: 0 24px;
