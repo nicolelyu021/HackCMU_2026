@@ -9,6 +9,7 @@
 html,
 body {
   height: 100%;
+  overscroll-behavior: none; /* no rubber-band over the map on phones */
   background: var(--paper);
   color: var(--ink);
   font-family:
@@ -49,4 +50,15 @@ body {
 
 .maplibregl-ctrl-attrib {
   font-size: 10px;
+}
+
+/* phone chrome */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.h-dvh {
+  height: 100dvh;
 }

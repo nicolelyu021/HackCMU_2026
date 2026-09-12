@@ -31,7 +31,14 @@ export function createApp(container: Container, opts: AppOptions = {}): Hono<App
   app.use(
     '*',
     cors({
-      origin: [container.env.PINLOG_WEB_ORIGIN, 'http://localhost:3000', 'http://127.0.0.1:3000'],
+      // the web app on this laptop, plus a phone on the same Wi-Fi opening http://<laptop-lan-ip>:3000 (mobile-first demo)
+      origin: (origin) =>
+        origin === container.env.PINLOG_WEB_ORIGIN ||
+        /^https?:\/\/(localhost|127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|\[?[0-9a-f:]+\]?)(:\d+)?$/i.test(
+          origin,
+        )
+          ? origin
+          : null,
       allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowHeaders: ['content-type', 'accept'],
       exposeHeaders: ['content-length', 'content-type'],
