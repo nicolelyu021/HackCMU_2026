@@ -1,35 +1,72 @@
 {
-  "_comment": "English voice-over cues for Videos/pinlog_demo_concat.mp4 (30.1 s). `at` = seconds from the start of the video. `scene` describes what is on screen so a line can be rewritten without re-watching.",
+  "_comment": "Vlog-style English voice-over for Videos/pinlog_demo_concat.mp4 (30.1 s). `at` = seconds from the start. [bracket] tags are ElevenLabs v3 audio tags; they are stripped for captions and for non-v3 models. `caption` overrides the on-screen subtitle text (defaults to the spoken line without tags). `labels` are hand-written location tags shown top-left; `cards` are centred title text.",
+  "voice": "cgSgspJ2msm6clMCkdW9",
+  "model": "eleven_v3",
   "cues": [
     {
       "at": 0.0,
-      "scene": "Cathedral of Learning photo dissolves into a watercolor notebook page",
-      "text": "Every trip starts as a blur of photos. Pinlog turns them into a story."
+      "scene": "Cathedral of Learning dissolves into a watercolor notebook page",
+      "text": "Okay so, I take too many photos. Pinlog turns them into a story."
     },
     {
-      "at": 5.1,
-      "scene": "Phipps Conservatory glasshouse, inside and out; then the Warhol Museum gallery",
-      "text": "Drop in your day in Pittsburgh: the Cathedral of Learning, the glasshouse at Phipps, an afternoon with Warhol."
+      "at": 5.6,
+      "scene": "Phipps glasshouse inside and out, then the Warhol gallery",
+      "text": "My Pittsburgh day: the Cathedral, Phipps, and an afternoon with Warhol."
     },
     {
-      "at": 11.1,
-      "scene": "Gallery photo is painted over into a hand-drawn journal page with a camera and lavender",
-      "text": "It paints them into a hand-drawn travel journal, pinned to your map."
+      "at": 11.8,
+      "scene": "Gallery photo painted over into a journal page with a camera and lavender",
+      "text": "And it paints it all into a little hand-drawn journal, pinned on my map."
     },
     {
-      "at": 15.5,
-      "scene": "CMU campus from above, then Spring Carnival: Ferris wheel, booths, a student sketching on a red wall",
-      "text": "Back on campus for Carnival: the Ferris wheel, the booths, a quick sketch on the wall."
+      "at": 15.6,
+      "scene": "CMU campus from above, then Spring Carnival: Ferris wheel, booths, a student drawing on a red wall",
+      "text": "[excited] Then Carnival on campus! Ferris wheel, the booths, and yeah, I doodled on the wall."
     },
     {
       "at": 23.2,
-      "scene": "Kennywood wooden roller coaster under storm clouds, watercolor edges",
-      "text": "Then a stormy ride at Kennywood."
+      "scene": "Kennywood wooden coaster under storm clouds",
+      "text": "Then Kennywood, storm rolling in. [laughs] Iconic."
     },
     {
       "at": 27.0,
-      "scene": "The finished journal, closed on a wooden table",
-      "text": "Pinlog. Your little wander diary."
+      "scene": "Finished journal closed on a wooden table",
+      "text": "Pinlog. My little wander diary."
+    }
+  ],
+  "labels": [
+    {
+      "at": 0.3,
+      "end": 2.4,
+      "text": "Cathedral of Learning · Pittsburgh"
+    },
+    {
+      "at": 3.2,
+      "end": 6.8,
+      "text": "Phipps Conservatory"
+    },
+    {
+      "at": 7.4,
+      "end": 10.4,
+      "text": "The Andy Warhol Museum"
+    },
+    {
+      "at": 14.9,
+      "end": 17.6,
+      "text": "CMU · Spring Carnival"
+    },
+    {
+      "at": 24.6,
+      "end": 27.0,
+      "text": "Kennywood"
+    }
+  ],
+  "cards": [
+    {
+      "at": 28.2,
+      "end": 30.1,
+      "text": "pinlog",
+      "sub": "your little wander diary"
     }
   ]
 }
